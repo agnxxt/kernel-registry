@@ -40,7 +40,12 @@
         "deployment_unit",
         "adapter",
         "protocol_contract",
-        "psychology"
+        "psychology",
+        "theory_of_mind",
+        "game_theory",
+        "decision_strategy",
+        "business_strategy",
+        "framework"
       ]
     },
     "name": {

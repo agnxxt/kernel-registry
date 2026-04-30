@@ -27,6 +27,11 @@ Supported artifact kinds:
 - adapter
 - protocol_contract
 - psychology
+- theory_of_mind
+- game_theory
+- decision_strategy
+- business_strategy
+- framework
 
 Design goals:
 - single canonical format across Docker/Kubernetes/runtime providers
