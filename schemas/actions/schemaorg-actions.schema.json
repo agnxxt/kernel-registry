@@ -25,7 +25,9 @@
         "ReserveAction",
         "OrderAction",
         "TravelAction",
-        "AssessAction"
+        "AssessAction",
+        "PlanAction",
+        "ControlAction"
       ]
     },
     "agent": {
