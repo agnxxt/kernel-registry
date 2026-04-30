@@ -1,36 +1,76 @@
 from typing import Dict, Any, Optional
 from datetime import datetime
+from sqlalchemy.orm import Session
+from persistence.db import SessionLocal
+from persistence.models.identity import CanonicalIdentity, TrustScore
 
 class IdentityTrustManager:
     """
     Manages the Dynamic Epistemic Trust Ledger for agents and sources.
+    Backed by Postgres persistence.
     """
     def __init__(self):
-        # Initializing with baseline trust values from schema
-        self.ledger = {}
+        pass
 
     def get_trust_score(self, entity_id: str) -> float:
-        return self.ledger.get(entity_id, {}).get("score", 0.5)
+        with SessionLocal() as session:
+            # First, ensure canonical identity exists
+            identity = session.query(CanonicalIdentity).filter(
+                (CanonicalIdentity.canonical_id == entity_id) | 
+                (CanonicalIdentity.subject_ref == entity_id)
+            ).first()
+            
+            if not identity:
+                return 0.5
+            
+            # Get latest trust score
+            score_record = session.query(TrustScore).filter(
+                TrustScore.subject_canonical_id == identity.canonical_id
+            ).order_by(TrustScore.id.desc()).first()
+            
+            return score_record.score if score_record else 0.5
 
     def update_trust(self, entity_id: str, outcome: str, impact: float = 0.1):
         """
-        Updates trust based on validation outcomes.
+        Updates trust based on validation outcomes and persists to DB.
         """
-        if entity_id not in self.ledger:
-            self.ledger[entity_id] = {
-                "score": 0.5,
-                "interactions_count": 0,
-                "last_validated": None
-            }
-        
-        current = self.ledger[entity_id]
-        current["interactions_count"] += 1
-        current["last_validated"] = datetime.utcnow().isoformat()
+        with SessionLocal() as session:
+            identity = session.query(CanonicalIdentity).filter(
+                (CanonicalIdentity.canonical_id == entity_id) | 
+                (CanonicalIdentity.subject_ref == entity_id)
+            ).first()
+            
+            if not identity:
+                # Create default identity if missing
+                identity = CanonicalIdentity(
+                    canonical_id=f"cid:{entity_id}",
+                    subject_type="Agent",
+                    subject_ref=entity_id,
+                    issuer="kernel:identity:manager",
+                    metadata_json={}
+                )
+                session.add(identity)
+                session.flush()
 
-        if outcome == "success":
-            current["score"] = min(1.0, current["score"] + (impact * 0.5))
-        elif outcome == "betrayal":
-            current["score"] = max(0.0, current["score"] - impact)
+            current_score = self.get_trust_score(identity.canonical_id)
+            
+            if outcome == "success":
+                new_score = min(1.0, current_score + (impact * 0.5))
+            elif outcome == "betrayal":
+                new_score = max(0.0, current_score - impact)
+            else:
+                new_score = current_score
+
+            new_record = TrustScore(
+                subject_canonical_id=identity.canonical_id,
+                score=new_score,
+                tier="Cognitive",
+                model_version="v1",
+                factors=["interaction_outcome"],
+                evidence={"outcome": outcome, "impact": impact, "timestamp": datetime.utcnow().isoformat()}
+            )
+            session.add(new_record)
+            session.commit()
 
     def generate_identity_signature(self, agent_id: str) -> str:
         """
@@ -38,4 +78,3 @@ class IdentityTrustManager:
         """
         score = self.get_trust_score(agent_id)
         return f"identity_v1_{agent_id}_{score:.2f}"
-

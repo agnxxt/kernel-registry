@@ -37,7 +37,6 @@ from kernel_engine.identity import IdentityTrustManager
 from kernel_engine.graph_adapter import GraphAdapter
 from kernel_engine.executor import ActionExecutor
 from kernel_engine.model_runner import CognitiveModelRunner
-from kernel_engine.secret_kernel import SecretKernel
 from kernel_engine.policy_engine import PolicyEngine
 from kernel_engine.learning_loop import LearningLoop
 from kernel_engine.feature_store import CognitiveFeatureStore

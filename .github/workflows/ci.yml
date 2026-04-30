@@ -38,4 +38,4 @@ jobs:
 
       - name: Docker Compose Lint Placeholder
         run: |
-          echo "Add deploy smoke tests here (k3s/kind or container checks)."
+          docker compose config
