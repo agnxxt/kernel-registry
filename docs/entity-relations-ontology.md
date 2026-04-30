@@ -65,6 +65,7 @@ These relations connect high-level global conditions to local agent execution.
 *   `[Agent] -OPERATES_IN_SOCIETY-> [SocietyState]`: Connects agent behavior to societal norms and demographic realities.
 *   `[Action] -COMMUNICATES_VIA-> [LanguageLens]`: Formalizes the linguistic medium and formality requirements of an interaction.
 *   `[Action] -STYLIZED_BY-> [AestheticLens]`: Binds the presentation of an action or result to a specific creative canon (Literature, Art, Music).
+*   `[Action] -SANCTIFIED_BY-> [BeliefSystemLens]`: Links an action or temporal window to specific religious ethics, prohibitions, or sacred cycles.
 *   `[Place] -EXPERIENCING-> [Climate/Weather]`: Grounds a location in its atmospheric reality.
 *   `[Bargaining/Trade] -CONSTRAINED_BY-> [Economy]`: Links micro-transactions to macro-economic indicators (e.g., volatility).
 

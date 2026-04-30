@@ -26,7 +26,12 @@ Defines the creative, symbolic, and emotional medium through which information a
 *   **Music**: Rhythmic cadence, tonal resonance, and emotional harmonics (e.g., Uplifting vs. Somber).
 *   **Impact**: Modifies `CommunicationAction` style and `result` presentation. (e.g., An agent delivering a critical update might adopt a "minimalist literature" style to ensure clarity, or a "somber music" cadence to match the gravity of an emergency).
 
-## 5. Geopolitical Context (`GeopoliticalState`)
+## 5. Religion & Belief Systems (`BeliefSystemLens`)
+Defines the theological, ethical, and ritualistic frameworks that govern human or community behavior.
+*   **Attributes**: `primary_theology`, `ethical_prohibitions` (e.g., Dietary, Financial/Usury), `sacred_temporal_cycles` (Prayer times, Sabbaths, Festivals), `behavioral_norms`.
+*   **Impact**: Modifies `deontic_constraints` and `TemporalNuance`. (e.g., An agent might automatically defer a non-critical `TradeAction` during a sacred window, or filter recommendations to adhere to ethical/religious prohibitions).
+
+## 6. Geopolitical Context (`GeopoliticalState`)
 Defines the political boundaries, regulatory jurisdictions, and international relations impacting an agent.
 *   **Attributes**: `jurisdiction_id`, `sanction_status`, `regulatory_compliance_regime` (e.g., GDPR, EU-AI-Act).
 *   **Impact**: Modifies `deontic_constraints`. (e.g., An agent cannot initiate a `TransferAction` between two jurisdictions with an active trade embargo).
