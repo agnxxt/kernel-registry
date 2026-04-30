@@ -1,0 +1,76 @@
+# Macro-Context Framework: Culture, Geopolitics, Geography, Climate, and Economy
+
+Agents must operate through the "Lens" of Macro-Context. This framework defines how large-scale environmental and societal factors constrain or enable agent reasoning and actions.
+
+---
+
+## 1. Cultural Aspects (`CultureLens`)
+Defines the norms, values, and communication styles of a specific human or agent collective.
+*   **Attributes**: `communication_style` (High-Context vs. Low-Context), `value_priority` (Individualism vs. Collectivism), `power_distance_index`.
+*   **Impact**: Modifies `NegotiationTheory` and `dual_process_theory`. (e.g., An agent in a high-power-distance culture might escalate to human authority more frequently).
+
+## 2. Geopolitical Context (`GeopoliticalState`)
+Defines the political boundaries, regulatory jurisdictions, and international relations impacting an agent.
+*   **Attributes**: `jurisdiction_id`, `sanction_status`, `regulatory_compliance_regime` (e.g., GDPR, EU-AI-Act).
+*   **Impact**: Modifies `deontic_constraints`. (e.g., An agent cannot initiate a `TransferAction` between two jurisdictions with an active trade embargo).
+
+## 3. Geographic Context (`GeographyState`)
+The physical or virtual topology where an action is located.
+*   **Attributes**: `terrain_type`, `urban_density`, `network_topology_region`.
+*   **Impact**: Modifies `predictive_control` and `allowed_heuristics`. (e.g., Logistics heuristics for "Urban" are invalidated in "Remote Mountainous" terrain).
+
+## 4. Climate & Weather (`ClimateState`)
+Long-term climate patterns and real-time weather phenomena.
+*   **Attributes**: `average_temperature`, `active_disaster_risk`, `real_time_weather_event` (Storm, Heatwave).
+*   **Impact**: Modifies `ActionStatus` and `CriticalityOverrides`. (e.g., Severe weather triggers a shift from "Economy" to "Max-Reliability" broadcast mode).
+
+## 5. Economic Context (`EconomyState`)
+The market conditions, resource availability, and currency dynamics.
+*   **Attributes**: `market_volatility_index`, `resource_scarcity_level` (e.g., GPU shortage), `fiat_vs_token_parity`.
+*   **Impact**: Modifies `BargainingTheory` and `CognitiveProfile/epistemic_budget`. (e.g., During high volatility, the agent's `epistemic_budget` is increased to allow for more frequent `active_probe` calls).
+
+---
+
+## Universal Schema Mapping
+
+| Macro Dimension | Schema.org `@type` | Relational Edge |
+| :--- | :--- | :--- |
+| **Culture** | `Intangible` / `SpecialAnnouncement` | `[Agent] -ADHERES_TO-> [Culture]` |
+| **Geopolitics**| `GovernmentOrganization` / `AdministrativeArea` | `[Action] -SUBJECT_TO-> [Geopolitics]` |
+| **Geography** | `Place` / `GeoShape` | `[Action] -OCCURS_IN-> [Geography]` |
+| **Climate** | `WeatherForecast` / `Event` | `[Place] -EXPERIENCING-> [Climate]` |
+| **Economy** | `MonetaryAmount` / `ExchangeRate` | `[Bargaining] -CONSTRAINED_BY-> [Economy]` |
+
+## JSON-LD Example: Geopolitical and Cultural Filtering
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "AssessAction",
+  "name": "Cross-Border Data Verification",
+  "agent": { "@type": "SoftwareApplication", "name": "Global-Auditor-01" },
+  "semantic_extension": {
+    "taxonomy": { "labels": ["geopolitics", "cultural_alignment"] },
+    "attributes": {
+      "geopolitical_context": {
+        "source_jurisdiction": "EU",
+        "target_jurisdiction": "US",
+        "compliance_check": "Privacy-Shield-2.0"
+      },
+      "cultural_context": {
+        "primary_norm": "High-Transparency",
+        "expected_response_latency": "Business-Day"
+      }
+    },
+    "ontology": {
+      "relations": [
+        {
+          "subject": "urn:agnxxt:action:verify-445",
+          "predicate": "SUBJECT_TO",
+          "object": "urn:agnxxt:geopol:GDPR-Reg-2026"
+        }
+      ]
+    }
+  }
+}
+```

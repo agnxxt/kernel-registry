@@ -57,11 +57,15 @@ These relations define the "Organization Science" and "Epistemic Trust" of the n
 These relations define the mathematical and tactical interactions between autonomous units.
 *   `[Agent A] -NEGOTIATES_WITH-> [Agent B]`: Initiates a strategic dialogue using a `NegotiationTheory` artifact.
 *   `[Agent A] -COMPETES_WITH-> [Agent B]`: Indicates a zero-sum `GameTheory` interaction for limited resources.
-*   `[Agent A] -COOPERATES_WITH-> [Agent B]`: Defines a non-zero-sum collaboration.
-*   `[Action] -RESULTS_IN_EQUILIBRIUM-> [Belief/State]`: Records the stable outcome of a strategic interaction.
-*   `[Agent] -HAS_BATNA-> [Artifact]`: Links an agent to its "Best Alternative" during bargaining.
 
-### 8. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
+### 8. Macro-Context Relations (Action/Agent $\leftrightarrow$ WorldState)
+These relations connect high-level global conditions to local agent execution.
+*   `[Action/Agent] -SUBJECT_TO-> [Geopolitics/Regime]`: Enforces legal and regulatory compliance boundaries.
+*   `[Agent] -ADHERES_TO-> [Culture]`: Binds an agent's communication and value system to a specific cultural lens.
+*   `[Place] -EXPERIENCING-> [Climate/Weather]`: Grounds a location in its atmospheric reality.
+*   `[Bargaining/Trade] -CONSTRAINED_BY-> [Economy]`: Links micro-transactions to macro-economic indicators (e.g., volatility).
+
+### 9. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
 These relations drive "Active Inference" and "Lineage Tracking".
 *   `[Agent] -ASSERTS {confidence: 0.95}-> [Belief]`: The agent introduces a fact into the world model.
 *   `[Agent] -OBSERVES-> [Context/Artifact]`: The agent registers an empirical reading (often the result of an `active_probe`).
