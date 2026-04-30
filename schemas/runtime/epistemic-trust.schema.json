@@ -30,11 +30,27 @@
     },
     "trust_dynamics": {
       "type": "object",
-      "description": "Rules for how trust evolves based on validation.",
+      "description": "Rules for how trust continuously evolves based on validation and observation.",
       "properties": {
         "betrayal_penalty": { "type": "number", "description": "Score reduction when source is proven wrong." },
         "validation_reward": { "type": "number", "description": "Score increase when source is proven right." },
-        "time_decay_rate": { "type": "number", "description": "Rate at which trust reverts to baseline over time." }
+        "time_decay_rate": { "type": "number", "description": "Rate at which trust reverts to baseline over time." },
+        "observation_feedback_loop": {
+          "type": "object",
+          "description": "Mechanisms for retroactively updating trust based on observing an agent's actions and environment changes.",
+          "properties": {
+            "action_alignment_check": {
+              "type": "boolean",
+              "description": "If true, reduces trust if an agent's observed actions contradict the information they provided.",
+              "default": true
+            },
+            "consensus_shift_impact": {
+              "type": "number",
+              "description": "How much a source's trust score drops if the rest of the trusted network reaches a consensus that contradicts them.",
+              "minimum": 0, "maximum": 1
+            }
+          }
+        }
       }
     },
     "assimilation_policy": {
