@@ -16,6 +16,10 @@ from kernel_engine.identity import IdentityTrustManager
 from kernel_engine.graph_adapter import GraphAdapter
 from kernel_engine.executor import ActionExecutor
 from kernel_engine.model_runner import CognitiveModelRunner
+from kernel_engine.secret_kernel import SecretKernel
+from kernel_engine.policy_engine import PolicyEngine
+from kernel_engine.learning_loop import LearningLoop
+from kernel_engine.feature_store import CognitiveFeatureStore
 
 app = FastAPI(title="Agent Kernel Platform", version="1.0.0")
 
@@ -30,6 +34,10 @@ identity_manager = IdentityTrustManager()
 graph = GraphAdapter()
 executor = ActionExecutor()
 model_runner = CognitiveModelRunner()
+secrets = SecretKernel()
+policies = PolicyEngine()
+learning = LearningLoop(tracker=tracker)
+feature_store = CognitiveFeatureStore()
 
 # Telemetry WebSockets
 class ConnectionManager:
@@ -76,8 +84,15 @@ async def process_action(data: Dict[str, Any], background_tasks: BackgroundTasks
 
     # 2. Epistemic Trust Check
     trust_score = identity_manager.get_trust_score(agent_id)
+    features = feature_store.get_agent_features(agent_id)
 
-    # 3. Intelligent Authentication (Gatekeeping)
+    # 3. Policy Evaluation (Deontic Constraints)
+    context = {"weather": "Clear", "goal_alignment": 0.85, "trust_score": trust_score, "is_authorized_owner": True}
+    policy_result = policies.evaluate_action(agent_id, data, context)
+    if not policy_result["allowed"]:
+        return {"status": "Policy-Blocked", "reason": policy_result["reason"]}
+
+    # 4. Intelligent Authentication (Gatekeeping)
     if "github" in str(data.get("object", "")).lower():
         auth_result = ToolGatekeeper("GitHub").authenticate_request(agent_id, data)
         if not auth_result["authenticated"]:
@@ -111,7 +126,8 @@ async def process_action(data: Dict[str, Any], background_tasks: BackgroundTasks
         "action_id": action_id,
         "pathway": exec_plan.get("pathway_used"),
         "theories": theories,
-        "trust_score": trust_score
+        "trust_score": trust_score,
+        "historical_reliability": features.get("historical_hallucination_rate")
     }
     background_tasks.add_task(telemetry_manager.broadcast, telemetry_payload)
 
@@ -119,8 +135,17 @@ async def process_action(data: Dict[str, Any], background_tasks: BackgroundTasks
         "execution_id": action_id,
         "status": result["execution_metadata"]["status"],
         "identified_patterns": theories,
-        "trust_score": trust_score
+        "trust_score": trust_score,
+        "policy_id": policy_result["policy_id"]
     }
+
+@app.post("/api/v1/feedback")
+async def post_feedback(action_id: str, feedback_data: Dict[str, Any]):
+    """
+    User/Peer feedback entry point for the Learning Loop.
+    """
+    result = learning.capture_feedback(action_id, feedback_data)
+    return result
 
 @app.get("/api/v1/identity/{agent_id}")
 async def get_agent_identity(agent_id: str):
