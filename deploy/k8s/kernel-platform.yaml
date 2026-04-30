@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kernel-api
+  labels:
+    app: kernel-api
+spec:
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    app: kernel-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kernel-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kernel-api
+  template:
+    metadata:
+      labels:
+        app: kernel-api
+    spec:
+      containers:
+        - name: kernel-api
+          image: agnxxt/kernel-api:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              value: "postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel"
+            - name: MLFLOW_TRACKING_URI
+              value: "http://mlflow:5000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kernel-ui
+  labels:
+    app: kernel-ui
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: kernel-ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kernel-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kernel-ui
+  template:
+    metadata:
+      labels:
+        app: kernel-ui
+    spec:
+      containers:
+        - name: kernel-ui
+          image: agnxxt/kernel-ui:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NEXT_PUBLIC_API_URL
+              value: "http://kernel-api:8000"

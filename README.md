@@ -75,63 +75,35 @@ Runtime targets:
 - Local Docker Compose for development and validation
 - Kubernetes manifests in `deploy/k8s/` for cluster deployment
 
-## Deployment Paths
-Local:
-- `compose.yaml` boots Caddy, Postgres, and kernel-tooling baseline services.
+## Deployment
 
-Kubernetes:
-- Use `deploy/k8s/` as base blueprints.
-- Promote to environment overlays (dev/stage/prod) with image pinning and storage classes.
+The Agent Kernel Platform is designed for multi-cloud and hybrid environments.
 
-Ingress and edge:
-- Caddy can be used as local/prototype ingress and reverse proxy.
-- For production ingress, pair with managed LB/Ingress controller and TLS automation policy.
+### 1. Docker Compose (Quickstart)
+Ideal for local testing and simulation.
+```bash
+docker compose up --build
+```
+*   **Kernel API**: http://localhost:8000
+*   **Visual Control Plane**: http://localhost:3000
+*   **MLflow Audit**: http://localhost:5000
 
-## CI/CD
-- CI: `.github/workflows/ci.yml`
-  - JSON schema validation
-  - proto structural validation
-  - Alembic syntax checks
-- Release: `.github/workflows/release.yml`
-  - tag/manual release artifact generation
+### 2. Kubernetes (Production)
+For distributed, high-availability deployments.
+```bash
+# Apply the core platform manifests
+kubectl apply -f deploy/k8s/kernel-platform.yaml
 
-## Operations Baseline
-Health and validation:
-- Schema and proto validation scripts must pass before merge.
-- Migration checks run through Alembic config in `persistence/alembic.ini`.
+# Apply specialized cognitive planes
+kubectl apply -f deploy/k8s/model-runner/
+kubectl apply -f deploy/k8s/secret-kernel.yaml
+```
 
-Security and policy:
-- Enforce pre-tool and post-completion hooks from guardrail contracts.
-- Route authorization checks through OPA/OpenFGA policy contracts.
+## Cognitive Features
+This kernel implements state-of-the-art AI reliability frameworks:
+- **RACF**: Rogue Agent Containment & Kill Switch.
+- **Dual-Process Routing**: Fast vs. Slow thinking selection.
+- **Epistemic Trust**: Dynamic credibility weighting.
+- **Intelligent Authentication**: Reasoning-based access control.
+- **Universal Schema**: Native Schema.org + JSON-LD interoperability.
 
-Reliability:
-- Persist stateful services with durable volumes.
-- Track baseline performance before and after stack changes.
-
-## Current Runtime Baseline (VPS)
-Kubernetes namespace `agent-kernel` currently includes:
-- Temporal
-- LiteLLM
-- Redis
-- Postgres
-- Qdrant
-- MinIO
-- NATS
-- Langfuse (v2)
-
-## Hardening Direction
-- pin images by digest
-- persistent storage for all stateful services
-- network policies + secret provider integration
-- SLO benchmark gating per change
-
-## Benchmark Assets
-- `ops/benchmark-scorecard.yaml`
-- `ops/collect-baseline.sh`
-- `ops/hardening-checklist.md`
-
-## Next Build Priorities
-1. Implement runtime services for policy-kernel and protocol-kernel contracts.
-2. Add environment overlays (`kustomize` or Helm) for dev/stage/prod.
-3. Add conformance tests for ANP/ACP and OPA/OpenFGA decision flows.
-4. Add SLO gate checks in CI for regression detection.
