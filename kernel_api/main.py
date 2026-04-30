@@ -159,3 +159,25 @@ async def get_agent_identity(agent_id: str):
 async def query_graph(subject_id: str):
     return {"subject": subject_id, "facts": graph.query_facts(subject_id)}
 
+
+@app.post("/api/v1/admin/discover")
+async def admin_discover(org_name: str):
+    """
+    Admin-only: Trigger discovery from a real GitHub Organization.
+    """
+    discovered = discovery.crawl_github_org(org_name)
+    return {
+        "organization": org_name,
+        "discovered_entities_count": len(discovered),
+        "entities": discovered,
+        "status": "Pending-Admin-Review"
+    }
+
+@app.post("/api/v1/admin/onboard")
+async def admin_onboard(user_id: str):
+    """
+    Admin-only: Approve and trigger user provisioning outreach.
+    """
+    outreach_action = discovery.generate_provisioning_request(user_id)
+    # In a full system, this would be dispatched to the A2A communication bus.
+    return {"status": "Outreach-Sent", "action": outreach_action}
