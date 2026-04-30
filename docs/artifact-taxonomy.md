@@ -56,3 +56,9 @@ These artifacts represent advanced architectural patterns required for conscious
 - `global_workspace`: (Global Workspace Theory) A centralized memory space where sub-agents compete to broadcast information globally.
 - `attention_schema`: (Attention Schema Theory) A model of the agent's own attentional state, allowing it to track and regulate its focus.
 - `meta_representation`: (Higher-Order Thought) The capacity for an agent to generate secondary representations or evaluations of its own primary thoughts and outputs.
+
+## 6. Visual & Observability Artifacts
+These artifacts define the interface and telemetry required for human oversight and system-wide transparency:
+- `visual_dashboard`: (Unified Control Plane) The comprehensive UI for monitoring cognitive traces, graph provenance, and multi-cloud topology.
+- `telemetry_stream`: The high-frequency event feed (WebSocket/gRPC) used to populate visual interfaces in real-time.
+- `audit_trail_browser`: Specialized view for navigating the cryptographic lineage of agent actions.
