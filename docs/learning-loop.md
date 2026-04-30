@@ -15,3 +15,9 @@ Per assignment cycle:
 - Change frequency is rate-limited.
 - Global rollout requires evidence threshold.
 - Every improvement event is auditable.
+
+## MLflow Integration
+- Track kernel learning loop metrics in MLflow.
+- Recommended experiment name: `kernel-learning-loop`.
+- Backend store: Postgres.
+- Artifact store: MinIO (`s3://mlflow`).

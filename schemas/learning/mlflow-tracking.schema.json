@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/learning/mlflow-tracking.schema.json",
+  "title": "MLflowTrackingEvent",
+  "type": "object",
+  "required": ["event_id", "occurred_at", "tenant_id", "agent_id", "run_id", "experiment", "metric_name", "metric_value"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "tenant_id": { "type": "string" },
+    "agent_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "run_id": { "type": "string" },
+    "experiment": { "type": "string" },
+    "metric_name": { "type": "string" },
+    "metric_value": { "type": "number" },
+    "step": { "type": "integer", "minimum": 0 },
+    "params": { "type": "object", "additionalProperties": true },
+    "tags": { "type": "object", "additionalProperties": { "type": "string" } },
+    "artifact_uri": { "type": "string" },
+    "semantic_extension": { "$ref": "../_semantic-extension.schema.json" },
+    "metadata": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false
+}
