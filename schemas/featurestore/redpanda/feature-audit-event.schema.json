@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/featurestore/redpanda/feature-audit-event.schema.json",
+  "title": "FeatureAuditEvent",
+  "type": "object",
+  "required": ["event_id", "occurred_at", "actor", "action", "tenant_id", "project", "decision", "trace_id"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "actor": { "type": "string" },
+    "action": { "type": "string", "enum": ["get_online_features", "materialize", "deny"] },
+    "tenant_id": { "type": "string" },
+    "project": { "type": "string" },
+    "entity_name": { "type": "string" },
+    "entity_id": { "type": "string" },
+    "features": { "type": "array", "items": { "type": "string" } },
+    "decision": { "type": "string", "enum": ["allow", "deny"] },
+    "trace_id": { "type": "string" },
+    "metadata": { "type": "object", "additionalProperties": true },
+    "semantic_extension": { "$ref": "../../_semantic-extension.schema.json" }
+  },
+  "additionalProperties": false
+}

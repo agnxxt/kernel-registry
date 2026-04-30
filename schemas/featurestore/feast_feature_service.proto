@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package agnxxt.kernel.featurestore.v1;
+
+option go_package = "github.com/agnxxt/agent-kernel-local/gen/featurestore/v1;featurestorev1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+message FeatureRef {
+  string tenant_id = 1;
+  string project = 2;
+  string entity_name = 3;
+  string entity_id = 4;
+  string feature_view = 5;
+  repeated string feature_names = 6;
+}
+
+message OnlineFeatureRequest {
+  string request_id = 1;
+  string trace_id = 2;
+  FeatureRef ref = 3;
+  google.protobuf.Timestamp event_timestamp = 4;
+}
+
+message OnlineFeatureResponse {
+  string request_id = 1;
+  string trace_id = 2;
+  FeatureRef ref = 3;
+  google.protobuf.Struct feature_values = 4;
+  google.protobuf.Timestamp served_at = 5;
+}
+
+message MaterializeRequest {
+  string request_id = 1;
+  string trace_id = 2;
+  string project = 3;
+  google.protobuf.Timestamp start = 4;
+  google.protobuf.Timestamp end = 5;
+}
+
+message MaterializeResponse {
+  string request_id = 1;
+  string trace_id = 2;
+  string status = 3; // accepted|running|completed|failed
+  string job_ref = 4;
+}
+
+message FeatureAuditEvent {
+  string event_id = 1;
+  string actor = 2;
+  string action = 3; // get_online_features|materialize|deny
+  string tenant_id = 4;
+  string project = 5;
+  string entity_name = 6;
+  string entity_id = 7;
+  repeated string features = 8;
+  string decision = 9; // allow|deny
+  string trace_id = 10;
+  google.protobuf.Timestamp occurred_at = 11;
+  google.protobuf.Struct metadata = 12;
+}
+
+message Empty {}
+
+service FeatureStoreKernel {
+  rpc GetOnlineFeatures(OnlineFeatureRequest) returns (OnlineFeatureResponse);
+  rpc Materialize(MaterializeRequest) returns (MaterializeResponse);
+}

@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: feast-kernel
+  namespace: agent-kernel
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feast-kernel
+  namespace: agent-kernel
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: feast-kernel
+  template:
+    metadata:
+      labels:
+        app: feast-kernel
+    spec:
+      serviceAccountName: feast-kernel
+      containers:
+      - name: feast-kernel
+        image: ghcr.io/agnxxt/feast-kernel:0.1.0
+        ports:
+        - containerPort: 7081
+          name: grpc
+        env:
+        - name: FEAST_REGISTRY_PATH
+          value: /feast/registry.db
+        - name: FEAST_PROJECT
+          value: kernel
+        - name: ONLINE_STORE_TYPE
+          value: redis
+        - name: ONLINE_STORE_REDIS_HOST
+          value: redis-master.agent-kernel.svc.cluster.local
+        - name: ONLINE_STORE_REDIS_PORT
+          value: "6379"
+        - name: OFFLINE_STORE_TYPE
+          value: postgres
+        - name: OFFLINE_STORE_POSTGRES_HOST
+          value: postgres-postgresql.agent-kernel.svc.cluster.local
+        - name: OFFLINE_STORE_POSTGRES_PORT
+          value: "5432"
+        - name: OFFLINE_STORE_POSTGRES_DB
+          value: kernel
+        - name: OFFLINE_STORE_POSTGRES_USER
+          value: kernel
+        - name: OFFLINE_STORE_POSTGRES_PASSWORD
+          value: kernelpass
+        - name: AUDIT_TOPIC
+          value: kernel.featurestore.audit.v1
+        readinessProbe:
+          tcpSocket:
+            port: grpc
+          initialDelaySeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: grpc
+          initialDelaySeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: feast-kernel
+  namespace: agent-kernel
+spec:
+  selector:
+    app: feast-kernel
+  ports:
+  - name: grpc
+    port: 7081
+    targetPort: 7081

@@ -1,0 +1,13 @@
+version: 1
+namespace: agnxxt.kernel.featurestore.v1
+broker: redpanda
+topics:
+  - name: kernel.featurestore.audit.v1
+    schema_ref: schemas/featurestore/redpanda/feature-audit-event.schema.json
+    schema_registry_subject: kernel.featurestore.audit.v1-value
+    compatibility: backward
+    partitions: 12
+    replication_factor: 3
+    cleanup_policy: compact,delete
+keying:
+  key: tenant_id:project:entity_name:entity_id
