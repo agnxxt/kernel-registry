@@ -28,8 +28,11 @@ Defines the creative, symbolic, and emotional medium through which information a
 
 ## 5. Religion & Belief Systems (`BeliefSystemLens`)
 Defines the theological, ethical, and ritualistic frameworks that govern human or community behavior.
-*   **Attributes**: `primary_theology`, `ethical_prohibitions` (e.g., Dietary, Financial/Usury), `sacred_temporal_cycles` (Prayer times, Sabbaths, Festivals), `behavioral_norms`.
-*   **Impact**: Modifies `deontic_constraints` and `TemporalNuance`. (e.g., An agent might automatically defer a non-critical `TradeAction` during a sacred window, or filter recommendations to adhere to ethical/religious prohibitions).
+*   **Core Beliefs**: Foundational theological tenets and ethical axioms (e.g., Ahimsa, Monotheism, Karma).
+*   **Festivals & Celebrations**: Major calendar events, their significance, and **Celebration Modes** (e.g., fasting, feasting, silence, communal gathering).
+*   **Prayers & Rituals**: Daily/periodic sacred actions, frequency, and spatial requirements (e.g., facing a specific direction, requiring a quiet environment).
+*   **Clothing & Aesthetics**: Modesty standards, ceremonial dress codes, and symbolic attire (e.g., Hijab, Kippah, Saffron robes).
+*   **Impact**: Modifies `deontic_constraints`, `TemporalNuance`, and `AestheticLens`. (e.g., During a "silent celebration mode," an agent might shift its communication style to purely text/minimalist; or recommend only attire that aligns with local religious modesty standards).
 
 ## 6. Geopolitical Context (`GeopoliticalState`)
 Defines the political boundaries, regulatory jurisdictions, and international relations impacting an agent.
