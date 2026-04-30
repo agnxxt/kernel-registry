@@ -23,9 +23,16 @@ The Kernel Admin's organizational policies are mapped to the tool copilot's conf
 *   **Implementation**: The Kernel's `discovery_unit` syncs Admin policies with the tool copilot's API permissions. 
 *   **Impact**: Even if a User Agent is compromised or goes "Rogue," it is blocked by the Tool Copilot if the action violates the Admin's global policy.
 
+## 3. Bypass Pathways & Direct Execution
+While the tool-copilot mediated flow is the **primary governed pathway**, the kernel recognizes that alternative **Bypass Pathways** exist (e.g., direct API access, CLI execution, or legacy integrations).
+
+*   **Risk Mitigation**: Any action taken via a bypass pathway is flagged in the Knowledge Graph with a `GovernanceMode: Unmediated` label. 
+*   **Audit Escalation**: The self-improving harness automatically assigns a higher `Criticality` score to unmediated actions, triggering mandatory post-hoc verification by a `watchdog_role`.
+*   **Deontic Veto**: Admin policies can be set to **Forbidden** for specific sensitive actions if attempted via a bypass route, forcing the agent to revert to the Tool-Copilot flow.
+
 ---
 
-## 3. Universal Schema Mapping (Hierarchical Action)
+## 4. Universal Schema Mapping (Hierarchical Action)
 
 A task execution in this model is represented as a nested Schema.org `UpdateAction`.
 

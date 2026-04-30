@@ -63,6 +63,7 @@ These relations define the mathematical and tactical interactions between autono
 *   `[Agent A] -COMPETES_WITH-> [Agent B]`: Indicates a zero-sum `GameTheory` interaction for limited resources.
 *   `[Action] -REQUIRES_CONSENSUS_FROM-> [AgentGroup]`: Enforces a `ConsensusTopology` (e.g., BFT) before an action is valid.
 *   `[ToolCopilot] -ACTS_AS_GATEKEEPER_FOR-> [Artifact/Tool]`: Formally establishes a tool-specific intermediary that enforces logic and kernel policies.
+*   `[Agent] -BYPASSES_GATEKEEPER_VIA-> [DirectAccessChannel]`: Tracks actions that utilize non-mediated pathways (API/CLI), flagging them for high-criticality audit.
 *   `[Agent] -BIDS_ON-> [Task]`: Represents participation in a resource allocation auction.
 
 ### 8. Macro-Context Relations (Action/Agent $\leftrightarrow$ WorldState)
