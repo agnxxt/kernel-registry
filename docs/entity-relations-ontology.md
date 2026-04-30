@@ -86,10 +86,14 @@ These relations allow for the auditing of systematic reasoning errors.
 These relations define the agent's perception of its internal and external strategic position.
 *   `[Agent] -CLAIMS_STRENGTH-> [Skill/Artifact]`: Records a positive internal self-evaluation.
 *   `[Agent] -ACKNOWLEDGES_WEAKNESS-> [Skill/Logic]`: Records a negative internal self-evaluation.
-*   `[Agent] -SENSES_OPPORTUNITY-> [Context/Event]`: Flags an external condition that could facilitate goal achievement.
-*   `[Agent] -DETECTS_THREAT-> [Context/Agent]`: Flags an external condition or actor that could compromise reliability.
 
-### 12. Operational & Stigmergic Relations (Agent $\leftrightarrow$ Action/Artifact)
+### 12. Economic Cognition Relations (Action/Agent $\leftrightarrow$ Utility/Action)
+These relations define the financial and utility-based trade-offs in agent reasoning.
+*   `[Action] -HAS_TVM_IMPACT-> [MonetaryAmount/Utility]`: Links an action to the time-decay of its value.
+*   `[Action] -FORGOES-> [AlternativeAction/Artifact]`: Formally documents the **Opportunity Cost** of a choice.
+*   `[Agent] -ASSESSES_MARGINAL_UTILITY-> [Artifact]`: Evaluates the benefit of one additional unit of resource.
+
+### 13. Operational & Stigmergic Relations (Agent $\leftrightarrow$ Action/Artifact)
 These relations enable "Predictive Control" and environment-based coordination.
 *   `[Agent] -PLANS-> [Action]`: Represents the "look-ahead" simulation phase of Predictive Control.
 *   `[Agent] -EXECUTES-> [Action]`: The actual commitment to an action.
