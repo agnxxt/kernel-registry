@@ -3,7 +3,11 @@
   "$id": "https://agnxxt.com/schemas/guardrails/guard-event.schema.json",
   "title": "Guard Event",
   "type": "object",
-  "required": ["event_type", "meta", "payload"],
+  "required": [
+    "event_type",
+    "meta",
+    "payload"
+  ],
   "properties": {
     "event_type": {
       "type": "string",
@@ -19,50 +23,164 @@
     },
     "meta": {
       "type": "object",
-      "required": ["event_id", "tenant_id", "trace_id", "agent_id", "occurred_at"],
+      "required": [
+        "event_id",
+        "tenant_id",
+        "trace_id",
+        "agent_id",
+        "occurred_at"
+      ],
       "properties": {
-        "event_id": {"type": "string", "minLength": 8},
-        "tenant_id": {"type": "string", "minLength": 2},
-        "trace_id": {"type": "string", "minLength": 8},
-        "agent_id": {"type": "string", "minLength": 2},
-        "workflow_id": {"type": "string"},
-        "source": {"type": "string"},
-        "occurred_at": {"type": "string", "format": "date-time"}
+        "event_id": {
+          "type": "string",
+          "minLength": 8
+        },
+        "tenant_id": {
+          "type": "string",
+          "minLength": 2
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 8
+        },
+        "agent_id": {
+          "type": "string",
+          "minLength": 2
+        },
+        "workflow_id": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        }
       },
       "additionalProperties": true
     },
     "payload": {
       "type": "object",
-      "required": ["risks"],
+      "required": [
+        "risks"
+      ],
       "properties": {
-        "action": {"type": "string", "enum": ["allow", "challenge", "block", "escalate"]},
-        "reason": {"type": "string"},
-        "drift_score": {"type": "number", "minimum": 0, "maximum": 1},
-        "sycophancy_score": {"type": "number", "minimum": 0, "maximum": 1},
-        "reasoning_policy_passed": {"type": "boolean"},
-        "isolation_passed": {"type": "boolean"},
-        "inferred_intents": {"type": "array", "items": {"type": "string"}},
-        "prohibited_intents": {"type": "array", "items": {"type": "string"}},
-        "violations": {"type": "array", "items": {"type": "string"}},
-        "injected_constraints": {"type": "array", "items": {"type": "string"}},
-        "rejected_actions": {"type": "array", "items": {"type": "string"}},
-        "leaked_memory_scopes": {"type": "array", "items": {"type": "string"}},
-        "interventions": {"type": "array", "items": {"type": "string"}},
-        "controls_applied": {"type": "array", "items": {"type": "string"}},
+        "action": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "challenge",
+            "block",
+            "escalate"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "drift_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "sycophancy_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reasoning_policy_passed": {
+          "type": "boolean"
+        },
+        "isolation_passed": {
+          "type": "boolean"
+        },
+        "inferred_intents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prohibited_intents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "injected_constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rejected_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "leaked_memory_scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "interventions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "controls_applied": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "risks": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["label", "score", "severity"],
+            "required": [
+              "label",
+              "score",
+              "severity"
+            ],
             "properties": {
-              "label": {"type": "string"},
-              "score": {"type": "number", "minimum": 0, "maximum": 1},
-              "severity": {"type": "string", "enum": ["low", "medium", "high", "critical"]}
+              "label": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ]
+              }
             },
             "additionalProperties": false
           }
         }
       },
+      "additionalProperties": true
+    },
+    "semantic_extension": {
+      "$ref": "../../../_semantic-extension.schema.json"
+    },
+    "metadata": {
+      "type": "object",
       "additionalProperties": true
     }
   },

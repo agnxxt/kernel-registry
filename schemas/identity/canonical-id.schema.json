@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/identity/canonical-id.schema.json",
+  "title": "CanonicalId",
+  "type": "object",
+  "required": [
+    "canonical_id",
+    "subject_type",
+    "subject_ref",
+    "issuer",
+    "issued_at"
+  ],
+  "properties": {
+    "canonical_id": {
+      "type": "string",
+      "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+    },
+    "subject_type": {
+      "type": "string",
+      "enum": [
+        "tenant",
+        "org",
+        "agent",
+        "user",
+        "group",
+        "project",
+        "product",
+        "task"
+      ]
+    },
+    "subject_ref": {
+      "type": "string",
+      "minLength": 2
+    },
+    "issuer": {
+      "type": "string",
+      "minLength": 2
+    },
+    "did": {
+      "type": "string"
+    },
+    "key_id": {
+      "type": "string"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "wallets": {
+      "type": "array",
+      "items": {
+        "$ref": "./wallet.schema.json"
+      }
+    },
+    "trust_score": {
+      "$ref": "./trust-score.schema.json"
+    },
+    "registry_record": {
+      "$ref": "./registry-record.schema.json"
+    },
+    "semantic_extension": {
+      "$ref": "../../_semantic-extension.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

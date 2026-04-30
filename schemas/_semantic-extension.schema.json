@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/_semantic-extension.schema.json",
+  "title": "SemanticExtension",
+  "type": "object",
+  "properties": {
+    "taxonomy": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string" },
+        "labels": { "type": "array", "items": { "type": "string" } },
+        "path": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "vocabulary": {
+      "type": "object",
+      "properties": {
+        "namespace": { "type": "string", "format": "uri" },
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "term": { "type": "string" },
+              "iri": { "type": "string", "format": "uri" },
+              "definition": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "ontology": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string" },
+        "classes": { "type": "array", "items": { "type": "string" } },
+        "relations": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

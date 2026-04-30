@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package agnxxt.kernel.identity.v1;
+
+option go_package = "github.com/agnxxt/agent-kernel-local/gen/identity/v1;identityv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+message BlockchainWallet {
+  string wallet_id = 1;
+  string holder_canonical_id = 2;
+  string chain = 3;            // ethereum|polygon|solana|bitcoin|other
+  string network = 4;          // mainnet|testnet|custom
+  string address = 5;
+  string public_key = 6;
+  bool verified = 7;
+  google.protobuf.Timestamp verified_at = 8;
+  google.protobuf.Struct metadata = 9;
+}
+
+message TrustScore {
+  string subject_canonical_id = 1;
+  double score = 2;            // 0..1
+  string tier = 3;             // untrusted|low|medium|high
+  string model_version = 4;
+  repeated string factors = 5;
+  google.protobuf.Timestamp computed_at = 6;
+  google.protobuf.Timestamp expires_at = 7;
+  google.protobuf.Struct evidence = 8;
+}
+
+message RegistryRecord {
+  string canonical_id = 1;
+  string record_type = 2;      // identity|wallet|credential|trust
+  string status = 3;           // active|suspended|revoked|archived
+  string source = 4;
+  string checksum = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Struct attributes = 7;
+}
+
+service IdentityRegistry {
+  rpc UpsertWallet(BlockchainWallet) returns (BlockchainWallet);
+  rpc GetWallet(BlockchainWallet) returns (BlockchainWallet);
+  rpc UpsertTrustScore(TrustScore) returns (TrustScore);
+  rpc GetTrustScore(TrustScore) returns (TrustScore);
+  rpc UpsertRegistryRecord(RegistryRecord) returns (RegistryRecord);
+  rpc GetRegistryRecord(RegistryRecord) returns (RegistryRecord);
+}

@@ -21,6 +21,18 @@ enum ActionType {
   SCHEMA_ORG = 10;
 }
 
+enum ActionScope {
+  ACTION_SCOPE_UNSPECIFIED = 0;
+  GLOBAL = 1;
+  ORG = 2;
+  COUNTRY = 3;
+  LOCAL = 4;
+  PRODUCT = 5;
+  PROJECT = 6;
+  GROUP = 7;
+  INDIVIDUAL = 8;
+}
+
 enum ActionStatus {
   ACTION_STATUS_UNSPECIFIED = 0;
   PENDING = 1;
@@ -44,25 +56,26 @@ message ActionRef {
 message KernelActionRequest {
   ActionRef ref = 1;
   ActionType type = 2;
-  string provider = 3; // e.g. n8n|langgraph|google|whatsapp|wordpress|x|uber|schemaorg
-  string operation = 4; // provider-specific operation id
-  google.protobuf.Struct input = 5;
-  google.protobuf.Struct policy = 6;
-  google.protobuf.Timestamp requested_at = 7;
+  ActionScope scope = 3;
+  string provider = 4; // e.g. n8n|langgraph|google|whatsapp|wordpress|x|uber|schemaorg
+  string operation = 5; // provider-specific operation id
+  google.protobuf.Struct input = 6;
+  google.protobuf.Struct policy = 7;
+  google.protobuf.Timestamp requested_at = 8;
 }
 
 message KernelActionResult {
   ActionRef ref = 1;
   ActionType type = 2;
-  ActionStatus status = 3;
-  string provider = 4;
-  string operation = 5;
-  google.protobuf.Struct output = 6;
-  string error_code = 7;
-  string error_message = 8;
-  int32 latency_ms = 9;
-  repeated string artifacts = 10;
-  google.protobuf.Timestamp completed_at = 11;
+  ActionStatus status = 4;
+  string provider = 5;
+  string operation = 6;
+  google.protobuf.Struct output = 7;
+  string error_code = 8;
+  string error_message = 9;
+  int32 latency_ms = 10;
+  repeated string artifacts = 11;
+  google.protobuf.Timestamp completed_at = 12;
 }
 
 service KernelActionBus {

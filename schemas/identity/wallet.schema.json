@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/identity/wallet.schema.json",
+  "title": "BlockchainWallet",
+  "type": "object",
+  "required": [
+    "wallet_id",
+    "holder_canonical_id",
+    "chain",
+    "network",
+    "address",
+    "verified"
+  ],
+  "properties": {
+    "wallet_id": {
+      "type": "string",
+      "minLength": 4
+    },
+    "holder_canonical_id": {
+      "type": "string",
+      "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+    },
+    "chain": {
+      "type": "string"
+    },
+    "network": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string",
+      "minLength": 8
+    },
+    "public_key": {
+      "type": "string"
+    },
+    "verified": {
+      "type": "boolean"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "semantic_extension": {
+      "$ref": "../../_semantic-extension.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

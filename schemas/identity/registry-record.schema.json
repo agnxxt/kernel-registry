@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/identity/registry-record.schema.json",
+  "title": "RegistryRecord",
+  "type": "object",
+  "required": [
+    "canonical_id",
+    "record_type",
+    "status",
+    "source",
+    "updated_at"
+  ],
+  "properties": {
+    "canonical_id": {
+      "type": "string",
+      "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+    },
+    "record_type": {
+      "type": "string",
+      "enum": [
+        "identity",
+        "wallet",
+        "credential",
+        "trust"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "revoked",
+        "archived"
+      ]
+    },
+    "source": {
+      "type": "string"
+    },
+    "checksum": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "semantic_extension": {
+      "$ref": "../../_semantic-extension.schema.json"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

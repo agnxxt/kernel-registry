@@ -5,6 +5,7 @@
   "type": "object",
   "required": [
     "action_id",
+    "canonical_id",
     "tenant_id",
     "agent_id",
     "task_id",
@@ -12,19 +13,41 @@
     "step_id",
     "trace_id",
     "type",
+    "action_scope",
     "provider",
     "operation",
     "input",
     "requested_at"
   ],
   "properties": {
-    "action_id": { "type": "string", "minLength": 8 },
-    "tenant_id": { "type": "string", "minLength": 2 },
-    "agent_id": { "type": "string", "minLength": 2 },
-    "task_id": { "type": "string", "minLength": 2 },
-    "run_id": { "type": "string", "minLength": 2 },
-    "step_id": { "type": "string", "minLength": 2 },
-    "trace_id": { "type": "string", "minLength": 8 },
+    "action_id": {
+      "type": "string",
+      "minLength": 8
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "agent_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "step_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 8
+    },
     "type": {
       "type": "string",
       "enum": [
@@ -40,73 +63,387 @@
         "schema_org"
       ]
     },
-    "provider": { "type": "string" },
-    "operation": { "type": "string" },
-    "input": { "type": "object", "additionalProperties": true },
-    "policy": { "type": "object", "additionalProperties": true },
-    "requested_at": { "type": "string", "format": "date-time" }
+    "provider": {
+      "type": "string"
+    },
+    "operation": {
+      "type": "string"
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "action_scope": {
+      "type": "string",
+      "enum": [
+        "global",
+        "org",
+        "country",
+        "local",
+        "product",
+        "project",
+        "group",
+        "individual"
+      ]
+    },
+    "scope_ref": {
+      "type": "object",
+      "properties": {
+        "org_id": {
+          "type": "string"
+        },
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "locality": {
+          "type": "string"
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "project_id": {
+          "type": "string"
+        },
+        "group_id": {
+          "type": "string"
+        },
+        "individual_id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "canonical_id": {
+      "type": "string",
+      "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+    },
+    "verifiable_credentials": {
+      "type": "array",
+      "items": {
+        "$ref": "../identity/verifiable-credential.schema.json"
+      }
+    },
+    "semantic_extension": {
+      "$ref": "../../_semantic-extension.schema.json"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
   },
   "allOf": [
     {
-      "if": { "properties": { "type": { "const": "automate" } } },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "automate"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "provider": { "enum": ["n8n"] },
-          "operation": { "enum": ["run_workflow", "trigger_webhook", "upsert_workflow"] }
+          "provider": {
+            "enum": [
+              "n8n"
+            ]
+          },
+          "operation": {
+            "enum": [
+              "run_workflow",
+              "trigger_webhook",
+              "upsert_workflow"
+            ]
+          }
         }
       }
     },
     {
-      "if": { "properties": { "type": { "const": "flow" } } },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "flow"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "provider": { "enum": ["langgraph"] },
-          "operation": { "enum": ["start_flow", "resume_flow", "inspect_state"] }
+          "provider": {
+            "enum": [
+              "langgraph"
+            ]
+          },
+          "operation": {
+            "enum": [
+              "start_flow",
+              "resume_flow",
+              "inspect_state"
+            ]
+          }
         }
       }
     },
     {
-      "if": { "properties": { "type": { "const": "search" } } },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "search"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "provider": { "enum": ["google"] },
-          "operation": { "enum": ["web_search", "news_search", "image_search"] }
+          "provider": {
+            "enum": [
+              "google"
+            ]
+          },
+          "operation": {
+            "enum": [
+              "web_search",
+              "news_search",
+              "image_search"
+            ]
+          }
         }
       }
     },
     {
-      "if": { "properties": { "type": { "const": "message" } } },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "message"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "provider": { "enum": ["whatsapp"] },
-          "operation": { "enum": ["send_text", "send_template", "send_media"] }
+          "provider": {
+            "enum": [
+              "whatsapp"
+            ]
+          },
+          "operation": {
+            "enum": [
+              "send_text",
+              "send_template",
+              "send_media"
+            ]
+          }
         }
       }
     },
     {
-      "if": { "properties": { "type": { "const": "publish" } } },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "publish"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "provider": { "enum": ["wordpress", "ghost", "medium"] },
-          "operation": { "enum": ["publish_article", "update_article", "delete_article"] }
+          "provider": {
+            "enum": [
+              "wordpress",
+              "ghost",
+              "medium"
+            ]
+          },
+          "operation": {
+            "enum": [
+              "publish_article",
+              "update_article",
+              "delete_article"
+            ]
+          }
         }
       }
     },
     {
-      "if": { "properties": { "type": { "const": "post" } } },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "post"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "provider": { "enum": ["x", "linkedin", "facebook", "instagram"] },
-          "operation": { "enum": ["create_post", "schedule_post", "delete_post"] }
+          "provider": {
+            "enum": [
+              "x",
+              "linkedin",
+              "facebook",
+              "instagram"
+            ]
+          },
+          "operation": {
+            "enum": [
+              "create_post",
+              "schedule_post",
+              "delete_post"
+            ]
+          }
         }
       }
     },
     {
-      "if": { "properties": { "type": { "const": "travel_book" } } },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "travel_book"
+          }
+        }
+      },
       "then": {
         "properties": {
-          "provider": { "enum": ["uber"] },
-          "operation": { "enum": ["estimate_ride", "book_ride", "cancel_ride"] }
+          "provider": {
+            "enum": [
+              "uber"
+            ]
+          },
+          "operation": {
+            "enum": [
+              "estimate_ride",
+              "book_ride",
+              "cancel_ride"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action_scope": {
+            "const": "org"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "scope_ref": {
+            "required": [
+              "org_id"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action_scope": {
+            "const": "country"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "scope_ref": {
+            "required": [
+              "country_code"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action_scope": {
+            "const": "local"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "scope_ref": {
+            "required": [
+              "locality"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action_scope": {
+            "const": "product"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "scope_ref": {
+            "required": [
+              "product_id"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action_scope": {
+            "const": "project"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "scope_ref": {
+            "required": [
+              "project_id"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action_scope": {
+            "const": "group"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "scope_ref": {
+            "required": [
+              "group_id"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action_scope": {
+            "const": "individual"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "scope_ref": {
+            "required": [
+              "individual_id"
+            ]
+          }
         }
       }
     }

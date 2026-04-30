@@ -46,6 +46,28 @@
         },
         "auth_strength": {
           "type": "string"
+        },
+        "canonical_id": {
+          "type": "string",
+          "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+        },
+        "credential_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "./identity/verifiable-credential.schema.json"
+          }
+        },
+        "wallets": {
+          "type": "array",
+          "items": {
+            "$ref": "./identity/wallet.schema.json"
+          }
+        },
+        "trust_score": {
+          "$ref": "./identity/trust-score.schema.json"
+        },
+        "registry_record": {
+          "$ref": "./identity/registry-record.schema.json"
         }
       },
       "additionalProperties": false
@@ -253,6 +275,9 @@
     },
     "awareness": {
       "$ref": "./context-awareness.schema.json"
+    },
+    "semantic_extension": {
+      "$ref": "../_semantic-extension.schema.json"
     }
   },
   "additionalProperties": false

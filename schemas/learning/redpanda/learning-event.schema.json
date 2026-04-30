@@ -3,9 +3,20 @@
   "$id": "https://agnxxt.com/schemas/learning/learning-event.schema.json",
   "title": "LearningEvent",
   "type": "object",
-  "required": ["event_id", "event_type", "occurred_at", "tenant_id", "agent_id", "task_id", "run_id"],
+  "required": [
+    "event_id",
+    "event_type",
+    "occurred_at",
+    "tenant_id",
+    "agent_id",
+    "task_id",
+    "run_id"
+  ],
   "properties": {
-    "event_id": { "type": "string", "format": "uuid" },
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
     "event_type": {
       "type": "string",
       "enum": [
@@ -20,28 +31,80 @@
         "improvement.rolled_back"
       ]
     },
-    "occurred_at": { "type": "string", "format": "date-time" },
-    "tenant_id": { "type": "string", "minLength": 2 },
-    "agent_id": { "type": "string", "minLength": 2 },
-    "task_id": { "type": "string", "minLength": 2 },
-    "run_id": { "type": "string", "minLength": 2 },
-    "step_id": { "type": "string" },
-    "trace_id": { "type": "string" },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "agent_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "step_id": {
+      "type": "string"
+    },
+    "trace_id": {
+      "type": "string"
+    },
     "payload": {
       "type": "object",
       "properties": {
-        "score": { "type": "integer", "minimum": 0, "maximum": 100 },
-        "proposal_id": { "type": "string" },
-        "target": { "type": "string" },
-        "change_set": { "type": "string" },
-        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-        "requires_human_approval": { "type": "boolean" },
-        "status": { "type": "string" },
-        "scope": { "type": "string" },
-        "metric": { "type": "string" },
-        "delta": { "type": "number" },
-        "action": { "type": "string" }
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "proposal_id": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "change_set": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "requires_human_approval": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "delta": {
+          "type": "number"
+        },
+        "action": {
+          "type": "string"
+        }
       },
+      "additionalProperties": true
+    },
+    "semantic_extension": {
+      "$ref": "../../../_semantic-extension.schema.json"
+    },
+    "metadata": {
+      "type": "object",
       "additionalProperties": true
     }
   },

@@ -3,41 +3,122 @@
   "$id": "https://agnxxt.com/schemas/context-awareness.schema.json",
   "title": "AwarenessLayer",
   "type": "object",
-  "required": ["awareness_version", "self", "environment", "risk"],
+  "required": [
+    "awareness_version",
+    "self",
+    "environment",
+    "risk"
+  ],
   "properties": {
-    "awareness_version": { "type": "string", "const": "1.0.0" },
+    "awareness_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
     "self": {
       "type": "object",
-      "required": ["agent_identity", "capability_profile", "confidence"],
+      "required": [
+        "agent_identity",
+        "capability_profile",
+        "confidence"
+      ],
       "properties": {
-        "agent_identity": { "type": "string" },
-        "capability_profile": { "type": "string" },
-        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-        "known_limits": { "type": "array", "items": { "type": "string" } }
+        "agent_identity": {
+          "type": "string"
+        },
+        "capability_profile": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "known_limits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       },
       "additionalProperties": false
     },
     "environment": {
       "type": "object",
-      "required": ["deployment_tier", "region", "runtime_health"],
+      "required": [
+        "deployment_tier",
+        "region",
+        "runtime_health"
+      ],
       "properties": {
-        "deployment_tier": { "type": "string", "enum": ["dev", "staging", "prod"] },
-        "region": { "type": "string" },
-        "runtime_health": { "type": "string", "enum": ["healthy", "degraded", "critical"] },
-        "resource_pressure": { "type": "string", "enum": ["low", "medium", "high"] }
+        "deployment_tier": {
+          "type": "string",
+          "enum": [
+            "dev",
+            "staging",
+            "prod"
+          ]
+        },
+        "region": {
+          "type": "string"
+        },
+        "runtime_health": {
+          "type": "string",
+          "enum": [
+            "healthy",
+            "degraded",
+            "critical"
+          ]
+        },
+        "resource_pressure": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "risk": {
       "type": "object",
-      "required": ["risk_level", "guardrail_mode"],
+      "required": [
+        "risk_level",
+        "guardrail_mode"
+      ],
       "properties": {
-        "risk_level": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
-        "guardrail_mode": { "type": "string", "enum": ["observe", "enforce", "strict"] },
-        "requires_human_review": { "type": "boolean" },
-        "active_decision_id": { "type": "string" }
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "guardrail_mode": {
+          "type": "string",
+          "enum": [
+            "observe",
+            "enforce",
+            "strict"
+          ]
+        },
+        "requires_human_review": {
+          "type": "boolean"
+        },
+        "active_decision_id": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
+    },
+    "semantic_extension": {
+      "$ref": "../_semantic-extension.schema.json"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
     }
   },
   "additionalProperties": false

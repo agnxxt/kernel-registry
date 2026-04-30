@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/identity/trust-score.schema.json",
+  "title": "TrustScore",
+  "type": "object",
+  "required": [
+    "subject_canonical_id",
+    "score",
+    "tier",
+    "model_version",
+    "computed_at"
+  ],
+  "properties": {
+    "subject_canonical_id": {
+      "type": "string",
+      "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "untrusted",
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "model_version": {
+      "type": "string"
+    },
+    "factors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "computed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "semantic_extension": {
+      "$ref": "../../_semantic-extension.schema.json"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

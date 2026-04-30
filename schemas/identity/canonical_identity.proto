@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package agnxxt.kernel.identity.v1;
+
+option go_package = "github.com/agnxxt/agent-kernel-local/gen/identity/v1;identityv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+message CanonicalId {
+  string canonical_id = 1;         // stable kernel-level ID (CID)
+  string subject_type = 2;         // tenant|org|agent|user|group|project|product|task
+  string subject_ref = 3;          // source-system local ID
+  string issuer = 4;               // authority namespace
+  string did = 5;                  // optional decentralized identifier
+  string key_id = 6;               // active key reference
+  google.protobuf.Timestamp issued_at = 7;
+  google.protobuf.Timestamp expires_at = 8;
+  google.protobuf.Struct metadata = 9;
+}
+
+message VerifiableCredentialRef {
+  string vc_id = 1;
+  string vc_type = 2;
+  string issuer = 3;
+  string holder_canonical_id = 4;
+  string proof_type = 5;           // e.g. Ed25519Signature2020
+  string status = 6;               // active|revoked|suspended|expired
+  google.protobuf.Timestamp issued_at = 7;
+  google.protobuf.Timestamp expires_at = 8;
+  string credential_hash = 9;
+  google.protobuf.Struct claims = 10;
+}
+
+service IdentityKernel {
+  rpc ResolveCanonicalId(CanonicalId) returns (CanonicalId);
+  rpc AttachCredential(VerifiableCredentialRef) returns (VerifiableCredentialRef);
+  rpc VerifyCredential(VerifiableCredentialRef) returns (VerifiableCredentialRef);
+}

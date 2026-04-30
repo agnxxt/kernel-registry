@@ -83,6 +83,9 @@
     "metadata": {
       "type": "object",
       "additionalProperties": true
+    },
+    "semantic_extension": {
+      "$ref": "../../_semantic-extension.schema.json"
     }
   },
   "allOf": [

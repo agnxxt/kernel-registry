@@ -78,14 +78,22 @@
     },
     "verdict": {
       "type": "string",
-      "enum": ["ALLOW", "WARN", "STRONG_WARN", "BLOCK"],
+      "enum": [
+        "ALLOW",
+        "WARN",
+        "STRONG_WARN",
+        "BLOCK"
+      ],
       "description": "Verdict from behavioral-gate at time of event"
     },
     "signals": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["type", "weight"],
+        "required": [
+          "type",
+          "weight"
+        ],
         "properties": {
           "type": {
             "type": "string",
@@ -114,10 +122,18 @@
       "type": "object",
       "description": "The action being evaluated (present on BLOCK/WARN events)",
       "properties": {
-        "resource": { "type": "string" },
-        "relation": { "type": "string" },
-        "tool_name": { "type": "string" },
-        "parameters_json": { "type": "string" }
+        "resource": {
+          "type": "string"
+        },
+        "relation": {
+          "type": "string"
+        },
+        "tool_name": {
+          "type": "string"
+        },
+        "parameters_json": {
+          "type": "string"
+        }
       }
     },
     "remediation": {
@@ -137,11 +153,15 @@
     "metadata": {
       "type": "object",
       "description": "Arbitrary k/v from caller context",
-      "additionalProperties": { "type": "string" }
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "semantic_extension": {
+      "$ref": "../../../../_semantic-extension.schema.json"
     }
   },
   "additionalProperties": false,
-
   "x-topic-config": {
     "topic_name": "cognitive-drift-events",
     "partitions": 12,
@@ -155,19 +175,28 @@
         "name": "behavioral-gate-consumer",
         "service": "behavioral-gate",
         "port": 50059,
-        "filter": ["DRIFT_SCORE_UPDATED", "GOAL_DEVIATION_DETECTED", "SYCOPHANCY_DETECTED"]
+        "filter": [
+          "DRIFT_SCORE_UPDATED",
+          "GOAL_DEVIATION_DETECTED",
+          "SYCOPHANCY_DETECTED"
+        ]
       },
       {
         "name": "fraud-pipeline-consumer",
         "service": "fraud-pipeline",
         "port": 50054,
-        "filter": ["*"]
+        "filter": [
+          "*"
+        ]
       },
       {
         "name": "decision-service-consumer",
         "service": "decision-service",
         "port": 50055,
-        "filter": ["REVIEW_ESCALATED", "AGENT_SUSPENDED"]
+        "filter": [
+          "REVIEW_ESCALATED",
+          "AGENT_SUSPENDED"
+        ]
       }
     ]
   }
