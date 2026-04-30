@@ -1,0 +1,31 @@
+version: 1
+namespace: agnxxt.kernel.learning.v1
+broker: redpanda
+topics:
+  - name: kernel.feedback.received.v1
+    schema_ref: schemas/learning/redpanda/learning-event.schema.json
+    schema_registry_subject: kernel.feedback.received.v1-value
+    compatibility: backward
+  - name: kernel.introspection.generated.v1
+    schema_ref: schemas/learning/redpanda/learning-event.schema.json
+    schema_registry_subject: kernel.introspection.generated.v1-value
+    compatibility: backward
+  - name: kernel.notes.upserted.v1
+    schema_ref: schemas/learning/redpanda/learning-event.schema.json
+    schema_registry_subject: kernel.notes.upserted.v1-value
+    compatibility: backward
+    cleanup_policy: compact,delete
+  - name: kernel.improvement.proposed.v1
+    schema_ref: schemas/learning/redpanda/learning-event.schema.json
+    schema_registry_subject: kernel.improvement.proposed.v1-value
+    compatibility: backward
+  - name: kernel.improvement.applied.v1
+    schema_ref: schemas/learning/redpanda/learning-event.schema.json
+    schema_registry_subject: kernel.improvement.applied.v1-value
+    compatibility: backward
+  - name: kernel.improvement.regressed.v1
+    schema_ref: schemas/learning/redpanda/learning-event.schema.json
+    schema_registry_subject: kernel.improvement.regressed.v1-value
+    compatibility: backward
+keying:
+  key: tenant_id:agent_id:task_id

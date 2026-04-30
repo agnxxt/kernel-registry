@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package agnxxt.kernel.learning.v1;
+
+option go_package = "github.com/agnxxt/agent-kernel-local/gen/learning/v1;learningv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+enum ImprovementStatus {
+  IMPROVEMENT_STATUS_UNSPECIFIED = 0;
+  PROPOSED = 1;
+  APPROVED = 2;
+  APPLIED = 3;
+  REJECTED = 4;
+  ROLLED_BACK = 5;
+  REGRESSED = 6;
+}
+
+message AssignmentRef {
+  string tenant_id = 1;
+  string agent_id = 2;
+  string task_id = 3;
+  string run_id = 4;
+  string step_id = 5;
+  string trace_id = 6;
+}
+
+message FeedbackReceived {
+  AssignmentRef ref = 1;
+  string feedback_id = 2;
+  string source = 3; // user|system|tool
+  int32 score = 4; // 0-100
+  string comment = 5;
+  google.protobuf.Struct rubric = 6;
+  google.protobuf.Timestamp occurred_at = 7;
+}
+
+message IntrospectionReport {
+  AssignmentRef ref = 1;
+  string report_id = 2;
+  repeated string strengths = 3;
+  repeated string failures = 4;
+  repeated string uncertainty_tags = 5;
+  repeated string root_cause_tags = 6;
+  string summary = 7;
+  google.protobuf.Timestamp occurred_at = 8;
+}
+
+message NoteUpsert {
+  AssignmentRef ref = 1;
+  string note_id = 2;
+  string note_type = 3; // episodic|procedural|tool|policy
+  string content = 4;
+  repeated string tags = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+}
+
+message ImprovementProposal {
+  AssignmentRef ref = 1;
+  string proposal_id = 2;
+  string target = 3; // prompt|tool|policy|workflow
+  string change_set = 4;
+  string rationale = 5;
+  double confidence = 6;
+  bool requires_human_approval = 7;
+  google.protobuf.Struct evidence = 8;
+  google.protobuf.Timestamp occurred_at = 9;
+}
+
+message ImprovementDecision {
+  string proposal_id = 1;
+  ImprovementStatus status = 2;
+  string actor = 3;
+  string reason = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+message ImprovementApplied {
+  string proposal_id = 1;
+  string release_id = 2;
+  string scope = 3; // canary|tenant|global
+  google.protobuf.Timestamp applied_at = 4;
+}
+
+message ImprovementRegressed {
+  string proposal_id = 1;
+  string release_id = 2;
+  string metric = 3;
+  double delta = 4;
+  string action = 5; // rollback|hold|retrain
+  google.protobuf.Timestamp occurred_at = 6;
+}

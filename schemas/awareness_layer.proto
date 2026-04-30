@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package agnxxt.kernel.awareness.v1;
+
+option go_package = "github.com/agnxxt/agent-kernel-local/gen/awareness/v1;awarenessv1";
+
+message SelfAwareness {
+  string agent_identity = 1;
+  string capability_profile = 2;
+  double confidence = 3;
+  repeated string known_limits = 4;
+}
+
+message EnvironmentAwareness {
+  string deployment_tier = 1;
+  string region = 2;
+  string runtime_health = 3;
+  string resource_pressure = 4;
+}
+
+message RiskAwareness {
+  string risk_level = 1;
+  string guardrail_mode = 2;
+  bool requires_human_review = 3;
+  string active_decision_id = 4;
+}
+
+message AwarenessLayer {
+  string awareness_version = 1;
+  SelfAwareness self = 2;
+  EnvironmentAwareness environment = 3;
+  RiskAwareness risk = 4;
+}

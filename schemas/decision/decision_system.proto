@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package agnxxt.kernel.decision.v1;
+
+option go_package = "github.com/agnxxt/agent-kernel-local/gen/decision/v1;decisionv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+enum DecisionVerdict {
+  DECISION_VERDICT_UNSPECIFIED = 0;
+  ALLOW = 1;
+  WARN = 2;
+  BLOCK = 3;
+  ESCALATE = 4;
+}
+
+enum DecisionStatus {
+  DECISION_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  APPROVED = 2;
+  REJECTED = 3;
+  EXPIRED = 4;
+  CANCELED = 5;
+}
+
+message DecisionRef {
+  string decision_id = 1;
+  string tenant_id = 2;
+  string agent_id = 3;
+  string task_id = 4;
+  string run_id = 5;
+  string step_id = 6;
+}
+
+message SubmitDecisionRequest {
+  DecisionRef ref = 1;
+  string trigger_event_id = 2;
+  string reason = 3;
+  DecisionVerdict proposed_verdict = 4;
+  int32 required_approvals = 5;
+  int32 allowed_rejections = 6;
+  google.protobuf.Timestamp deadline_at = 7;
+  repeated string approver_principals = 8;
+  google.protobuf.Struct evidence = 9;
+}
+
+message SubmitDecisionResponse {
+  DecisionRef ref = 1;
+  DecisionStatus status = 2;
+  DecisionVerdict effective_verdict = 3;
+}
+
+message ApproveDecisionRequest {
+  string decision_id = 1;
+  string actor = 2;
+  string comment = 3;
+}
+
+message RejectDecisionRequest {
+  string decision_id = 1;
+  string actor = 2;
+  string comment = 3;
+}
+
+message DecisionStatusResponse {
+  DecisionRef ref = 1;
+  DecisionStatus status = 2;
+  DecisionVerdict effective_verdict = 3;
+  int32 approval_count = 4;
+  int32 rejection_count = 5;
+  int32 required_approvals = 6;
+  int32 allowed_rejections = 7;
+  google.protobuf.Timestamp deadline_at = 8;
+  google.protobuf.Struct audit = 9;
+}
+
+message BindDecisionToRunRequest {
+  string decision_id = 1;
+  string run_id = 2;
+  string step_id = 3;
+}
+
+message Empty {}
+
+service DecisionSystem {
+  rpc SubmitDecision(SubmitDecisionRequest) returns (SubmitDecisionResponse);
+  rpc GetDecisionStatus(DecisionRef) returns (DecisionStatusResponse);
+  rpc ApproveDecision(ApproveDecisionRequest) returns (DecisionStatusResponse);
+  rpc RejectDecision(RejectDecisionRequest) returns (DecisionStatusResponse);
+  rpc BindDecisionToRun(BindDecisionToRunRequest) returns (Empty);
+}

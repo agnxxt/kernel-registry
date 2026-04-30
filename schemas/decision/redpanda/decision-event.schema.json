@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/decision/decision-event.schema.json",
+  "title": "DecisionEvent",
+  "type": "object",
+  "required": [
+    "event_id",
+    "context",
+    "occurred_at",
+    "decision_id",
+    "tenant_id",
+    "agent_id",
+    "task_id",
+    "status",
+    "effective_verdict"
+  ],
+  "properties": {
+    "context": {
+      "$ref": "../../context-envelope.schema.json"
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision_id": {
+      "type": "string",
+      "minLength": 8
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "agent_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "step_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED",
+        "EXPIRED",
+        "CANCELED"
+      ]
+    },
+    "effective_verdict": {
+      "type": "string",
+      "enum": [
+        "ALLOW",
+        "WARN",
+        "BLOCK",
+        "ESCALATE"
+      ]
+    },
+    "trigger_event_id": {
+      "type": "string"
+    },
+    "approval_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rejection_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "required_approvals": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "allowed_rejections": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "deadline_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package agnxxt.kernel.context.v1;
+
+option go_package = "github.com/agnxxt/agent-kernel-local/gen/context/v1;contextv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+message IdentityContext {
+  string tenant_id = 1;
+  string user_id = 2;
+  string agent_id = 3;
+  repeated string roles = 4;
+  string auth_strength = 5;
+}
+
+message DataContext {
+  string dataset_id = 1;
+  string data_fingerprint = 2;
+  string sensitivity = 3;
+  string residency = 4;
+  string lineage_ref = 5;
+  string freshness = 6;
+}
+
+message ChunkingContext {
+  string chunk_strategy = 1;
+  string chunk_version = 2;
+  string chunk_id = 3;
+  string chunk_span = 4;
+  int32 overlap_tokens = 5;
+}
+
+message RetrievalContext {
+  string retrieval_profile = 1;
+  int32 top_k = 2;
+  repeated string retrieved_ids = 3;
+  double confidence = 4;
+  string rerank_profile = 5;
+}
+
+message InferenceContext {
+  string model_profile = 1;
+  string prompt_hash = 2;
+  int32 temperature_milli = 3;
+  int32 max_tokens = 4;
+  int32 inference_budget_ms = 5;
+}
+
+message DecisionContext {
+  string risk_profile_id = 1;
+  string guardrail_mode = 2;
+  string pending_decision_id = 3;
+  string quorum_state = 4;
+}
+
+message ExecutionContext {
+  string task_id = 1;
+  string run_id = 2;
+  string step_id = 3;
+  string branch_path = 4;
+  int32 retry_count = 5;
+  string state_hash = 6;
+}
+
+message ObservabilityContext {
+  string trace_id = 1;
+  string correlation_id = 2;
+  repeated string audit_tags = 3;
+  repeated string incident_tags = 4;
+}
+
+message TemporalContext {
+  google.protobuf.Timestamp timestamp = 1;
+  google.protobuf.Timestamp deadline_at = 2;
+  int32 sla_budget_ms = 3;
+}
+
+message ContextEnvelope {
+  string context_id = 1;
+  string schema_version = 2;
+
+  IdentityContext identity = 3;
+  DataContext data = 4;
+  ChunkingContext chunking = 5;
+  RetrievalContext retrieval = 6;
+  InferenceContext inference = 7;
+  DecisionContext decision = 8;
+  ExecutionContext execution = 9;
+  ObservabilityContext observability = 10;
+  TemporalContext temporal = 11;
+
+  google.protobuf.Struct metadata = 12;
+}

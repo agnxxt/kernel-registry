@@ -1,0 +1,26 @@
+version: 1
+namespace: agnxxt.kernel.decision.v1
+broker: redpanda
+topics:
+  - name: kernel.decision.request.v1
+    schema_registry_subject: kernel.decision.request.v1-value
+    compatibility: backward
+    partitions: 12
+    replication_factor: 3
+    cleanup_policy: delete
+  - name: kernel.decision.status.v1
+    schema_ref: schemas/decision/redpanda/decision-event.schema.json
+    schema_registry_subject: kernel.decision.status.v1-value
+    compatibility: backward
+    partitions: 12
+    replication_factor: 3
+    cleanup_policy: compact,delete
+  - name: kernel.decision.audit.v1
+    schema_ref: schemas/decision/redpanda/decision-event.schema.json
+    schema_registry_subject: kernel.decision.audit.v1-value
+    compatibility: backward
+    partitions: 12
+    replication_factor: 3
+    cleanup_policy: delete
+keying:
+  key: tenant_id:agent_id:task_id
