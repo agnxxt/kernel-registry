@@ -34,7 +34,14 @@ Defines the theological, ethical, and ritualistic frameworks that govern human o
 *   **Clothing & Aesthetics**: Modesty standards, ceremonial dress codes, and symbolic attire (e.g., Hijab, Kippah, Saffron robes).
 *   **Impact**: Modifies `deontic_constraints`, `TemporalNuance`, and `AestheticLens`. (e.g., During a "silent celebration mode," an agent might shift its communication style to purely text/minimalist; or recommend only attire that aligns with local religious modesty standards).
 
-## 6. Geopolitical Context (`GeopoliticalState`)
+## 6. Media & Narrative Context (`NarrativeLens`)
+Defines the information environment created by news, social media, and cultural story-telling.
+*   **Media Channels**: News organizations, independent journalism, social media feeds, and "Gossip" networks.
+*   **Narrative Gravity**: The prevailing "story" about a topic (e.g., "The economy is failing," "AI is dangerous") that primes agent reasoning.
+*   **Subconscious Priming**: Implicit biases or "read-ahead" context that influences the `epistemic_trust` ledger before a task is even assigned.
+*   **Impact**: Modifies `active_inference` and `epistemic_trust`. (e.g., An agent might subconsciously discount high-growth data if the prevailing `NarrativeLens` is one of "economic recession").
+
+## 7. Geopolitical Context (`GeopoliticalState`)
 Defines the political boundaries, regulatory jurisdictions, and international relations impacting an agent.
 *   **Attributes**: `jurisdiction_id`, `sanction_status`, `regulatory_compliance_regime` (e.g., GDPR, EU-AI-Act).
 *   **Impact**: Modifies `deontic_constraints`. (e.g., An agent cannot initiate a `TransferAction` between two jurisdictions with an active trade embargo).
