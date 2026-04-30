@@ -50,3 +50,25 @@ Because all cognitive states are managed via the `semantic_extension`, the harne
 ```
 
 By leveraging the kernel's inherent versioning (`semantic_extension.versioning`), the self-improving harness ensures every automated tweak is tracked, fully reversible, and auditable by human operators.
+
+## 4. Reliability Science: Quantifying Improvement
+A self-improving harness must measure its effectiveness using formal reliability metrics rather than simple "pass/fail" rates.
+
+*   **Reliability Decay Curve (RDC):** The harness tracks how success probability drops as task complexity or duration increases. Success is defined as a patch that flattens this curve (keeping the agent reliable for longer horizons).
+*   **Meltdown Onset Point (MOP):** The harness monitors the entropy of an agent's tool calls and internal reasoning steps. If the entropy spikes without progress, the harness detects a "behavioral meltdown" and preemptively triggers a `predictive_control` simulation to reset the agent's state.
+*   **Variance Amplification Factor (VAF):** Measures how much stochastic noise (random errors) in one agent propagates to others. The harness optimizes the `consensus_topology` to minimize this factor.
+
+## 5. Collective Intelligence Propagation
+Reliability is a collective property. If the harness patches a vulnerability in one agent, that knowledge should be "broadcast" to the entire network via the Knowledge Graph.
+
+*   **Global Trust Updates:** When the harness reduces trust in a source for Agent A, it optionally publishes a `Gossip` event to all other agents sharing the same `taxonomy.path`. This ensures the whole organization "learns" from the failure of one unit.
+*   **Heuristic Blacklisting:** If a specific fast-thinking heuristic (System 1) is found to be dangerous in a certain `Context` (e.g., "Raining"), the harness can globally deprecate that heuristic artifact, protecting all agents simultaneously.
+
+## 6. The "Safety Valve" (Human-in-the-Loop)
+A self-improving harness must recognize its own cognitive boundaries. 
+
+*   **Autonomous Patch Limits:** You can set a limit on the number of automated `UpdateAction`s the harness can perform on a single artifact within a time window. 
+*   **Escalation Logic:** If the `Reliability Decay Curve` does not improve after three automated patches, the harness must trigger an `AssessAction` targeting a **Human Role**. It provides the human with the full `lineage` of the failures and its own failed patch history, allowing for high-context human intervention.
+
+---
+*Note: These guidelines are designed to turn the agent kernel into a self-healing ecosystem where the "harness" is not just a tester, but a continuous reliability engineer.*
