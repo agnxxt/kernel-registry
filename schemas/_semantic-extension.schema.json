@@ -1,9 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://agnxxt.com/schemas/_semantic-extension.schema.json",
-  "title": "SemanticExtension",
+  "title": "UniversalSemanticExtension",
+  "description": "Standardized block injected into Schema.org types to support advanced AI cognition, lineage, and audit trails.",
   "type": "object",
   "properties": {
+    "schema_definition": {
+      "type": "object",
+      "description": "The specific internal schema applied if Schema.org lacks native precision.",
+      "properties": {
+        "id": { "type": "string", "format": "uri" },
+        "version": { "type": "string" },
+        "fallback_schema_org_type": { "type": "string" }
+      }
+    },
+    "versioning": {
+      "type": "object",
+      "properties": {
+        "semantic_version": { "type": "string" },
+        "previous_version": { "type": "string" },
+        "iteration_hash": { "type": "string" }
+      }
+    },
     "taxonomy": {
       "type": "object",
       "properties": {
@@ -11,8 +29,7 @@
         "version": { "type": "string" },
         "labels": { "type": "array", "items": { "type": "string" } },
         "path": { "type": "array", "items": { "type": "string" } }
-      },
-      "additionalProperties": true
+      }
     },
     "vocabulary": {
       "type": "object",
@@ -26,12 +43,10 @@
               "term": { "type": "string" },
               "iri": { "type": "string", "format": "uri" },
               "definition": { "type": "string" }
-            },
-            "additionalProperties": true
+            }
           }
         }
-      },
-      "additionalProperties": true
+      }
     },
     "ontology": {
       "type": "object",
@@ -40,12 +55,32 @@
         "version": { "type": "string" },
         "classes": { "type": "array", "items": { "type": "string" } },
         "relations": { "type": "array", "items": { "type": "string" } }
-      },
-      "additionalProperties": true
+      }
     },
     "attributes": {
       "type": "object",
+      "description": "Custom key-value pairs representing cognitive state, triggers, or policies.",
       "additionalProperties": true
+    },
+    "lineage": {
+      "type": "object",
+      "description": "Data provenance and transformation history.",
+      "properties": {
+        "source_artifacts": { "type": "array", "items": { "type": "string" } },
+        "derived_from": { "type": "string" },
+        "transformation_logic": { "type": "string" }
+      }
+    },
+    "audit_tracking": {
+      "type": "object",
+      "properties": {
+        "created_by": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_by": { "type": "string" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "change_reason": { "type": "string" },
+        "cryptographic_signature": { "type": "string" }
+      }
     },
     "metadata": {
       "type": "object",

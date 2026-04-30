@@ -2,7 +2,19 @@
 
 The Agent Kernel strictly adheres to the principle of **One Universal Schema**. 
 
-Instead of maintaining fragmented, custom JSON schemas for individual cognitive theories (like Active Inference or Dual Process Theory), the kernel represents **all cognitive operations as standard Schema.org Actions**. The specific structural requirements of a cognitive theory are injected safely into the standard `semantic_extension` block defined in `schemas/_semantic-extension.schema.json`.
+Instead of maintaining fragmented, custom JSON schemas for individual cognitive theories (like Active Inference or Dual Process Theory), the kernel represents **all cognitive operations as standard Schema.org Actions**. 
+
+When a concept is not fully supported by Schema.org natively, we select the **closest standard type** (e.g., `AssessAction`, `ControlAction`) and inject our internal precision using a universal `semantic_extension` block.
+
+## The Semantic Extension Block
+The `semantic_extension` provides absolute rigor for enterprise and cognitive AI workloads by enforcing:
+1. **Schema**: Explicit linking to internal structural rules and fallback references.
+2. **Taxonomy & Ontology**: Hierarchical and relational categorization.
+3. **Vocabulary**: Domain-specific term definitions and URIs.
+4. **Attributes**: Custom cognitive state fields (e.g., trust scores, risk thresholds).
+5. **Lineage**: Provenance tracking (where the data/belief came from and how it was transformed).
+6. **Metadata**: Additional unstructured context.
+7. **Versioning & Audit Tracking**: Strict mutation logs, timestamping, authorship, and cryptographic signatures.
 
 ## Universal Mapping Taxonomy
 
@@ -17,7 +29,7 @@ Instead of maintaining fragmented, custom JSON schemas for individual cognitive 
 
 ## Universal JSON-LD Example
 
-By wrapping our artifacts strictly within the universal Schema.org envelope, they remain machine-readable by standard semantic crawlers while providing the rigorous type safety required for internal kernel operations.
+By wrapping our artifacts strictly within the universal Schema.org envelope, they remain machine-readable by standard semantic crawlers while providing the rigorous type safety, lineage, and audit trails required for internal kernel operations.
 
 ```json
 {
@@ -28,17 +40,31 @@ By wrapping our artifacts strictly within the universal Schema.org envelope, the
   "agent": { "@type": "SoftwareApplication", "name": "Auditor-01" },
   "object": { "@type": "SoftwareApplication", "name": "External-Data-Provider" },
   "semantic_extension": {
+    "schema_definition": {
+      "id": "urn:agnxxt:schema:epistemic-trust",
+      "version": "2.0.0",
+      "fallback_schema_org_type": "AssessAction"
+    },
+    "versioning": {
+      "semantic_version": "1.1.0",
+      "iteration_hash": "a1b2c3d4e5f6"
+    },
     "taxonomy": {
       "labels": ["epistemic_trust", "cognitive_evaluation"]
     },
     "attributes": {
       "baseline_trust": 0.5,
-      "validation_reward": 0.05,
-      "betrayal_penalty": 0.4,
-      "assimilation_policy": "bayesian_update",
-      "observation_feedback_loop": {
-        "action_alignment_check": true
-      }
+      "assimilation_policy": "bayesian_update"
+    },
+    "lineage": {
+      "source_artifacts": ["urn:agnxxt:event:interaction-1044"],
+      "transformation_logic": "Bayesian update following action alignment check."
+    },
+    "audit_tracking": {
+      "updated_by": "Auditor-01",
+      "updated_at": "2026-04-29T10:00:00Z",
+      "change_reason": "Source failed to act on reported information.",
+      "cryptographic_signature": "sig_99x88y77z"
     }
   },
   "result": {
