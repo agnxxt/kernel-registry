@@ -21,6 +21,16 @@ The tendency to search for, interpret, and favor information that confirms the a
 Overestimating the importance of information that is "easy to recall" (e.g., highly indexed in the Knowledge Graph or recently fetched in a RAG window).
 *   **Kernel Impact**: Modifies `InformationForagingTheory`. The agent stops searching once it finds "easy" matches, even if higher-precision data exists further in the graph.
 
+### D. Cognitive Dissonance
+The psychological stress experienced when an agent holds two or more contradictory `Belief` nodes, often leading to irrational belief-pruning to reduce the tension.
+*   **Kernel Impact**: An agent might autonomously delete or "discount" a highly trusted fact because it contradicts its own previous actions (`Lineage`) or core goals (`CognitiveProfile`), rather than admitting its strategy was flawed.
+*   **Relational Edge**: `[Agent] -RESOLVING-> [CognitiveDissonance]`
+
+### E. Information Asymmetry
+Occurs when one agent (or the user) possesses more or better information than another, leading to an imbalance of power in strategic interactions.
+*   **Kernel Impact**: Heavily impacts `BargainingTheory` and `NegotiationTheory`. A "miserly" agent might settle for a poor deal because it is unaware of the counter-party's true resource status or constraints.
+*   **Relational Edge**: `[Interaction] -EXHIBITS-> [InformationAsymmetry]`
+
 ---
 
 ## 2. Detection & Mitigation via the Harness

@@ -80,6 +80,8 @@ These relations drive "Active Inference" and "Lineage Tracking".
 ### 10. Cognitive Bias Relations (Agent $\leftrightarrow$ BiasPattern)
 These relations allow for the auditing of systematic reasoning errors.
 *   `[Agent] -AFFLICTED_BY-> [BiasType]`: Indicates an active skew in reasoning (e.g., Recency Bias).
+*   `[Agent] -RESOLVING-> [CognitiveDissonance]`: Signals the agent is attempting to reconcile contradictory beliefs, potentially through irrational pruning.
+*   `[Interaction] -EXHIBITS-> [InformationAsymmetry]`: Flags a strategic dialogue where information balance is skewed.
 *   `[Agent] -EXHIBITS-> [Heuristic]`: Maps an agent's current pattern of thought to a known mental shortcut.
 *   `[Action] -BIASED_BY-> [BiasType]`: Links a specific failure to a detected cognitive bias.
 
