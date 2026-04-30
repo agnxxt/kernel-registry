@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Dict, Any, List
@@ -40,6 +41,8 @@ from kernel_engine.model_runner import CognitiveModelRunner
 from kernel_engine.policy_engine import PolicyEngine
 from kernel_engine.learning_loop import LearningLoop
 from kernel_engine.feature_store import CognitiveFeatureStore
+from persistence.models.identity import CanonicalIdentity
+from persistence.db import SessionLocal
 
 app = FastAPI(title="Agent Kernel Platform", version="1.0.0")
 
@@ -192,6 +195,32 @@ async def admin_discover(org_name: str, username: str = Depends(get_current_admi
         "entities": discovered,
         "status": "Pending-Admin-Review"
     }
+
+
+@app.get("/api/v1/admin/policies")
+async def get_admin_policies(username: str = Depends(get_current_admin)):
+    policy_path = os.getenv("POLICY_PATH", "config/policies.json")
+    try:
+        with open(policy_path, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/v1/admin/policies")
+async def update_admin_policies(data: Dict[str, Any], username: str = Depends(get_current_admin)):
+    policy_path = os.getenv("POLICY_PATH", "config/policies.json")
+    try:
+        with open(policy_path, "w") as f:
+            json.dump(data, f, indent=2)
+        return {"status": "Updated"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/admin/identities")
+async def get_admin_identities(username: str = Depends(get_current_admin)):
+    with SessionLocal() as session:
+        identities = session.query(CanonicalIdentity).all()
+        return identities
 
 @app.post("/api/v1/admin/onboard")
 async def admin_onboard(user_id: str, username: str = Depends(get_current_admin)):
