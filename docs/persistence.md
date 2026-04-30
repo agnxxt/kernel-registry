@@ -23,3 +23,20 @@ alembic -c persistence/alembic.ini upgrade head
 ```bash
 alembic -c persistence/alembic.ini revision --autogenerate -m "message"
 ```
+
+## Containerized Local Run
+
+Build and start:
+```bash
+docker compose up --build -d
+```
+
+Run migrations in container:
+```bash
+docker compose exec kernel-tooling alembic -c persistence/alembic.ini upgrade head
+```
+
+Validate schemas/protos in container:
+```bash
+docker compose exec kernel-tooling bash -lc "./scripts/validate_schemas.sh && ./scripts/validate_proto.sh"
+```
