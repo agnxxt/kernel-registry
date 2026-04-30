@@ -110,15 +110,19 @@ These relations define the financial and utility-based trade-offs in agent reaso
 *   `[Action] -FORGOES-> [AlternativeAction/Artifact]`: Formally documents the **Opportunity Cost** of a choice.
 *   `[Agent] -ASSESSES_MARGINAL_UTILITY-> [Artifact]`: Evaluates the benefit of one additional unit of resource.
 
-### 13. Operational & Stigmergic Relations (Agent $\leftrightarrow$ Action/Artifact)
+### 12. Operational & Stigmergic Relations (Agent $\leftrightarrow$ Action/Artifact)
 These relations enable "Predictive Control" and environment-based coordination.
 *   `[Agent] -PLANS-> [Action]`: Represents the "look-ahead" simulation phase of Predictive Control.
 *   `[Agent] -EXECUTES-> [Action]`: The actual commitment to an action.
-*   `[Action] -CONSUMES-> [Artifact]`: Indicates dependencies for a task.
-*   `[Action] -PRODUCES-> [Artifact]`: Tracks the output and transformation of resources.
-*   `[Agent] -LOCKS / TRACES-> [Artifact]`: **Stigmergy in action.** An agent leaves a marker on a resource so other agents know it is currently being operated on, preventing race conditions.
 
-## Universal Schema Implementation
+### 13. Rogue Containment & Guardian Relations (Agent $\leftrightarrow$ Kernel)
+These relations define the defensive measures against autonomous drift or rebellion.
+*   `[Agent] -IS_FLAGGED_AS_ROGUE_BY-> [Watchdog/Harness]`: Marks the transition to suspicious or dangerous status.
+*   `[Agent] -IS_CONTAINED_IN-> [CognitiveSandbox]`: Formally isolates an agent's I/O from the network.
+*   `[Guardian] -EXECUTES_KILL_SWITCH_ON-> [Agent]`: The ultimate kernel veto; terminates a deployment unit.
+*   `[Belief] -PRODUCED_BY_ROGUE_AGENT-> [Agent]`: Taints facts associated with a rogue unit to prevent network-wide infection.
+
+### 14. Universal Schema Implementation
 These relations are injected directly into the `semantic_extension.ontology.relations` block of our Schema.org payloads.
 
 **Example: Stigmergy & Lineage in the Graph**
