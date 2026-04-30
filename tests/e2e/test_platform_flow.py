@@ -2,8 +2,10 @@ import requests
 import pytest
 import time
 import os
+import subprocess
+import signal
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = os.getenv("TEST_BASE_URL", "http://localhost:8000")
 
 def test_full_agent_lifecycle():
     """
@@ -27,10 +29,6 @@ def test_full_agent_lifecycle():
             "lineage": {
                 "source_artifacts": ["urn:agnxxt:test:baseline"],
                 "transformation_logic": "Standard E2E validation path."
-            },
-            "audit_tracking": {
-                "created_by": "Pytest-Runner",
-                "created_at": "2026-04-29T20:00:00Z"
             }
         }
     }
@@ -55,7 +53,15 @@ def test_full_agent_lifecycle():
     assert len(graph_response.json()["facts"]) > 0
 
 if __name__ == "__main__":
-    # Allow manual execution
+    # If running directly, attempt to start the server locally if it is not up
+    try:
+        requests.get(f"{BASE_URL}/api/v1/identity/ping")
+    except Exception:
+        print("Starting local API server for testing...")
+        proc = subprocess.Popen(["uvicorn", "kernel_api.main:app", "--port", "8000"], 
+                                cwd=os.path.join(os.getcwd(), "../../"))
+        time.sleep(3) # Wait for start
+        
     try:
         test_full_agent_lifecycle()
         print("✅ E2E Platform Flow Test Passed.")
