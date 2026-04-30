@@ -1,0 +1,64 @@
+# Agent Knowledge Graph: Entity Relations & Ontology
+
+To fully realize the cognitive frameworks (Active Inference, Epistemic Trust, Stigmergy), the Knowledge Graph relies on a rigorously defined ontology. It is the **relations (edges)** between the **entities (nodes)** that give the system its semantic reasoning capabilities.
+
+Below is the standard relational ontology mapping the interactions within the Agent Kernel.
+
+## Core Entity Types (Nodes)
+*   **`Agent`**: Autonomous software components (e.g., Critic, Worker).
+*   **`User`**: Human operators or external stakeholders.
+*   **`Action` / `Task`**: Executable units of work (mapped to Schema.org Actions).
+*   **`Artifact`**: Digital resources, data objects, or tools.
+*   **`Belief` / `Fact`**: Assertions about the world model.
+*   **`Context`**: Environmental states or bounding scopes.
+
+---
+
+## Key Relational Domains (Edges)
+
+### 1. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
+These relations define the "Organization Science" and "Epistemic Trust" of the network.
+*   `[Agent A] -TRUSTS {weight: 0.8}-> [Agent B]`: Defines the dynamic credibility weighting.
+*   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.
+*   `[Agent A] -MONITORS-> [Agent B]`: Defines an "Actor-Critic" relationship where one agent acts as a guardrail for another.
+*   `[Agent A] -DISAGREES_WITH-> [Belief X]`: Highlights a conflict in the consensus mechanism.
+
+### 2. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
+These relations drive "Active Inference" and "Lineage Tracking".
+*   `[Agent] -ASSERTS {confidence: 0.95}-> [Belief]`: The agent introduces a fact into the world model.
+*   `[Agent] -OBSERVES-> [Context/Artifact]`: The agent registers an empirical reading (often the result of an `active_probe`).
+*   `[Belief A] -DERIVES_FROM-> [Belief B]`: Absolute provenance tracing (Lineage). If Belief B is proven false, the graph invalidates Belief A automatically.
+*   `[Agent] -VALIDATES-> [Belief]`: An agent confirms a peer's assertion, increasing the network's consensus score.
+
+### 3. Operational & Stigmergic Relations (Agent $\leftrightarrow$ Action/Artifact)
+These relations enable "Predictive Control" and environment-based coordination.
+*   `[Agent] -PLANS-> [Action]`: Represents the "look-ahead" simulation phase of Predictive Control.
+*   `[Agent] -EXECUTES-> [Action]`: The actual commitment to an action.
+*   `[Action] -CONSUMES-> [Artifact]`: Indicates dependencies for a task.
+*   `[Action] -PRODUCES-> [Artifact]`: Tracks the output and transformation of resources.
+*   `[Agent] -LOCKS / TRACES-> [Artifact]`: **Stigmergy in action.** An agent leaves a marker on a resource so other agents know it is currently being operated on, preventing race conditions.
+
+## Universal Schema Implementation
+These relations are injected directly into the `semantic_extension.ontology.relations` block of our Schema.org payloads.
+
+**Example: Stigmergy & Lineage in the Graph**
+```json
+"semantic_extension": {
+  "ontology": {
+    "relations": [
+      {
+        "subject": "urn:agnxxt:agent:Data-Parser-01",
+        "predicate": "CONSUMES",
+        "object": "urn:agnxxt:artifact:raw-dataset-99"
+      },
+      {
+        "subject": "urn:agnxxt:agent:Data-Parser-01",
+        "predicate": "ASSERTS",
+        "object": "urn:agnxxt:belief:dataset-is-corrupted"
+      }
+    ]
+  }
+}
+```
+
+By defining these strict relations, the Knowledge Graph can automatically execute complex reasoning algorithms. For example, if an Agent's Trust score drops below a threshold, the graph can traverse the `ASSERTS` and `DERIVES_FROM` edges to instantly flag all downstream knowledge that was dependent on that compromised agent.
