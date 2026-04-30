@@ -122,6 +122,7 @@ These relations enable "Predictive Control" and environment-based coordination.
 These relations define the defensive measures and administrative lifecycle.
 *   `[Admin] -DISCOVERS-> [User/Artifact]`: Records an entity found during the automated app-crawling phase.
 *   `[Admin] -ENFORCES_POLICY_VIA-> [ToolCopilot]`: Explicitly utilizes a tool-specific gatekeeper to maintain organizational guardrails.
+*   `[ToolCopilot] -INTELLIGENTLY_AUTHENTICATES-> [Action]`: Represents the cognitive reasoning phase where a gatekeeper validates intent and context before granting access.
 *   `[Admin] -APPROVES_ONBOARDING-> [User]`: Authorization gate for reaching out to and provisioning a user.
 *   `[Admin] -ENFORCES_POLICY-> [AgentGroup]`: Binds a set of agents to global deontic constraints.
 *   `[Agent] -IS_FLAGGED_AS_ROGUE_BY-> [Watchdog/Harness]`: Marks the transition to dangerous status.

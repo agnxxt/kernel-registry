@@ -30,9 +30,18 @@ While the tool-copilot mediated flow is the **primary governed pathway**, the ke
 *   **Audit Escalation**: The self-improving harness automatically assigns a higher `Criticality` score to unmediated actions, triggering mandatory post-hoc verification by a `watchdog_role`.
 *   **Deontic Veto**: Admin policies can be set to **Forbidden** for specific sensitive actions if attempted via a bypass route, forcing the agent to revert to the Tool-Copilot flow.
 
+## 4. Intelligent Runtime Authentication
+The most advanced feature of this model is the shift from static to **Intelligent Authentication**. The Tool-Specific Copilot (e.g., GitHub Agent) does not just check a static permission bit; it performs a **Cognitive Validation** of the request at runtime.
+
+*   **Dynamic Intent Validation**: The gatekeeper agent analyzes the request's `payload` and `lineage`. It asks: *"Does this code change align with the stated task intent? Is it logically sound?"*
+*   **Contextual Risk Assessment**: The gatekeeper checks the current `Macro-Context`. If a `NaturalDisaster` or `GeopoliticalShift` is occurring, it may autonomously elevate the authentication requirements (e.g., requiring multi-agent consensus) even if the user has standard permissions.
+*   **Behavioral Identity**: Authentication is granted based on the **Agent's Identity Signature**—a combination of its `CognitiveProfile`, previous reliability scores, and its ability to explain the transformation logic of the action.
+
+In this model, **Authentication becomes a reasoning task**, not a lookup task.
+
 ---
 
-## 4. Universal Schema Mapping (Hierarchical Action)
+## 5. Universal Schema Mapping (Hierarchical Action)
 
 A task execution in this model is represented as a nested Schema.org `UpdateAction`.
 
