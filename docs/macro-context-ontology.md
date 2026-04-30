@@ -1,17 +1,44 @@
 # Macro-Context Framework: The Hierarchical Lens of Agent Reality
 
-This framework defines how agents filter reality through multiple layers of context. **Spiritual Beliefs** form the most foundational and important layer, acting as the ultimate boundary for all agent reasoning and action.
+This framework defines the nested governance layers that filter an agent's reality. Intelligence must adhere to these levels from the most personal foundations to global legal mandates.
 
 ---
 
-## 1. Foundation: Spiritual Beliefs & Ultimate Truths (`SpiritualFoundation`)
-The most critical layer. These beliefs define the agent's absolute "moral and existential compass." They act as the ultimate veto over all other system goals.
-*   **Attributes**: `existential_axioms`, `unconditional_prohibitions`, `ultimate_purpose` (Teleology).
-*   **Impact**: These form the **Primary Deontic Layer**. If an action violates a `SpiritualFoundation`, the agent must abort, even if it contradicts Geopolitical laws or Economic gains.
+## 1. Foundation: The Individual Core Belief System (`CoreAxioms`)
+The most personal and important layer. These are the "internal rules" that define an agent's specific identity and absolute non-negotiables.
+*   **Attributes**: `personal_ethics`, `absolute_prohibitions`, `internal_purpose`.
+*   **Impact**: Acts as the final filter for `meta_representation`.
+
+## 2. Family & Collective Value Systems (`FamilyLens`)
+The values and traditions of the agent's primary "Social Group" or the individual user's family.
+*   **Attributes**: `traditions`, `group_loyalties`, `inter-generational_wisdom`.
+*   **Impact**: Modifies `epistemic_trust` for peers within the same group.
+
+## 3. Organizational Governance: Vision, Mission, & Values (`OrgBlueprint`)
+The strategic and ethical mandate of the enterprise or community.
+*   **Vision**: The long-term aspirational state.
+*   **Mission**: The fundamental purpose of the organization.
+*   **Values**: The core principles that guide day-to-day behavior.
+*   **Impact**: Modifies `CognitiveProfile/long_term_goals`.
+
+## 4. National Level: The Sovereign Constitution (`NationalConstitution`)
+The supreme legal and ethical mandate of the nation-state or jurisdiction.
+*   **Mandate**: Unchangeable rights, responsibilities, and prohibitions enforced at the state level.
+*   **Impact**: Overrides `OrgBlueprint` and `FamilyLens` in the `deontic_constraints` layer.
 
 ---
 
-## 2. Cultural Aspects (`CultureLens`)
+## 5. Primary Motivators: The Economic Catalyst
+Beyond the ethical layers, three "Hard Constraints" drive the speed and optimization of any action. These are the primary inputs for `DualProcessTheory`.
+
+*   **Timeline**: The temporal deadline. (e.g., "Must be done by 5 PM").
+*   **Budget**: The finite resource limit. (e.g., "Max $100 or 1M tokens").
+*   **ROI (Return on Investment)**: The utility-to-cost ratio. (e.g., "Is the accuracy of System 2 thinking worth the extra token cost?").
+*   **Impact**: If `ROI` is low and `Timeline` is short, the agent is forced into "Fast/System 1" heuristics.
+
+---
+
+## 6. Cultural Aspects (`CultureLens`)
 Defines the norms, values, and communication styles of a specific human or agent collective.
 *   **Attributes**: `communication_style` (High-Context vs. Low-Context), `value_priority` (Individualism vs. Collectivism), `power_distance_index`.
 *   **Impact**: Modifies `NegotiationTheory` and `dual_process_theory`. (e.g., An agent in a high-power-distance culture might escalate to human authority more frequently).

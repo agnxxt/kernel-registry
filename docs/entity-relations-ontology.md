@@ -66,22 +66,22 @@ These relations define the mathematical and tactical interactions between autono
 *   `[Agent] -BYPASSES_GATEKEEPER_VIA-> [DirectAccessChannel]`: Tracks actions that utilize non-mediated pathways (API/CLI), flagging them for high-criticality audit.
 *   `[Agent] -BIDS_ON-> [Task]`: Represents participation in a resource allocation auction.
 
-### 8. Macro-Context Relations (Action/Agent $\leftrightarrow$ WorldState)
-These relations connect high-level global conditions to local agent execution.
-*   `[Agent] -GROUNDED_IN-> [SpiritualFoundation]`: The most critical and immutable link; defines the ultimate moral and existential boundary.
+### 8. Macro-Context & Governance Relations (Action/Agent $\leftrightarrow$ WorldState)
+These relations connect high-level global conditions and nested ethical layers to local agent execution.
+*   `[Action/Agent] -MANDATED_BY-> [NationalConstitution]`: The supreme legal binding.
+*   `[Agent] -GUIDED_BY-> [OrgBlueprint]`: Connects actions to organizational Vision, Mission, and Values.
+*   `[Agent] -ADHERES_TO-> [FamilyLens]`: Binds an agent to collective social or family group values.
+*   `[Agent] -GROUNDED_IN-> [CoreAxioms]`: The most critical and immutable link; defines the ultimate personal moral boundary.
 *   `[Action/Agent] -SUBJECT_TO-> [Geopolitics/Regime]`: Enforces legal and regulatory compliance boundaries.
-*   `[Agent] -ADHERES_TO-> [Culture]`: Binds an agent's communication and value system to a specific cultural lens.
-*   `[Agent] -OPERATES_IN_SOCIETY-> [SocietyState]`: Connects agent behavior to societal norms and demographic realities.
-*   `[Action] -COMMUNICATES_VIA-> [LanguageLens]`: Formalizes the linguistic medium and formality requirements of an interaction.
-*   `[Action] -STYLIZED_BY-> [AestheticLens]`: Binds the presentation of an action or result to a specific creative canon (Literature, Art, Music).
-*   `[Action] -SANCTIFIED_BY-> [BeliefSystemLens]`: Links an action or temporal window to specific religious ethics, prohibitions, or sacred cycles.
-*   `[Agent] -PRIMED_BY-> [NarrativeLens]`: Connects an agent's subconscious reasoning or bias to prevailing media narratives or social trends.
-*   `[Place] -EXPERIENCING-> [Climate/Weather]`: Grounds a location in its atmospheric reality.
-*   `[Place/Agent] -AUDIBLY_EXPERIENCING-> [AcousticContext]`: Links a location or agent's state to background noise, music, or ambient soundscapes.
-*   `[Bargaining/Trade] -CONSTRAINED_BY-> [Economy]`: Links micro-transactions to macro-economic indicators (e.g., volatility).
-*   `[Device/Hardware] -PHYSICALLY_LOCATED_IN-> [Place]`: Binds IoT sensors and edge hardware to a geographic coordinate.
 
-### 9. Hardware & IoT Relations (Agent $\leftrightarrow$ Device)
+### 9. Economic Motivator Relations (Action/Agent $\leftrightarrow$ EconomicConstraint)
+These relations define the "Hard Drivers" of agent speed and optimization.
+*   `[Action] -DRIVEN_BY-> [ROI]`: The primary utility-to-cost motivator.
+*   `[Action] -CONSTRAINED_BY-> [Budget]`: The finite resource boundary.
+*   `[Action] -BOUND_BY-> [Timeline]`: The temporal deadline ensuring urgency awareness.
+*   `[EconomicConstraint] -INFLUENCES-> [DualProcess/Pathway]`: Directly triggers the shift between System 1 and System 2 thinking.
+
+### 10. Hardware & IoT Relations (Agent $\leftrightarrow$ Device)
 These relations define the agent's interaction with the physical substrate.
 *   `[Agent] -HOSTED_ON-> [Device/Hardware]`: Identifies the specific edge or server hardware running the agent.
 *   `[Agent] -CONTROLS_DEVICE-> [Device]`: Establishes authority over a physical actuator or system.
