@@ -57,11 +57,12 @@ message KernelActionRequest {
   ActionRef ref = 1;
   ActionType type = 2;
   ActionScope scope = 3;
-  string provider = 4; // e.g. n8n|langgraph|google|whatsapp|wordpress|x|uber|schemaorg
+  string provider = 4; // e.g. n8n|langgraph|google|whatsapp|wordpress|x|uber|schemaorg|git|docker|caddy
   string operation = 5; // provider-specific operation id
   google.protobuf.Struct input = 6;
   google.protobuf.Struct policy = 7;
   google.protobuf.Timestamp requested_at = 8;
+  string adapter_profile = 9;
 }
 
 message KernelActionResult {

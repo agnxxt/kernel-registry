@@ -34,3 +34,26 @@ Each action request should include:
 - individual
 
 Use `action_scope` plus `scope_ref` to target execution boundaries.
+
+## Additional provider adapters
+### git
+- `clone_repo`
+- `fetch_repo`
+- `open_pr`
+- `list_branches`
+- `read_file`
+
+### docker
+- `build_image`
+- `run_container`
+- `compose_up`
+- `compose_down`
+- `push_image`
+- `pull_image`
+
+### caddy
+- `upsert_site`
+- `reload_config`
+- `add_reverse_proxy`
+- `remove_site`
+- `get_cert_status`

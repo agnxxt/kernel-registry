@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: action-adapters
+  namespace: agent-kernel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: action-adapters
+  template:
+    metadata:
+      labels:
+        app: action-adapters
+    spec:
+      containers:
+      - name: action-adapters
+        image: ghcr.io/agnxxt/action-adapters:0.1.0
+        env:
+        - name: ENABLED_ADAPTERS
+          value: git,docker,caddy
+        - name: ACTION_REQUEST_TOPIC
+          value: kernel.action.request.v1
+        - name: ACTION_RESULT_TOPIC
+          value: kernel.action.result.v1
+        ports:
+        - containerPort: 7101
+          name: grpc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: action-adapters
+  namespace: agent-kernel
+spec:
+  selector:
+    app: action-adapters
+  ports:
+  - name: grpc
+    port: 7101
+    targetPort: 7101

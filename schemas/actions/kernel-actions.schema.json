@@ -138,6 +138,10 @@
     "metadata": {
       "type": "object",
       "additionalProperties": true
+    },
+    "adapter_hints": {
+      "type": "object",
+      "additionalProperties": true
     }
   },
   "allOf": [
@@ -442,6 +446,82 @@
           "scope_ref": {
             "required": [
               "individual_id"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "connect"
+          },
+          "provider": {
+            "const": "git"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "operation": {
+            "enum": [
+              "clone_repo",
+              "fetch_repo",
+              "open_pr",
+              "list_branches",
+              "read_file"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "automate"
+          },
+          "provider": {
+            "const": "docker"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "operation": {
+            "enum": [
+              "build_image",
+              "run_container",
+              "compose_up",
+              "compose_down",
+              "push_image",
+              "pull_image"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "connect"
+          },
+          "provider": {
+            "const": "caddy"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "operation": {
+            "enum": [
+              "upsert_site",
+              "reload_config",
+              "add_reverse_proxy",
+              "remove_site",
+              "get_cert_status"
             ]
           }
         }
