@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/agnxxt/kernel-registry/schemas/runtime/organizational-coordination.schema.json",
+  "title": "OrganizationalCoordinationModel",
+  "description": "Applies Organization Science and Stigmergy. Defines how an agent coordinates via roles and environmental traces.",
+  "type": "object",
+  "required": ["role_definition", "stigmergy_channels"],
+  "properties": {
+    "role_definition": {
+      "type": "object",
+      "properties": {
+        "organizational_role": {
+          "type": "string",
+          "enum": ["actor", "critic", "manager", "researcher", "auditor"]
+        },
+        "authority_level": { "type": "integer", "description": "Determines who can override whom." }
+      }
+    },
+    "stigmergy_channels": {
+      "type": "object",
+      "description": "How the agent reads/writes traces in the environment instead of direct messaging.",
+      "properties": {
+        "environmental_markers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Resources (like databases, locks, caches) the agent monitors for indirect signals of other agents' activities."
+        },
+        "trace_decay": {
+          "type": "integer",
+          "description": "Time in ms before a left marker/trace is considered stale."
+        }
+      }
+    },
+    "consensus_requirements": {
+      "type": "object",
+      "description": "Rules for when an agent must achieve consensus with peers before proceeding.",
+      "properties": {
+        "required_quorum": { "type": "integer" },
+        "escalation_path": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

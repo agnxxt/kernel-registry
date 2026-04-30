@@ -55,7 +55,10 @@
         "organization_science",
         "cognitive_profile",
         "active_probe",
-        "epistemic_trust"
+        "epistemic_trust",
+        "predictive_control",
+        "active_inference",
+        "organizational_coordination"
       ]
     },
     "name": {

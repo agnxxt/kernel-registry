@@ -42,9 +42,10 @@ These artifacts govern how agents strategically interact with their environment,
 ## 4. Advanced Reliability & Architecture Frameworks
 These represent formal engineering and cognitive science frameworks utilized to ensure predictable, stable, and fault-tolerant agent execution:
 - `framework`: General, extensible architectural templates.
-- `control_theory`: Application of Model Predictive Control and iterative look-ahead simulations.
+- `predictive_control`: (Control Theory) Requires internal simulation/look-ahead of irreversible or high-risk actions.
+- `active_inference`: (Free Energy Principle) Maintains probabilistic world models and acts to minimize 'surprise'.
+- `organizational_coordination`: (Organization Science/Stigmergy) Defines roles and environmental trace-based coordination to prevent cascading failures.
 - `information_foraging_theory`: Dynamic, evidence-based retrieval strategies (advanced RAG).
-- `active_inference`: Implementations of the Free Energy Principle, maintaining belief states and minimizing surprise.
 - `bdi_architecture`: Belief-Desire-Intention cognitive structures.
 - `actor_critic`: Architectures utilizing centralized evaluation of decentralized actor actions.
 - `dual_process_theory`: Implementation of explicit knowledge boundaries (Fast vs. Slow thinking).
