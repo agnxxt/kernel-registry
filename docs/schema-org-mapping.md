@@ -26,6 +26,9 @@ The `semantic_extension` provides absolute rigor for enterprise and cognitive AI
 | `active_inference` | `AssessAction` | Minimizing surprise requires constant assessment of world-model alignment. |
 | `dual_process_theory`| `ControlAction` | Managing cognitive routing (Fast vs. Slow) is a meta-control action. |
 | `bdi_architecture` | `PlanAction` | Intentions are formalized plans based on beliefs and desires. |
+| `deontic_constraints`| `Policy` | Formal boundaries defining what is obligated, permitted, or forbidden, operating entirely independently of goal-seeking logic. |
+| `consensus_topology` | `ActionAccessSpecification` | Defines structural redundancy and voting mechanisms (e.g., Majority Voting) requiring multi-agent agreement before execution. |
+| `watchdog_role`      | `Role` | An independent oversight identity solely responsible for detecting error propagation ("hallucination snowballs") and triggering rollbacks. |
 
 ## Universal JSON-LD Example
 
