@@ -8,6 +8,7 @@ This document formalizes how the Agent Kernel interacts with the physical world.
 Devices act as the "Sensory Organs" of the agent network.
 
 *   **IoT Sensors**: Provide real-time `Context` (Weather, Temperature, Proximity, Biometrics).
+*   **Acoustic & Ambient Sensors**: Capture background noise levels, ambient soundscapes, and music. (e.g., Identifying a high-stress environment via noise levels, or recognizing a cultural setting via background music).
 *   **Edge Hardware**: Specialized compute units (GPUs, TPUs, NPUs) where an agent may reside.
 *   **Actuators**: Physical tools an agent can control (e.g., Smart Locks, Robotic Arms, Industrial Control Systems).
 

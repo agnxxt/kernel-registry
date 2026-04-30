@@ -73,6 +73,7 @@ These relations connect high-level global conditions to local agent execution.
 *   `[Action] -SANCTIFIED_BY-> [BeliefSystemLens]`: Links an action or temporal window to specific religious ethics, prohibitions, or sacred cycles.
 *   `[Agent] -PRIMED_BY-> [NarrativeLens]`: Connects an agent's subconscious reasoning or bias to prevailing media narratives or social trends.
 *   `[Place] -EXPERIENCING-> [Climate/Weather]`: Grounds a location in its atmospheric reality.
+*   `[Place/Agent] -AUDIBLY_EXPERIENCING-> [AcousticContext]`: Links a location or agent's state to background noise, music, or ambient soundscapes.
 *   `[Bargaining/Trade] -CONSTRAINED_BY-> [Economy]`: Links micro-transactions to macro-economic indicators (e.g., volatility).
 *   `[Device/Hardware] -PHYSICALLY_LOCATED_IN-> [Place]`: Binds IoT sensors and edge hardware to a geographic coordinate.
 
