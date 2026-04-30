@@ -52,10 +52,16 @@ These relations define how an agent utilizes its past and its boundaries.
 These relations define the "Organization Science" and "Epistemic Trust" of the network.
 *   `[Agent A] -TRUSTS {weight: 0.8}-> [Agent B]`: Defines the dynamic credibility weighting.
 *   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.
-*   `[Agent A] -MONITORS-> [Agent B]`: Defines an "Actor-Critic" relationship where one agent acts as a guardrail for another.
-*   `[Agent A] -DISAGREES_WITH-> [Belief X]`: Highlights a conflict in the consensus mechanism.
 
-### 2. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
+### 7. Strategic & Interaction Relations (Agent $\leftrightarrow$ Agent)
+These relations define the mathematical and tactical interactions between autonomous units.
+*   `[Agent A] -NEGOTIATES_WITH-> [Agent B]`: Initiates a strategic dialogue using a `NegotiationTheory` artifact.
+*   `[Agent A] -COMPETES_WITH-> [Agent B]`: Indicates a zero-sum `GameTheory` interaction for limited resources.
+*   `[Agent A] -COOPERATES_WITH-> [Agent B]`: Defines a non-zero-sum collaboration.
+*   `[Action] -RESULTS_IN_EQUILIBRIUM-> [Belief/State]`: Records the stable outcome of a strategic interaction.
+*   `[Agent] -HAS_BATNA-> [Artifact]`: Links an agent to its "Best Alternative" during bargaining.
+
+### 8. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
 These relations drive "Active Inference" and "Lineage Tracking".
 *   `[Agent] -ASSERTS {confidence: 0.95}-> [Belief]`: The agent introduces a fact into the world model.
 *   `[Agent] -OBSERVES-> [Context/Artifact]`: The agent registers an empirical reading (often the result of an `active_probe`).
