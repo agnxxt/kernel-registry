@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/agnxxt/kernel-registry/schemas/runtime/runtime-artifact.schema.json",
   "title": "RuntimeArtifact",
+  "description": "Unified envelope for all kernel artifacts with native Multi-Cloud, Multi-Framework, and Multi-LLM support.",
   "type": "object",
   "required": [
     "artifact_id",
@@ -11,169 +12,117 @@
     "lifecycle_state",
     "owner_ref",
     "environment",
+    "runtime",
     "spec"
   ],
   "properties": {
-    "artifact_id": {
-      "type": "string"
-    },
+    "artifact_id": { "type": "string" },
     "kind": {
       "type": "string",
       "enum": [
-        "service",
-        "worker",
-        "job",
-        "cronjob",
-        "queue_topic",
-        "stream_consumer",
-        "database",
-        "cache",
-        "vector_index",
-        "object_store",
-        "policy_bundle",
-        "secret_binding",
-        "config_bundle",
-        "ingress_route",
-        "certificate",
-        "observability_pipe",
-        "slo_policy",
-        "deployment_unit",
-        "adapter",
-        "protocol_contract",
-        "psychology",
-        "theory_of_mind",
-        "game_theory",
-        "decision_strategy",
-        "business_strategy",
-        "framework",
-        "control_theory",
-        "information_foraging_theory",
-        "active_inference",
-        "bdi_architecture",
-        "actor_critic",
-        "dual_process_theory",
-        "organization_science",
-        "cognitive_profile",
-        "active_probe",
-        "epistemic_trust",
-        "predictive_control",
-        "active_inference",
-        "organizational_coordination"
+        "service", "worker", "job", "cronjob", "queue_topic", "stream_consumer",
+        "database", "cache", "vector_index", "object_store", "policy_bundle",
+        "secret_binding", "config_bundle", "ingress_route", "certificate",
+        "observability_pipe", "slo_policy", "deployment_unit", "adapter",
+        "protocol_contract", "psychology", "theory_of_mind", "game_theory",
+        "decision_strategy", "business_strategy", "framework", "control_theory",
+        "information_foraging_theory", "active_inference", "bdi_architecture",
+        "actor_critic", "dual_process_theory", "organization_science",
+        "cognitive_profile", "active_probe", "epistemic_trust", "predictive_control",
+        "active_inference", "organizational_coordination", "global_workspace",
+        "attention_schema", "meta_representation"
       ]
     },
-    "name": {
-      "type": "string"
-    },
-    "version": {
-      "type": "string"
-    },
+    "name": { "type": "string" },
+    "version": { "type": "string" },
     "lifecycle_state": {
       "type": "string",
-      "enum": [
-        "draft",
-        "active",
-        "deprecated",
-        "retired"
-      ]
+      "enum": ["draft", "active", "deprecated", "retired"]
     },
-    "owner_ref": {
-      "type": "string"
-    },
+    "owner_ref": { "type": "string" },
     "environment": {
       "type": "string",
-      "enum": [
-        "local",
-        "dev",
-        "stage",
-        "prod",
-        "multi"
-      ]
+      "enum": ["local", "dev", "stage", "prod", "multi", "airgapped"]
     },
-    "scope": {
-      "type": "string",
-      "enum": [
-        "global",
-        "org",
-        "country",
-        "local",
-        "product",
-        "project",
-        "group",
-        "individual"
-      ]
-    },
-    "dependencies": {
-      "type": "array",
-      "items": {
-        "type": "string"
+    "runtime": {
+      "type": "object",
+      "description": "Defines the multi-modal, multi-cloud, and multi-framework execution environment.",
+      "required": ["provider_topology", "framework_signature"],
+      "properties": {
+        "provider_topology": {
+          "type": "object",
+          "properties": {
+            "primary_provider": { "enum": ["aws", "gcp", "azure", "on_prem", "hybrid"] },
+            "region": { "type": "string" },
+            "zones": { "type": "array", "items": { "type": "string" } },
+            "is_multi_cloud": { "type": "boolean", "default": false }
+          }
+        },
+        "framework_signature": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" }, # e.g. LangChain, CrewAI
+            "version": { "type": "string" },
+            "language": { "type": "string" } # e.g. Python, Go, Node.js
+          }
+        },
+        "model_signature": {
+          "type": "object",
+          "description": "Defines the specific LLM(s) powering the agent.",
+          "properties": {
+            "primary_model": { "type": "string" }, # e.g. gpt-4o, claude-3-7-sonnet
+            "provider": { "type": "string" }, # e.g. OpenAI, Anthropic, Ollama
+            "fallback_models": { "type": "array", "items": { "type": "string" } },
+            "context_window_limit": { "type": "integer" }
+          }
+        },
+        "resource_governance": {
+          "type": "object",
+          "properties": {
+            "token_budget": { "type": "integer" },
+            "max_concurrency": { "type": "integer" },
+            "priority_level": { "type": "integer", "minimum": 0, "maximum": 10 }
+          }
+        }
       }
     },
+    "dependencies": { "type": "array", "items": { "type": "string" } },
     "interfaces": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "type",
-          "ref"
-        ],
+        "required": ["type", "ref"],
         "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "http",
-              "grpc",
-              "topic",
-              "table",
-              "bucket",
-              "policy",
-              "secret"
-            ]
-          },
-          "ref": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
+          "type": { "enum": ["http", "grpc", "topic", "table", "bucket", "policy", "secret"] },
+          "ref": { "type": "string" }
+        }
       }
     },
     "slo": {
       "type": "object",
       "properties": {
-        "availability_target": {
-          "type": "number"
-        },
-        "latency_p95_ms": {
-          "type": "integer"
-        },
-        "error_rate_max": {
-          "type": "number"
-        }
-      },
-      "additionalProperties": false
+        "availability_target": { "type": "number" },
+        "latency_p95_ms": { "type": "integer" },
+        "error_rate_max": { "type": "number" }
+      }
     },
     "security": {
       "type": "object",
       "properties": {
-        "authn": {
-          "type": "string"
-        },
-        "authz": {
-          "type": "string"
-        },
-        "data_classification": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
+        "authn": { "type": "string" },
+        "authz": { "type": "string" },
+        "data_classification": { "type": "string" },
+        "airgap_policy": { "type": "string" }
+      }
     },
-    "spec": {
-      "type": "object"
-    },
+    "spec": { "type": "object" },
     "metadata": {
       "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
+      "additionalProperties": { "type": "string" }
+    },
+    "semantic_extension": {
+       "description": "External reference to the universal extension block.",
+       "type": "object"
     }
   },
   "additionalProperties": false
