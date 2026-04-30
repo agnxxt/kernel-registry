@@ -41,6 +41,7 @@ Supported artifact kinds:
 - organization_science
 - cognitive_profile
 - active_probe
+- epistemic_trust
 
 Design goals:
 - single canonical format across Docker/Kubernetes/runtime providers

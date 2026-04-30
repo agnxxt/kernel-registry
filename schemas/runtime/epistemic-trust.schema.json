@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/agnxxt/kernel-registry/schemas/runtime/epistemic-trust.schema.json",
+  "title": "EpistemicTrustModel",
+  "description": "Defines how an agent evaluates the credibility of information sources and scales its belief updates accordingly.",
+  "type": "object",
+  "required": ["baseline_trust", "assimilation_policy"],
+  "properties": {
+    "baseline_trust": {
+      "type": "object",
+      "description": "Default trust scores (0.0 to 1.0) for different categories of information sources.",
+      "properties": {
+        "system_directives": { "type": "number", "default": 1.0 },
+        "direct_observation": { "type": "number", "default": 0.9 },
+        "peer_gossip": { "type": "number", "default": 0.5 },
+        "public_metadata": { "type": "number", "default": 0.4 }
+      }
+    },
+    "entity_trust_ledger": {
+      "type": "object",
+      "description": "Dynamic ledger of trust scores for specific agents or endpoints.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "interactions_count": { "type": "integer" },
+          "last_validated": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "trust_dynamics": {
+      "type": "object",
+      "description": "Rules for how trust evolves based on validation.",
+      "properties": {
+        "betrayal_penalty": { "type": "number", "description": "Score reduction when source is proven wrong." },
+        "validation_reward": { "type": "number", "description": "Score increase when source is proven right." },
+        "time_decay_rate": { "type": "number", "description": "Rate at which trust reverts to baseline over time." }
+      }
+    },
+    "assimilation_policy": {
+      "type": "string",
+      "enum": ["bayesian_update", "threshold_filtering", "weighted_average"],
+      "description": "Mathematical approach used to combine new info with existing beliefs, weighted by source trust."
+    }
+  },
+  "additionalProperties": false
+}
