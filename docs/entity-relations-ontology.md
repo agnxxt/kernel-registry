@@ -10,13 +10,21 @@ Below is the standard relational ontology mapping the interactions within the Ag
 *   **`Action` / `Task`**: Executable units of work (mapped to Schema.org Actions).
 *   **`Artifact`**: Digital resources, data objects, or tools.
 *   **`Belief` / `Fact`**: Assertions about the world model.
-*   **`Context`**: Environmental states or bounding scopes.
+*   **`Context`**: Environmental and situational states bounding the agent's reality.
+    *   *Sub-types:* `Place`, `TimeState`, `WeatherCondition`, `Event` (e.g., Elections, Cricket Matches, Natural Disasters).
 
 ---
 
 ## Key Relational Domains (Edges)
 
-### 1. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
+### 1. Situational & Environmental Relations (Action/Agent $\leftrightarrow$ Context)
+These relations ground the agent's operations in the real physical and socio-political world.
+*   `[Action] -OCCURS_IN-> [Place]`: Binds a task to a geographic or virtual location.
+*   `[Action] -IMPACTED_BY-> [Event / Weather]`: Links a task's success probability to external factors (e.g., a supply chain task impacted by a natural disaster).
+*   `[Agent] -AWARE_OF-> [Event]`: Indicates the agent holds the current state of a public event (like an ongoing election or cricket match) in its active memory.
+*   `[Event] -TRIGGERS-> [Action]`: A macro-event (like a market crash or a sports match ending) automatically initiates a pre-planned agent response.
+
+### 2. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
 These relations define the "Organization Science" and "Epistemic Trust" of the network.
 *   `[Agent A] -TRUSTS {weight: 0.8}-> [Agent B]`: Defines the dynamic credibility weighting.
 *   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.

@@ -1,0 +1,36 @@
+{
+  "@context": "https://schema.org",
+  "@type": "AssessAction",
+  "name": "Register Situational Context: Major Public Event",
+  "actionStatus": "CompletedActionStatus",
+  "agent": { 
+    "@type": "SoftwareApplication", 
+    "name": "Context-Monitor-01" 
+  },
+  "object": {
+    "@type": "SportsEvent",
+    "name": "Cricket World Cup Final",
+    "location": { "@type": "Place", "name": "Mumbai" },
+    "startDate": "2026-05-15T14:00:00Z",
+    "eventStatus": "EventInProgress"
+  },
+  "semantic_extension": {
+    "taxonomy": {
+      "labels": ["situational_awareness", "public_event", "traffic_impact"]
+    },
+    "ontology": {
+      "relations": [
+        {
+          "subject": "urn:agnxxt:agent:Logistics-Router-Alpha",
+          "predicate": "IMPACTED_BY",
+          "object": "urn:agnxxt:event:cricket-wc-final-mumbai"
+        }
+      ]
+    },
+    "attributes": {
+      "severity_index": 0.85,
+      "expected_network_latency": "high",
+      "expected_physical_traffic": "critical"
+    }
+  }
+}
