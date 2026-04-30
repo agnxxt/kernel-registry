@@ -36,7 +36,13 @@ This prevents agents from blindly optimizing for a single variable (e.g., "cost"
 *   `[Context/Event] -MODIFIES_OBJECTIVE-> [CognitiveProfile/Objective]`: Temporarily changes the agent's short-term goal weighting (e.g., shifting priority from "cost optimization" to "safety/comfort" during a severe weather event).
 *   `[Action] -REQUIRES_CONDITION-> [Context]`: An action cannot be proposed unless the environmental state permits it.
 
-### 4. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
+### 4. Criticality & Emergency Overrides (Context $\leftrightarrow$ Execution)
+This ensures that during high-stakes events (e.g., medical emergencies), the agent's core execution engine shifts modes instantly.
+*   `[EmergencyContext] -OVERRIDES_PATHWAY-> [DualProcess/Pathway]`: Instantly forces the agent into a "Max-Reliability / Zero-Latency" execution mode.
+*   `[EmergencyContext] -SUSPENDS_CONSTRAINT-> [CognitiveProfile/Constraint]`: Temporarily ignores constraints like "cost-efficiency" or "token-budget" to prioritize speed and reach.
+*   `[Action] -MODIFIES_TOPOLOGY-> [Broadcast/Parallel]`: Changes a standard sequential communication flow into a parallel broadcast across all available channels (`CommunicateAction`) to ensure maximum reach during a crisis.
+
+### 5. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
 These relations define the "Organization Science" and "Epistemic Trust" of the network.
 *   `[Agent A] -TRUSTS {weight: 0.8}-> [Agent B]`: Defines the dynamic credibility weighting.
 *   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.

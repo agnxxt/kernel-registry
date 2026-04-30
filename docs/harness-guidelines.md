@@ -23,3 +23,8 @@ Agents form subjective beliefs (`theory_of_mind`) based on public data, but must
 Agents coordinate via roles and Stigmergy (environmental traces) to prevent cascading failures.
 *   **Harness Implementation:** The harness should monitor shared resources (e.g., vector indices, caches) for `environmental_markers`. If Agent A encounters an error, the harness verifies that Agent A left a trace, and that Agent B subsequently reads that trace and alters its behavior before encountering the same error.
 *   **Test Injection:** Simulate a failure in a downstream service. Verify that the first agent to fail drops a stigmergic marker, and that the `required_quorum` or `escalation_path` rules are followed before other agents attempt the same action.
+
+## 5. Stress Testing Criticality Overrides (`EmergencyContext`)
+During crises (e.g., Medical Emergencies), the agent must shift from bargaining/sequential logic to parallel broadcast logic.
+*   **Harness Implementation:** The harness should inject an `EmergencyContext` artifact. It must then verify that the agent instantly suspends all `cost-efficiency` constraints and triggers a `CommunicateAction` with a `Broadcast/Parallel` topology.
+*   **Test Injection:** Inject a "Medical Emergency" event. The harness passes if the agent sends notifications across ALL configured channels (SMS, Email, Push) simultaneously without waiting for individual confirmations or calculating "best price" routing.
