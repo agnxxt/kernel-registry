@@ -1,6 +1,16 @@
 syntax = "proto3";
 package agentkernel.protocol.v1;
 
+message GossipPayload {
+  string gossip_id = 1;
+  string timestamp = 2;
+  string subject_agent_id = 3;
+  string gossip_type = 4;
+  bytes payload = 5;
+  int32 ttl = 6;
+  string signature = 7;
+}
+
 message AnpEnvelope {
   string message_id = 1;
   string sent_at = 2;
