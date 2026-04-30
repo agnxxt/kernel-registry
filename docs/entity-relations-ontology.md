@@ -24,7 +24,13 @@ These relations ground the agent's operations in the real physical and socio-pol
 *   `[Agent] -AWARE_OF-> [Event]`: Indicates the agent holds the current state of a public event (like an ongoing election or cricket match) in its active memory.
 *   `[Event] -TRIGGERS-> [Action]`: A macro-event (like a market crash or a sports match ending) automatically initiates a pre-planned agent response.
 
-### 2. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
+### 2. Temporal Nuance & Intersection (TimeState $\leftrightarrow$ Context)
+This ensures the agent recognizes that recurring time periods are unique based on their intersections.
+*   `[TimeState] -CHARACTERIZED_BY-> [Event / Weather]`: Distinguishes "Monday (Normal)" from "Monday (Public Holiday)" or "Monday (Post-Disaster)".
+*   `[TimeState] -HAS_HISTORICAL_ANOMALY-> [Fact]`: Allows the agent to recall specific patterns (e.g., "Mondays during this season usually have higher latency").
+*   `[Action] -SCHEDULED_FOR-> [TimeState]`: Binds an action to a specific temporal window that is already enriched with situational context.
+
+### 3. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
 These relations define the "Organization Science" and "Epistemic Trust" of the network.
 *   `[Agent A] -TRUSTS {weight: 0.8}-> [Agent B]`: Defines the dynamic credibility weighting.
 *   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.
