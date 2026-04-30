@@ -1,0 +1,161 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/agnxxt/kernel-registry/schemas/runtime/runtime-artifact.schema.json",
+  "title": "RuntimeArtifact",
+  "type": "object",
+  "required": [
+    "artifact_id",
+    "kind",
+    "name",
+    "version",
+    "lifecycle_state",
+    "owner_ref",
+    "environment",
+    "spec"
+  ],
+  "properties": {
+    "artifact_id": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "service",
+        "worker",
+        "job",
+        "cronjob",
+        "queue_topic",
+        "stream_consumer",
+        "database",
+        "cache",
+        "vector_index",
+        "object_store",
+        "policy_bundle",
+        "secret_binding",
+        "config_bundle",
+        "ingress_route",
+        "certificate",
+        "observability_pipe",
+        "slo_policy",
+        "deployment_unit",
+        "adapter",
+        "protocol_contract"
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "retired"
+      ]
+    },
+    "owner_ref": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "local",
+        "dev",
+        "stage",
+        "prod",
+        "multi"
+      ]
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "global",
+        "org",
+        "country",
+        "local",
+        "product",
+        "project",
+        "group",
+        "individual"
+      ]
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "ref"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "http",
+              "grpc",
+              "topic",
+              "table",
+              "bucket",
+              "policy",
+              "secret"
+            ]
+          },
+          "ref": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "slo": {
+      "type": "object",
+      "properties": {
+        "availability_target": {
+          "type": "number"
+        },
+        "latency_p95_ms": {
+          "type": "integer"
+        },
+        "error_rate_max": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "authn": {
+          "type": "string"
+        },
+        "authz": {
+          "type": "string"
+        },
+        "data_classification": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec": {
+      "type": "object"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -10,6 +10,33 @@ Framework/model/cloud-agnostic kernel contracts and runtime scaffolding for:
 - secret management
 - persistence + migrations
 
+## Production Quickstart
+Prerequisites:
+- Docker + Docker Compose
+- Git
+
+Run local baseline:
+```bash
+git clone https://github.com/agnxxt/kernel-registry.git
+cd kernel-registry
+docker compose up --build -d
+```
+
+Validate contracts:
+```bash
+docker compose exec kernel-tooling bash -lc "./scripts/validate_schemas.sh && ./scripts/validate_proto.sh"
+```
+
+Run DB migrations:
+```bash
+docker compose exec kernel-tooling alembic -c persistence/alembic.ini upgrade head
+```
+
+Stop stack:
+```bash
+docker compose down
+```
+
 ## Repo Layout
 - `schemas/` protocol contracts (JSON Schema + proto)
 - `docs/` architecture and operational docs
@@ -29,22 +56,36 @@ Framework/model/cloud-agnostic kernel contracts and runtime scaffolding for:
 - Secret Kernel: `schemas/secrets/`
 - Policy Kernel (OPA/OpenFGA): `schemas/policy/`
 - Protocol Kernel (ANP/ACP): `schemas/protocol/`
+- Runtime Artifact Registry: `schemas/runtime/`
 
-## Local Container Workflow
-Start local stack:
-```bash
-docker compose up --build -d
-```
+## Reference Architecture
+Control planes:
+- Guardrail plane (intent checks, drift controls, constraint enforcement)
+- Policy plane (OPA + OpenFGA)
+- Identity plane (canonical ID, VC, wallet, trust, registry)
+- Action plane (provider adapters: git, docker, caddy, and extensible providers)
+- Learning/observability plane (learning loop + ML observability integration)
 
-Validate contracts:
-```bash
-docker compose exec kernel-tooling bash -lc "./scripts/validate_schemas.sh && ./scripts/validate_proto.sh"
-```
+Data and protocol contracts:
+- JSON Schema for payload validation
+- Proto for service/event interfaces
+- Extension model via semantic metadata and taxonomy overlays
 
-Run migrations:
-```bash
-docker compose exec kernel-tooling alembic -c persistence/alembic.ini upgrade head
-```
+Runtime targets:
+- Local Docker Compose for development and validation
+- Kubernetes manifests in `deploy/k8s/` for cluster deployment
+
+## Deployment Paths
+Local:
+- `compose.yaml` boots Caddy, Postgres, and kernel-tooling baseline services.
+
+Kubernetes:
+- Use `deploy/k8s/` as base blueprints.
+- Promote to environment overlays (dev/stage/prod) with image pinning and storage classes.
+
+Ingress and edge:
+- Caddy can be used as local/prototype ingress and reverse proxy.
+- For production ingress, pair with managed LB/Ingress controller and TLS automation policy.
 
 ## CI/CD
 - CI: `.github/workflows/ci.yml`
@@ -53,6 +94,19 @@ docker compose exec kernel-tooling alembic -c persistence/alembic.ini upgrade he
   - Alembic syntax checks
 - Release: `.github/workflows/release.yml`
   - tag/manual release artifact generation
+
+## Operations Baseline
+Health and validation:
+- Schema and proto validation scripts must pass before merge.
+- Migration checks run through Alembic config in `persistence/alembic.ini`.
+
+Security and policy:
+- Enforce pre-tool and post-completion hooks from guardrail contracts.
+- Route authorization checks through OPA/OpenFGA policy contracts.
+
+Reliability:
+- Persist stateful services with durable volumes.
+- Track baseline performance before and after stack changes.
 
 ## Current Runtime Baseline (VPS)
 Kubernetes namespace `agent-kernel` currently includes:
@@ -75,3 +129,9 @@ Kubernetes namespace `agent-kernel` currently includes:
 - `ops/benchmark-scorecard.yaml`
 - `ops/collect-baseline.sh`
 - `ops/hardening-checklist.md`
+
+## Next Build Priorities
+1. Implement runtime services for policy-kernel and protocol-kernel contracts.
+2. Add environment overlays (`kustomize` or Helm) for dev/stage/prod.
+3. Add conformance tests for ANP/ACP and OPA/OpenFGA decision flows.
+4. Add SLO gate checks in CI for regression detection.
