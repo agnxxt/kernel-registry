@@ -1,0 +1,43 @@
+version: 1
+name: agent-kernel-runtime-benchmark
+window: 5m
+slo:
+  availability:
+    target: 99.9
+  error_rate:
+    target_max_percent: 1.0
+  p95_latency_ms:
+    pre_tool_check: 250
+    action_execute: 1200
+    decision_status: 300
+    memory_read: 80
+    memory_write: 120
+  p99_latency_ms:
+    pre_tool_check: 500
+    action_execute: 2500
+    decision_status: 600
+    memory_read: 200
+    memory_write: 300
+  restart_rate:
+    target_max_restarts_per_pod_per_hour: 0
+  queue_lag:
+    target_max_messages: 100
+
+metrics:
+  - name: kube_pod_container_status_restarts_total
+    source: prometheus
+  - name: container_cpu_usage_seconds_total
+    source: prometheus
+  - name: container_memory_working_set_bytes
+    source: prometheus
+  - name: request_latency_ms
+    source: app
+  - name: request_error_total
+    source: app
+  - name: queue_lag
+    source: nats_or_redpanda
+
+phases:
+  - baseline
+  - post_change
+  - compare
