@@ -40,6 +40,7 @@ Supported artifact kinds:
 - dual_process_theory
 - organization_science
 - cognitive_profile
+- active_probe
 
 Design goals:
 - single canonical format across Docker/Kubernetes/runtime providers

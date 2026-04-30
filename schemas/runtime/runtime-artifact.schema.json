@@ -53,7 +53,8 @@
         "actor_critic",
         "dual_process_theory",
         "organization_science",
-        "cognitive_profile"
+        "cognitive_profile",
+        "active_probe"
       ]
     },
     "name": {

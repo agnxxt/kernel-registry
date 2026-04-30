@@ -31,6 +31,7 @@ These artifacts define the internal mental models, decision-making capabilities,
 - `theory_of_mind`: Mechanisms for agents to attribute mental states to themselves and others.
 - `decision_strategy`: Frameworks for evaluating options and selecting actions.
 - `cognitive_profile`: Internal state (personality, goals, constraints) driving an agent's dynamic knowledge expansion.
+- `active_probe`: Empirical tests or micro-actions an agent executes to gather real-time data and update its beliefs.
 
 ## 3. Strategic & Interaction Theories
 These artifacts govern how agents strategically interact with their environment, users, and other agents:
