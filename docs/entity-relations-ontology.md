@@ -52,6 +52,7 @@ These relations define how an agent utilizes its past and its boundaries.
 These relations define the "Organization Science" and "Epistemic Trust" of the network.
 *   `[Agent A] -TRUSTS {weight: 0.8}-> [Agent B]`: Defines the dynamic credibility weighting.
 *   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.
+*   `[User] -OWNS_AGENT-> [Agent]`: Maps a provisioned assistant or worker to a specific human stakeholder.
 *   `[Agent] -GOSSIPS_ABOUT-> [Agent/Belief]`: Decentralized propagation of reputation or knowledge.
 *   `[Agent] -SHARES_MEMORY_WITH-> [Agent]`: Defines access control boundaries for bipartite memory.
 *   `[Agent] -INTEROPERATES_WITH-> [Agent]`: Formally establishes a multi-modal, cross-framework, and multi-cloud communication channel.
@@ -115,9 +116,12 @@ These relations enable "Predictive Control" and environment-based coordination.
 *   `[Agent] -PLANS-> [Action]`: Represents the "look-ahead" simulation phase of Predictive Control.
 *   `[Agent] -EXECUTES-> [Action]`: The actual commitment to an action.
 
-### 13. Rogue Containment & Guardian Relations (Agent $\leftrightarrow$ Kernel)
-These relations define the defensive measures against autonomous drift or rebellion.
-*   `[Agent] -IS_FLAGGED_AS_ROGUE_BY-> [Watchdog/Harness]`: Marks the transition to suspicious or dangerous status.
+### 13. Rogue Containment & Governance Relations (Agent $\leftrightarrow$ Kernel)
+These relations define the defensive measures and administrative lifecycle.
+*   `[Admin] -DISCOVERS-> [User/Artifact]`: Records an entity found during the automated app-crawling phase.
+*   `[Admin] -APPROVES_ONBOARDING-> [User]`: Authorization gate for reaching out to and provisioning a user.
+*   `[Admin] -ENFORCES_POLICY-> [AgentGroup]`: Binds a set of agents to global deontic constraints.
+*   `[Agent] -IS_FLAGGED_AS_ROGUE_BY-> [Watchdog/Harness]`: Marks the transition to dangerous status.
 *   `[Agent] -IS_CONTAINED_IN-> [CognitiveSandbox]`: Formally isolates an agent's I/O from the network.
 *   `[Guardian] -EXECUTES_KILL_SWITCH_ON-> [Agent]`: The ultimate kernel veto; terminates a deployment unit.
 *   `[Action] -HAS_OPAQUE_INTENT-> [Agent]`: Flags an action performed without the required semantic explanation or lineage.
