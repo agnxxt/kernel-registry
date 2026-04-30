@@ -74,8 +74,16 @@ These relations connect high-level global conditions to local agent execution.
 *   `[Agent] -PRIMED_BY-> [NarrativeLens]`: Connects an agent's subconscious reasoning or bias to prevailing media narratives or social trends.
 *   `[Place] -EXPERIENCING-> [Climate/Weather]`: Grounds a location in its atmospheric reality.
 *   `[Bargaining/Trade] -CONSTRAINED_BY-> [Economy]`: Links micro-transactions to macro-economic indicators (e.g., volatility).
+*   `[Device/Hardware] -PHYSICALLY_LOCATED_IN-> [Place]`: Binds IoT sensors and edge hardware to a geographic coordinate.
 
-### 9. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
+### 9. Hardware & IoT Relations (Agent $\leftrightarrow$ Device)
+These relations define the agent's interaction with the physical substrate.
+*   `[Agent] -HOSTED_ON-> [Device/Hardware]`: Identifies the specific edge or server hardware running the agent.
+*   `[Agent] -CONTROLS_DEVICE-> [Device]`: Establishes authority over a physical actuator or system.
+*   `[Device] -PROVIDES_SENSE_TO-> [Agent]`: Defines a sensor data stream as a primary epistemic input.
+*   `[Action] -CONSUMES_HARDWARE_RESOURCE-> [Hardware]`: Tracks specific physical dependencies (e.g., TPU-V5).
+
+### 10. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
 These relations drive "Active Inference" and "Lineage Tracking".
 *   `[Agent] -ASSERTS {confidence: 0.95}-> [Belief]`: The agent introduces a fact into the world model.
 *   `[Agent] -OBSERVES-> [Context/Artifact]`: The agent registers an empirical reading (often the result of an `active_probe`).
