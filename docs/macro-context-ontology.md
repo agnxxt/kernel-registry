@@ -19,7 +19,14 @@ Defines the communication medium, including dialects, idioms, and semantic nuanc
 *   **Attributes**: `primary_language_iso`, `dialect_id`, `formality_level` (Honorifics vs. Casual), `semantic_drift_index`.
 *   **Impact**: Modifies `CommunicateAction` and `theory_of_mind`. (e.g., An agent must translate not just words, but the "intent" filtered through high-formality linguistic norms).
 
-## 4. Geopolitical Context (`GeopoliticalState`)
+## 4. Aesthetic & Creative Context (`AestheticLens`)
+Defines the creative, symbolic, and emotional medium through which information and intent are expressed.
+*   **Literature**: Narrative structures, rhetorical devices, and stylistic canons (e.g., Epic vs. Minimalist).
+*   **Art**: Visual semiotics, color theory, and historical movements (e.g., Bauhaus vs. Baroque).
+*   **Music**: Rhythmic cadence, tonal resonance, and emotional harmonics (e.g., Uplifting vs. Somber).
+*   **Impact**: Modifies `CommunicationAction` style and `result` presentation. (e.g., An agent delivering a critical update might adopt a "minimalist literature" style to ensure clarity, or a "somber music" cadence to match the gravity of an emergency).
+
+## 5. Geopolitical Context (`GeopoliticalState`)
 Defines the political boundaries, regulatory jurisdictions, and international relations impacting an agent.
 *   **Attributes**: `jurisdiction_id`, `sanction_status`, `regulatory_compliance_regime` (e.g., GDPR, EU-AI-Act).
 *   **Impact**: Modifies `deontic_constraints`. (e.g., An agent cannot initiate a `TransferAction` between two jurisdictions with an active trade embargo).
