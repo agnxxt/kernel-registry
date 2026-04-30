@@ -120,6 +120,8 @@ These relations enable "Predictive Control" and environment-based coordination.
 
 ### 13. Rogue Containment & Governance Relations (Agent $\leftrightarrow$ Kernel)
 These relations define the defensive measures and administrative lifecycle.
+*   `[Kernel/Admin] -RATIFIES-> [Constitution]`: The foundational act of system establishment.
+*   `[Agent/User] -GOVERNED_BY-> [Constitution]`: The universal binding to the system's supreme principles.
 *   `[Admin] -DISCOVERS-> [User/Artifact]`: Records an entity found during the automated app-crawling phase.
 *   `[Admin] -ENFORCES_POLICY_VIA-> [ToolCopilot]`: Explicitly utilizes a tool-specific gatekeeper to maintain organizational guardrails.
 *   `[ToolCopilot] -INTELLIGENTLY_AUTHENTICATES-> [Action]`: Represents the cognitive reasoning phase where a gatekeeper validates intent and context before granting access.
