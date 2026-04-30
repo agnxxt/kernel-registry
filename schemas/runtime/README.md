@@ -26,6 +26,7 @@ Supported artifact kinds:
 - deployment_unit
 - adapter
 - protocol_contract
+- psychology
 
 Design goals:
 - single canonical format across Docker/Kubernetes/runtime providers

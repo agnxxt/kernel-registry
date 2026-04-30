@@ -39,7 +39,8 @@
         "slo_policy",
         "deployment_unit",
         "adapter",
-        "protocol_contract"
+        "protocol_contract",
+        "psychology"
       ]
     },
     "name": {
