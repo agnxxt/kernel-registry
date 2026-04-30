@@ -83,7 +83,9 @@ These relations define the agent's interaction with the physical substrate.
 *   `[Agent] -HOSTED_ON-> [Device/Hardware]`: Identifies the specific edge or server hardware running the agent.
 *   `[Agent] -CONTROLS_DEVICE-> [Device]`: Establishes authority over a physical actuator or system.
 *   `[Device] -PROVIDES_SENSE_TO-> [Agent]`: Defines a sensor data stream as a primary epistemic input.
-*   `[Action] -CONSUMES_HARDWARE_RESOURCE-> [Hardware]`: Tracks specific physical dependencies (e.g., TPU-V5).
+*   `[Agent] -IS_ISOLATED_FROM-> [Network/KnowledgeGraph]`: Formally tracks the loss of connectivity and transition to sovereign state.
+*   `[Agent] -RELIES_PURELY_ON-> [LocalHardwareSensor]`: Indicates that an isolated agent has discounted all networked context sources.
+*   `[Action] -EXECUTED_IN_SOVEREIGN_MODE-> [Strategy]`: Marks a decision made without peer consensus due to isolation.
 
 ### 10. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
 These relations drive "Active Inference" and "Lineage Tracking".
