@@ -30,7 +30,13 @@ This ensures the agent recognizes that recurring time periods are unique based o
 *   `[TimeState] -HAS_HISTORICAL_ANOMALY-> [Fact]`: Allows the agent to recall specific patterns (e.g., "Mondays during this season usually have higher latency").
 *   `[Action] -SCHEDULED_FOR-> [TimeState]`: Binds an action to a specific temporal window that is already enriched with situational context.
 
-### 3. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
+### 3. Contextual Overrides & Decision Constraints (Context $\leftrightarrow$ Strategy)
+This prevents agents from blindly optimizing for a single variable (e.g., "cost") when environmental realities dictate otherwise.
+*   `[Context/Weather] -INVALIDATES_HEURISTIC-> [DualProcess/Heuristic]`: Prevents the agent from using a "Fast" heuristic (e.g., "suggest walking to save money") if the environment (e.g., "Raining") makes it illogical or unsafe.
+*   `[Context/Event] -MODIFIES_OBJECTIVE-> [CognitiveProfile/Objective]`: Temporarily changes the agent's short-term goal weighting (e.g., shifting priority from "cost optimization" to "safety/comfort" during a severe weather event).
+*   `[Action] -REQUIRES_CONDITION-> [Context]`: An action cannot be proposed unless the environmental state permits it.
+
+### 4. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
 These relations define the "Organization Science" and "Epistemic Trust" of the network.
 *   `[Agent A] -TRUSTS {weight: 0.8}-> [Agent B]`: Defines the dynamic credibility weighting.
 *   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.

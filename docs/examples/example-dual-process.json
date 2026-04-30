@@ -9,7 +9,16 @@
   "spec": {
     "default_pathway": {
       "optimization_target": "latency",
-      "allowed_heuristics": ["trust_public_cache_blindly", "use_smaller_model"]
+      "allowed_heuristics": [
+        {
+          "name": "suggest_walk_for_cost_savings",
+          "requires_context": {
+            "weather": ["Clear", "Cloudy"],
+            "max_distance_km": 1.0
+          }
+        },
+        "trust_public_cache_blindly"
+      ]
     },
     "engagement_triggers": {
       "goal_alignment_threshold": 0.8,
