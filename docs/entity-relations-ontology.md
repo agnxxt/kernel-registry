@@ -77,7 +77,13 @@ These relations drive "Active Inference" and "Lineage Tracking".
 *   `[Belief A] -DERIVES_FROM-> [Belief B]`: Absolute provenance tracing (Lineage). If Belief B is proven false, the graph invalidates Belief A automatically.
 *   `[Agent] -VALIDATES-> [Belief]`: An agent confirms a peer's assertion, increasing the network's consensus score.
 
-### 3. Operational & Stigmergic Relations (Agent $\leftrightarrow$ Action/Artifact)
+### 10. Cognitive Bias Relations (Agent $\leftrightarrow$ BiasPattern)
+These relations allow for the auditing of systematic reasoning errors.
+*   `[Agent] -AFFLICTED_BY-> [BiasType]`: Indicates an active skew in reasoning (e.g., Recency Bias).
+*   `[Agent] -EXHIBITS-> [Heuristic]`: Maps an agent's current pattern of thought to a known mental shortcut.
+*   `[Action] -BIASED_BY-> [BiasType]`: Links a specific failure to a detected cognitive bias.
+
+### 11. Operational & Stigmergic Relations (Agent $\leftrightarrow$ Action/Artifact)
 These relations enable "Predictive Control" and environment-based coordination.
 *   `[Agent] -PLANS-> [Action]`: Represents the "look-ahead" simulation phase of Predictive Control.
 *   `[Agent] -EXECUTES-> [Action]`: The actual commitment to an action.
