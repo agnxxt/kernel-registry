@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/agnxxt/agent-kernel/schemas/policy/opa-policy-bundle.schema.json",
+  "title": "OpaPolicyBundle",
+  "type": "object",
+  "required": [
+    "bundle_id",
+    "version",
+    "entrypoints",
+    "rego_modules"
+  ],
+  "properties": {
+    "bundle_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "entrypoints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rego_modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,18 @@
+syntax = "proto3";
+package agentkernel.policy.v1;
+
+message PolicyDecisionRequest {
+  string request_id = 1;
+  string policy_engine = 2; // opa | openfga
+  string subject = 3;
+  string action = 4;
+  string resource = 5;
+  map<string, string> context = 6;
+}
+
+message PolicyDecisionResponse {
+  string request_id = 1;
+  bool allow = 2;
+  string reason = 3;
+  repeated string obligations = 4;
+}

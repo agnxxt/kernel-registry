@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/agnxxt/agent-kernel/schemas/protocol/anp-envelope.schema.json",
+  "title": "AgentNetworkProtocolEnvelope",
+  "type": "object",
+  "required": [
+    "message_id",
+    "sent_at",
+    "from_agent_id",
+    "to_agent_id",
+    "message_type",
+    "payload"
+  ],
+  "properties": {
+    "message_id": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "from_agent_id": {
+      "type": "string"
+    },
+    "to_agent_id": {
+      "type": "string"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "REQUEST",
+        "RESPONSE",
+        "EVENT",
+        "ERROR",
+        "HEARTBEAT"
+      ]
+    },
+    "payload": {
+      "type": "object"
+    },
+    "trace_id": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

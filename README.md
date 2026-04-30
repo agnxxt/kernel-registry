@@ -27,6 +27,8 @@ Framework/model/cloud-agnostic kernel contracts and runtime scaffolding for:
 - Kernel Actions: `schemas/actions/`
 - Identity Kernel: `schemas/identity/`
 - Secret Kernel: `schemas/secrets/`
+- Policy Kernel (OPA/OpenFGA): `schemas/policy/`
+- Protocol Kernel (ANP/ACP): `schemas/protocol/`
 
 ## Local Container Workflow
 Start local stack:

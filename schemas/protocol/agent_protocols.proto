@@ -1,0 +1,21 @@
+syntax = "proto3";
+package agentkernel.protocol.v1;
+
+message AnpEnvelope {
+  string message_id = 1;
+  string sent_at = 2;
+  string from_agent_id = 3;
+  string to_agent_id = 4;
+  string message_type = 5;
+  bytes payload = 6;
+  string trace_id = 7;
+}
+
+message AcpSession {
+  string protocol_version = 1;
+  string session_id = 2;
+  string agent_id = 3;
+  repeated string capabilities = 4;
+  repeated string transports = 5;
+  repeated string auth_modes = 6;
+}
