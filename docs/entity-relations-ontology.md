@@ -54,6 +54,7 @@ These relations define the "Organization Science" and "Epistemic Trust" of the n
 *   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.
 *   `[Agent] -GOSSIPS_ABOUT-> [Agent/Belief]`: Decentralized propagation of reputation or knowledge.
 *   `[Agent] -SHARES_MEMORY_WITH-> [Agent]`: Defines access control boundaries for bipartite memory.
+*   `[Agent] -INTEROPERATES_WITH-> [Agent]`: Formally establishes a multi-modal, cross-framework, and multi-cloud communication channel.
 
 ### 7. Strategic & Interaction Relations (Agent $\leftrightarrow$ Agent)
 These relations define the mathematical and tactical interactions between autonomous units.
