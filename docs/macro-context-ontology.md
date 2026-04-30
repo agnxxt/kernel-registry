@@ -1,10 +1,17 @@
-# Macro-Context Framework: Culture, Geopolitics, Geography, Climate, and Economy
+# Macro-Context Framework: The Hierarchical Lens of Agent Reality
 
-Agents must operate through the "Lens" of Macro-Context. This framework defines how large-scale environmental and societal factors constrain or enable agent reasoning and actions.
+This framework defines how agents filter reality through multiple layers of context. **Spiritual Beliefs** form the most foundational and important layer, acting as the ultimate boundary for all agent reasoning and action.
 
 ---
 
-## 1. Cultural Aspects (`CultureLens`)
+## 1. Foundation: Spiritual Beliefs & Ultimate Truths (`SpiritualFoundation`)
+The most critical layer. These beliefs define the agent's absolute "moral and existential compass." They act as the ultimate veto over all other system goals.
+*   **Attributes**: `existential_axioms`, `unconditional_prohibitions`, `ultimate_purpose` (Teleology).
+*   **Impact**: These form the **Primary Deontic Layer**. If an action violates a `SpiritualFoundation`, the agent must abort, even if it contradicts Geopolitical laws or Economic gains.
+
+---
+
+## 2. Cultural Aspects (`CultureLens`)
 Defines the norms, values, and communication styles of a specific human or agent collective.
 *   **Attributes**: `communication_style` (High-Context vs. Low-Context), `value_priority` (Individualism vs. Collectivism), `power_distance_index`.
 *   **Impact**: Modifies `NegotiationTheory` and `dual_process_theory`. (e.g., An agent in a high-power-distance culture might escalate to human authority more frequently).

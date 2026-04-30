@@ -65,6 +65,7 @@ These relations define the mathematical and tactical interactions between autono
 
 ### 8. Macro-Context Relations (Action/Agent $\leftrightarrow$ WorldState)
 These relations connect high-level global conditions to local agent execution.
+*   `[Agent] -GROUNDED_IN-> [SpiritualFoundation]`: The most critical and immutable link; defines the ultimate moral and existential boundary.
 *   `[Action/Agent] -SUBJECT_TO-> [Geopolitics/Regime]`: Enforces legal and regulatory compliance boundaries.
 *   `[Agent] -ADHERES_TO-> [Culture]`: Binds an agent's communication and value system to a specific cultural lens.
 *   `[Agent] -OPERATES_IN_SOCIETY-> [SocietyState]`: Connects agent behavior to societal norms and demographic realities.
