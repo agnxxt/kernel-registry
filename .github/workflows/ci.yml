@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate JSON Schemas
+        run: ./scripts/validate_schemas.sh
+
+      - name: Validate Proto Contracts
+        run: ./scripts/validate_proto.sh
+
+      - name: Validate Alembic Migration Syntax
+        run: |
+          python -m py_compile persistence/migrations/env.py
+          python -m py_compile persistence/migrations/versions/0001_initial.py
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker Compose Lint Placeholder
+        run: |
+          echo "Add deploy smoke tests here (k3s/kind or container checks)."

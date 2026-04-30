@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build metadata artifact
+        run: |
+          mkdir -p dist
+          git rev-parse HEAD > dist/commit.txt
+          date -u +%Y-%m-%dT%H:%M:%SZ > dist/build_time_utc.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-build-metadata
+          path: dist/
+
+  publish-note:
+    runs-on: ubuntu-latest
+    needs: package
+    steps:
+      - name: Publish placeholder
+        run: |
+          echo "Wire container/image publish here (GHCR), gated by secrets and org policy."
