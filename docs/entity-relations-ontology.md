@@ -52,11 +52,15 @@ These relations define how an agent utilizes its past and its boundaries.
 These relations define the "Organization Science" and "Epistemic Trust" of the network.
 *   `[Agent A] -TRUSTS {weight: 0.8}-> [Agent B]`: Defines the dynamic credibility weighting.
 *   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.
+*   `[Agent] -GOSSIPS_ABOUT-> [Agent/Belief]`: Decentralized propagation of reputation or knowledge.
+*   `[Agent] -SHARES_MEMORY_WITH-> [Agent]`: Defines access control boundaries for bipartite memory.
 
 ### 7. Strategic & Interaction Relations (Agent $\leftrightarrow$ Agent)
 These relations define the mathematical and tactical interactions between autonomous units.
 *   `[Agent A] -NEGOTIATES_WITH-> [Agent B]`: Initiates a strategic dialogue using a `NegotiationTheory` artifact.
 *   `[Agent A] -COMPETES_WITH-> [Agent B]`: Indicates a zero-sum `GameTheory` interaction for limited resources.
+*   `[Action] -REQUIRES_CONSENSUS_FROM-> [AgentGroup]`: Enforces a `ConsensusTopology` (e.g., BFT) before an action is valid.
+*   `[Agent] -BIDS_ON-> [Task]`: Represents participation in a resource allocation auction.
 
 ### 8. Macro-Context Relations (Action/Agent $\leftrightarrow$ WorldState)
 These relations connect high-level global conditions to local agent execution.
