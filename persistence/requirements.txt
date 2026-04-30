@@ -7,3 +7,4 @@ jsonschema==4.23.0
 fastapi==0.115.11
 uvicorn==0.34.0
 litellm==1.63.4
+PyGithub==2.6.0
