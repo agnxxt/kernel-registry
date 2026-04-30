@@ -5,6 +5,27 @@ import uuid
 import json
 from datetime import datetime
 
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import Depends
+import secrets
+from kernel_engine.secret_kernel import SecretKernel
+
+security = HTTPBasic()
+
+def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    # Quick fix: In a real system this should check against a secure store
+    # For now, we secure the endpoint by checking against the SecretKernel's master key
+    sk = SecretKernel()
+    correct_username = secrets.compare_digest(credentials.username, "admin")
+    correct_password = secrets.compare_digest(credentials.password, sk.get_master_key())
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect admin username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
 from kernel_engine.validator import KernelValidator
 from kernel_engine.theory_identifier import TheoryIdentifier
 from kernel_engine.mlflow_tracker import KernelMLflowTracker
@@ -161,7 +182,7 @@ async def query_graph(subject_id: str):
 
 
 @app.post("/api/v1/admin/discover")
-async def admin_discover(org_name: str):
+async def admin_discover(org_name: str, username: str = Depends(get_current_admin)):
     """
     Admin-only: Trigger discovery from a real GitHub Organization.
     """
@@ -174,7 +195,7 @@ async def admin_discover(org_name: str):
     }
 
 @app.post("/api/v1/admin/onboard")
-async def admin_onboard(user_id: str):
+async def admin_onboard(user_id: str, username: str = Depends(get_current_admin)):
     """
     Admin-only: Approve and trigger user provisioning outreach.
     """
