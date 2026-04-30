@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package agnxxt.kernel.actions.v1;
+
+option go_package = "github.com/agnxxt/agent-kernel-local/gen/actions/v1;actionsv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+enum ActionType {
+  ACTION_TYPE_UNSPECIFIED = 0;
+  CONNECT = 1;
+  AUTOMATE = 2;
+  FLOW = 3;
+  LOOP = 4;
+  SEARCH = 5;
+  MESSAGE = 6;
+  PUBLISH = 7;
+  POST = 8;
+  TRAVEL_BOOK = 9;
+  SCHEMA_ORG = 10;
+}
+
+enum ActionStatus {
+  ACTION_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  RUNNING = 2;
+  SUCCEEDED = 3;
+  FAILED = 4;
+  CANCELED = 5;
+  RETRYING = 6;
+}
+
+message ActionRef {
+  string action_id = 1;
+  string tenant_id = 2;
+  string agent_id = 3;
+  string task_id = 4;
+  string run_id = 5;
+  string step_id = 6;
+  string trace_id = 7;
+}
+
+message KernelActionRequest {
+  ActionRef ref = 1;
+  ActionType type = 2;
+  string provider = 3; // e.g. n8n|langgraph|google|whatsapp|wordpress|x|uber|schemaorg
+  string operation = 4; // provider-specific operation id
+  google.protobuf.Struct input = 5;
+  google.protobuf.Struct policy = 6;
+  google.protobuf.Timestamp requested_at = 7;
+}
+
+message KernelActionResult {
+  ActionRef ref = 1;
+  ActionType type = 2;
+  ActionStatus status = 3;
+  string provider = 4;
+  string operation = 5;
+  google.protobuf.Struct output = 6;
+  string error_code = 7;
+  string error_message = 8;
+  int32 latency_ms = 9;
+  repeated string artifacts = 10;
+  google.protobuf.Timestamp completed_at = 11;
+}
+
+service KernelActionBus {
+  rpc Execute(KernelActionRequest) returns (KernelActionResult);
+  rpc GetStatus(ActionRef) returns (KernelActionResult);
+  rpc Cancel(ActionRef) returns (KernelActionResult);
+}

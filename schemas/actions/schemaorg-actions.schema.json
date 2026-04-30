@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/actions/schemaorg-actions.schema.json",
+  "title": "SchemaOrgActionEnvelope",
+  "type": "object",
+  "required": ["@context", "@type", "object"],
+  "properties": {
+    "@context": { "type": "string", "const": "https://schema.org" },
+    "@type": {
+      "type": "string",
+      "enum": [
+        "SearchAction",
+        "CommunicateAction",
+        "SendAction",
+        "PublishAction",
+        "CreateAction",
+        "UpdateAction",
+        "ReserveAction",
+        "OrderAction",
+        "TravelAction",
+        "AssessAction"
+      ]
+    },
+    "agent": { "type": "object", "additionalProperties": true },
+    "object": { "type": "object", "additionalProperties": true },
+    "result": { "type": "object", "additionalProperties": true },
+    "instrument": { "type": "object", "additionalProperties": true },
+    "actionStatus": {
+      "type": "string",
+      "enum": ["PotentialActionStatus", "ActiveActionStatus", "CompletedActionStatus", "FailedActionStatus"]
+    },
+    "startTime": { "type": "string", "format": "date-time" },
+    "endTime": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,19 @@
+version: 1
+namespace: agnxxt.kernel.actions.v1
+broker: redpanda
+topics:
+  - name: kernel.action.request.v1
+    schema_ref: schemas/actions/kernel-actions.schema.json
+    schema_registry_subject: kernel.action.request.v1-value
+    compatibility: backward
+    partitions: 12
+    replication_factor: 3
+  - name: kernel.action.result.v1
+    schema_ref: schemas/actions/kernel-actions.schema.json
+    schema_registry_subject: kernel.action.result.v1-value
+    compatibility: backward
+    partitions: 12
+    replication_factor: 3
+    cleanup_policy: compact,delete
+keying:
+  key: tenant_id:agent_id:task_id
