@@ -45,7 +45,14 @@
         "game_theory",
         "decision_strategy",
         "business_strategy",
-        "framework"
+        "framework",
+        "control_theory",
+        "information_foraging_theory",
+        "active_inference",
+        "bdi_architecture",
+        "actor_critic",
+        "dual_process_theory",
+        "organization_science"
       ]
     },
     "name": {

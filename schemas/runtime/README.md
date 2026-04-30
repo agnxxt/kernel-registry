@@ -32,6 +32,13 @@ Supported artifact kinds:
 - decision_strategy
 - business_strategy
 - framework
+- control_theory
+- information_foraging_theory
+- active_inference
+- bdi_architecture
+- actor_critic
+- dual_process_theory
+- organization_science
 
 Design goals:
 - single canonical format across Docker/Kubernetes/runtime providers
