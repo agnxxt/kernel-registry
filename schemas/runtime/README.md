@@ -39,6 +39,7 @@ Supported artifact kinds:
 - actor_critic
 - dual_process_theory
 - organization_science
+- cognitive_profile
 
 Design goals:
 - single canonical format across Docker/Kubernetes/runtime providers

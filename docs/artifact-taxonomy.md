@@ -30,6 +30,7 @@ These artifacts define the internal mental models, decision-making capabilities,
 - `psychology`: Base psychological profiling and behavioral baselines.
 - `theory_of_mind`: Mechanisms for agents to attribute mental states to themselves and others.
 - `decision_strategy`: Frameworks for evaluating options and selecting actions.
+- `cognitive_profile`: Internal state (personality, goals, constraints) driving an agent's dynamic knowledge expansion.
 
 ## 3. Strategic & Interaction Theories
 These artifacts govern how agents strategically interact with their environment, users, and other agents:
