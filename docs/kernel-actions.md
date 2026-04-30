@@ -22,3 +22,15 @@ Each action request should include:
 - guardrail mode
 - budget/cost limits
 - approval requirements for high-risk operations
+
+## Scope levels
+- global
+- org
+- country
+- local
+- product
+- project
+- group
+- individual
+
+Use `action_scope` plus `scope_ref` to target execution boundaries.
