@@ -1,0 +1,39 @@
+{
+  "artifact_id": "trust-model-alpha",
+  "kind": "epistemic_trust",
+  "name": "Zero-Trust Alpha Model",
+  "version": "2.0.0",
+  "lifecycle_state": "active",
+  "owner_ref": "security-team",
+  "environment": "prod",
+  "spec": {
+    "baseline_trust": {
+      "system_directives": 1.0,
+      "direct_observation": 0.95,
+      "peer_gossip": 0.3,
+      "public_metadata": 0.5
+    },
+    "entity_trust_ledger": {
+      "agent-data-ingest-01": {
+        "score": 0.85,
+        "interactions_count": 1420,
+        "last_validated": "2026-04-29T10:00:00Z"
+      },
+      "agent-external-scraper-03": {
+        "score": 0.2,
+        "interactions_count": 15,
+        "last_validated": "2026-04-28T15:30:00Z"
+      }
+    },
+    "trust_dynamics": {
+      "betrayal_penalty": 0.4,
+      "validation_reward": 0.05,
+      "time_decay_rate": 0.01,
+      "observation_feedback_loop": {
+        "action_alignment_check": true,
+        "consensus_shift_impact": 0.25
+      }
+    },
+    "assimilation_policy": "bayesian_update"
+  }
+}
