@@ -50,3 +50,9 @@ These represent formal engineering and cognitive science frameworks utilized to 
 - `actor_critic`: Architectures utilizing centralized evaluation of decentralized actor actions.
 - `dual_process_theory`: Implementation of explicit knowledge boundaries (Fast vs. Slow thinking).
 - `organization_science`: Application of human organizational structures to multi-agent systems for coordination and failure prevention.
+
+## 5. Machine Consciousness & Meta-Cognition Theories
+These artifacts represent advanced architectural patterns required for conscious-like awareness and self-modeling:
+- `global_workspace`: (Global Workspace Theory) A centralized memory space where sub-agents compete to broadcast information globally.
+- `attention_schema`: (Attention Schema Theory) A model of the agent's own attentional state, allowing it to track and regulate its focus.
+- `meta_representation`: (Higher-Order Thought) The capacity for an agent to generate secondary representations or evaluations of its own primary thoughts and outputs.

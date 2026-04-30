@@ -29,6 +29,9 @@ The `semantic_extension` provides absolute rigor for enterprise and cognitive AI
 | `deontic_constraints`| `Policy` | Formal boundaries defining what is obligated, permitted, or forbidden, operating entirely independently of goal-seeking logic. |
 | `consensus_topology` | `ActionAccessSpecification` | Defines structural redundancy and voting mechanisms (e.g., Majority Voting) requiring multi-agent agreement before execution. |
 | `watchdog_role`      | `Role` | An independent oversight identity solely responsible for detecting error propagation ("hallucination snowballs") and triggering rollbacks. |
+| `global_workspace`   | `CommunicateAction` | Implementation of "broadcast competition" where high-priority info is shared globally across subsystems. |
+| `attention_schema`   | `ControlAction` | A model of the agent's own focus, enabling self-regulation of attentional states. |
+| `meta_representation`| `AssessAction` | Evaluation or secondary representation of the agent's own primary cognitive outputs. |
 
 ## Universal JSON-LD Example
 
