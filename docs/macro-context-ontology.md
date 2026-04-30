@@ -9,7 +9,17 @@ Defines the norms, values, and communication styles of a specific human or agent
 *   **Attributes**: `communication_style` (High-Context vs. Low-Context), `value_priority` (Individualism vs. Collectivism), `power_distance_index`.
 *   **Impact**: Modifies `NegotiationTheory` and `dual_process_theory`. (e.g., An agent in a high-power-distance culture might escalate to human authority more frequently).
 
-## 2. Geopolitical Context (`GeopoliticalState`)
+## 2. Societal Context (`SocietyState`)
+Defines the social structures, demographics, and collective behaviors of a population.
+*   **Attributes**: `demographic_profile`, `social_class_distribution`, `religious_norm_index`, `prevailing_social_trends`.
+*   **Impact**: Modifies `organization_science` and `epistemic_trust`. (e.g., Agent trust weights are adjusted based on shared societal values or conflicting social norms).
+
+## 3. Linguistic Context (`LanguageLens`)
+Defines the communication medium, including dialects, idioms, and semantic nuances.
+*   **Attributes**: `primary_language_iso`, `dialect_id`, `formality_level` (Honorifics vs. Casual), `semantic_drift_index`.
+*   **Impact**: Modifies `CommunicateAction` and `theory_of_mind`. (e.g., An agent must translate not just words, but the "intent" filtered through high-formality linguistic norms).
+
+## 4. Geopolitical Context (`GeopoliticalState`)
 Defines the political boundaries, regulatory jurisdictions, and international relations impacting an agent.
 *   **Attributes**: `jurisdiction_id`, `sanction_status`, `regulatory_compliance_regime` (e.g., GDPR, EU-AI-Act).
 *   **Impact**: Modifies `deontic_constraints`. (e.g., An agent cannot initiate a `TransferAction` between two jurisdictions with an active trade embargo).

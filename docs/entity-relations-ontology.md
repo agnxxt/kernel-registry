@@ -62,6 +62,8 @@ These relations define the mathematical and tactical interactions between autono
 These relations connect high-level global conditions to local agent execution.
 *   `[Action/Agent] -SUBJECT_TO-> [Geopolitics/Regime]`: Enforces legal and regulatory compliance boundaries.
 *   `[Agent] -ADHERES_TO-> [Culture]`: Binds an agent's communication and value system to a specific cultural lens.
+*   `[Agent] -OPERATES_IN_SOCIETY-> [SocietyState]`: Connects agent behavior to societal norms and demographic realities.
+*   `[Action] -COMMUNICATES_VIA-> [LanguageLens]`: Formalizes the linguistic medium and formality requirements of an interaction.
 *   `[Place] -EXPERIENCING-> [Climate/Weather]`: Grounds a location in its atmospheric reality.
 *   `[Bargaining/Trade] -CONSTRAINED_BY-> [Economy]`: Links micro-transactions to macro-economic indicators (e.g., volatility).
 
