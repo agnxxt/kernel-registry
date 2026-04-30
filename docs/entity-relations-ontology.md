@@ -42,7 +42,13 @@ This ensures that during high-stakes events (e.g., medical emergencies), the age
 *   `[EmergencyContext] -SUSPENDS_CONSTRAINT-> [CognitiveProfile/Constraint]`: Temporarily ignores constraints like "cost-efficiency" or "token-budget" to prioritize speed and reach.
 *   `[Action] -MODIFIES_TOPOLOGY-> [Broadcast/Parallel]`: Changes a standard sequential communication flow into a parallel broadcast across all available channels (`CommunicateAction`) to ensure maximum reach during a crisis.
 
-### 5. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
+### 5. Memory & Contextual Relations (Agent $\leftrightarrow$ History/Environment)
+These relations define how an agent utilizes its past and its boundaries.
+*   `[Agent] -RECALLS-> [EpisodicMemory/Lineage]`: The agent queries its own history to inform a current action.
+*   `[Agent] -BOUND_BY-> [Context]`: Explicitly links an agent's current "Awareness" to specific situational constraints.
+*   `[Belief] -CONSOLIDATES_INTO-> [LongTermMemory]`: The transition from active working belief to stable world-model fact.
+
+### 6. Social & Trust Relations (Agent $\leftrightarrow$ Agent)
 These relations define the "Organization Science" and "Epistemic Trust" of the network.
 *   `[Agent A] -TRUSTS {weight: 0.8}-> [Agent B]`: Defines the dynamic credibility weighting.
 *   `[Agent A] -DELEGATES_TO-> [Agent B]`: Establishes hierarchical task execution and responsibility.
