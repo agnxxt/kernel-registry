@@ -15,6 +15,7 @@ from kernel_engine.discovery import DiscoveryEngine
 from kernel_engine.identity import IdentityTrustManager
 from kernel_engine.graph_adapter import GraphAdapter
 from kernel_engine.executor import ActionExecutor
+from kernel_engine.model_runner import CognitiveModelRunner
 
 app = FastAPI(title="Agent Kernel Platform", version="1.0.0")
 
@@ -28,6 +29,7 @@ discovery = DiscoveryEngine()
 identity_manager = IdentityTrustManager()
 graph = GraphAdapter()
 executor = ActionExecutor()
+model_runner = CognitiveModelRunner()
 
 # Telemetry WebSockets
 class ConnectionManager:
@@ -85,7 +87,13 @@ async def process_action(data: Dict[str, Any], background_tasks: BackgroundTasks
     context = {"weather": "Clear", "goal_alignment": 0.85, "trust_score": trust_score}
     exec_plan = await orchestrator.execute_plan(agent_id, data, context)
     
-    # 5. Physical Execution
+    # 5. Cognitive Realization (Model Runner)
+    # If the action requires reasoning, invoke the model runner
+    if data.get("@type") in ["AssessAction", "SearchAction", "CommunicateAction"]:
+        inference_result = await model_runner.invoke_model({"model": "gpt-4o", "provider": "openai"}, context)
+        data["result_raw"] = inference_result["model_output"]
+
+    # 6. Physical Execution
     result = await executor.execute(action_id, data)
 
     # 6. Graph Ingestion

@@ -90,7 +90,14 @@ These relations define the agent's interaction with the physical substrate.
 *   `[Agent] -RELIES_PURELY_ON-> [LocalHardwareSensor]`: Indicates that an isolated agent has discounted all networked context sources.
 *   `[Action] -EXECUTED_IN_SOVEREIGN_MODE-> [Strategy]`: Marks a decision made without peer consensus due to isolation.
 
-### 10. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
+### 10. Model Runner & Inference Relations (Agent $\leftrightarrow$ Model)
+These relations define the cognitive realization phase.
+*   `[Agent] -INVOKES-> [Model]`: Initiates a low-level inference request via the Model Runner.
+*   `[Model] -GENERATES-> [Belief/Fact]`: Records the raw output of an LLM as a candidate belief.
+*   `[Kernel] -ROUTES_TO-> [Provider]`: Tracks the dynamic selection of cloud (OpenAI/Anthropic) or local (Ollama) providers.
+*   `[Model] -UTILIZES_CONTEXT_FROM-> [KnowledgeGraph]`: Formally tracks GraphRAG grounding.
+
+### 11. Epistemic & Lineage Relations (Agent $\leftrightarrow$ Belief/Fact)
 These relations drive "Active Inference" and "Lineage Tracking".
 *   `[Agent] -ASSERTS {confidence: 0.95}-> [Belief]`: The agent introduces a fact into the world model.
 *   `[Agent] -OBSERVES-> [Context/Artifact]`: The agent registers an empirical reading (often the result of an `active_probe`).
