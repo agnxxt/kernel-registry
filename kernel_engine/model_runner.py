@@ -1,6 +1,12 @@
 import asyncio
+import os
 from typing import Dict, Any, List
-# import litellm  # In production, this is used for unified routing
+
+# Optional import for prod
+try:
+    import litellm
+except ImportError:
+    litellm = None
 
 class CognitiveModelRunner:
     """
@@ -9,27 +15,43 @@ class CognitiveModelRunner:
     Handles dynamic routing and prompt injection.
     """
     def __init__(self):
-        # LiteLLM allows us to route to any provider (OpenAI, Anthropic, Gemini, Ollama)
-        # using a single OpenAI-compatible interface.
         pass
 
     async def invoke_model(self, request_payload: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Executes a cognitive inference request via LiteLLM.
         """
-        # LiteLLM routing logic: provider/model (e.g., 'anthropic/claude-3-7-sonnet')
         model_path = f"{request_payload.get('provider', 'openai')}/{request_payload.get('model', 'gpt-4o')}"
         
-        # 1. Kernel-Enforced System Prompt Injection
         system_prompt = self._build_governed_prompt(context)
         
-        # 2. Simulate LiteLLM Call
-        # response = await litellm.acompletion(model=model_path, messages=[...])
-        await asyncio.sleep(0.2)
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": str(request_payload.get("input", "Compute action"))}
+        ]
+
+        if litellm and not os.getenv("MOCK_INFERENCE", "true").lower() == "true":
+            try:
+                response = await litellm.acompletion(model=model_path, messages=messages)
+                return {
+                    "model_output": response.choices[0].message.content,
+                    "runner": "LiteLLM",
+                    "usage": dict(response.usage),
+                    "system_prompt_applied": system_prompt[:100] + "..."
+                }
+            except Exception as e:
+                # Log error and fallback
+                pass
         
+        # Fallback if litellm is not installed or we hit an error, but in a real prod env
+        # MOCK_INFERENCE=false would fail. For scaffolding to work, we simulate.
+        if os.getenv("MOCK_INFERENCE", "true").lower() == "false":
+            raise RuntimeError(f"LiteLLM missing or invocation failed for {model_path} in production mode.")
+
+        await asyncio.sleep(0.1)
         return {
-            "model_output": f"LiteLLM routing success for {model_path}.",
-            "runner": "LiteLLM",
+            "model_output": f"Simulated routing success for {model_path}. Please set MOCK_INFERENCE=false to use litellm.",
+            "runner": "MockRunner",
             "usage": {"prompt_tokens": 150, "completion_tokens": 45},
             "system_prompt_applied": system_prompt[:100] + "..."
         }
@@ -43,4 +65,3 @@ class CognitiveModelRunner:
         context_str = f"\nCURRENT CONTEXT:\n- Weather: {context.get('weather')}\n- Trust Score: {context.get('trust_score')}"
         
         return f"{base}{constraints}{context_str}"
-

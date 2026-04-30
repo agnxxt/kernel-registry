@@ -1,4 +1,5 @@
 import asyncio
+import os
 from typing import Dict, Any
 from kernel_engine.adapters.github_adapter import GitHubAdapter
 from kernel_engine.secret_kernel import SecretKernel
@@ -48,7 +49,12 @@ class ActionExecutor:
                     "execution_metadata": {"status": "FailedActionStatus", "action_id": action_id}
                 }
 
-        # 2. Default/Simulated Execution for other types
+        # 2. Production handling for non-GitHub actions.
+        if os.getenv("MOCK_INFERENCE", "true").lower() == "false":
+            # In real production, unmapped actions should raise or defer to a real provider
+            raise NotImplementedError(f"Action type {action_type} lacks a physical execution adapter.")
+            
+        # 3. Fallback for scaffolding/testing
         await asyncio.sleep(0.1) 
         return {
             "@type": "PropertyValue",
@@ -56,4 +62,3 @@ class ActionExecutor:
             "value": "Execution completed (Simulated)",
             "execution_metadata": {"action_id": action_id, "status": "CompletedActionStatus"}
         }
-
