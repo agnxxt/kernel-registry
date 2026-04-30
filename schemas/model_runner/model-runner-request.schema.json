@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/model_runner/model-runner-request.schema.json",
+  "title": "ModelRunnerRequest",
+  "type": "object",
+  "required": [
+    "request_id",
+    "tenant_id",
+    "agent_id",
+    "task_id",
+    "run_id",
+    "step_id",
+    "trace_id",
+    "provider",
+    "model",
+    "input",
+    "requested_at"
+  ],
+  "properties": {
+    "request_id": { "type": "string", "minLength": 8 },
+    "tenant_id": { "type": "string", "minLength": 2 },
+    "agent_id": { "type": "string", "minLength": 2 },
+    "task_id": { "type": "string", "minLength": 2 },
+    "run_id": { "type": "string", "minLength": 2 },
+    "step_id": { "type": "string", "minLength": 2 },
+    "trace_id": { "type": "string", "minLength": 8 },
+    "provider": {
+      "type": "string",
+      "enum": ["openai_compat", "litellm", "vllm", "ollama", "anthropic", "google", "azure_openai", "custom"]
+    },
+    "model": { "type": "string", "minLength": 1 },
+    "endpoint": { "type": "string" },
+    "input": { "type": "object", "additionalProperties": true },
+    "generation_params": { "type": "object", "additionalProperties": true },
+    "timeout_ms": { "type": "integer", "minimum": 100, "maximum": 300000 },
+    "policy": { "type": "object", "additionalProperties": true },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "semantic_extension": { "$ref": "../_semantic-extension.schema.json" },
+    "metadata": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false
+}

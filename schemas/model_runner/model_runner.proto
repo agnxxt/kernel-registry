@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package agnxxt.kernel.modelrunner.v1;
+
+option go_package = "github.com/agnxxt/agent-kernel-local/gen/modelrunner/v1;modelrunnerv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+enum RunnerProvider {
+  RUNNER_PROVIDER_UNSPECIFIED = 0;
+  OPENAI_COMPAT = 1;
+  LITELLM = 2;
+  VLLM = 3;
+  OLLAMA = 4;
+  ANTHROPIC = 5;
+  GOOGLE = 6;
+  AZURE_OPENAI = 7;
+  CUSTOM = 8;
+}
+
+enum InferenceStatus {
+  INFERENCE_STATUS_UNSPECIFIED = 0;
+  QUEUED = 1;
+  RUNNING = 2;
+  SUCCEEDED = 3;
+  FAILED = 4;
+  CANCELED = 5;
+  TIMEOUT = 6;
+}
+
+message InferenceRef {
+  string request_id = 1;
+  string tenant_id = 2;
+  string agent_id = 3;
+  string task_id = 4;
+  string run_id = 5;
+  string step_id = 6;
+  string trace_id = 7;
+}
+
+message InferenceRequest {
+  InferenceRef ref = 1;
+  RunnerProvider provider = 2;
+  string model = 3;
+  string endpoint = 4;
+  google.protobuf.Struct input = 5;
+  google.protobuf.Struct generation_params = 6;
+  int32 timeout_ms = 7;
+  google.protobuf.Struct policy = 8;
+  google.protobuf.Timestamp requested_at = 9;
+}
+
+message InferenceResult {
+  InferenceRef ref = 1;
+  InferenceStatus status = 2;
+  RunnerProvider provider = 3;
+  string model = 4;
+  google.protobuf.Struct output = 5;
+  int32 prompt_tokens = 6;
+  int32 completion_tokens = 7;
+  int32 total_tokens = 8;
+  int32 latency_ms = 9;
+  string error_code = 10;
+  string error_message = 11;
+  google.protobuf.Timestamp completed_at = 12;
+}
+
+message CancelInferenceRequest {
+  InferenceRef ref = 1;
+  string reason = 2;
+}
+
+message ModelRegistryItem {
+  string model = 1;
+  RunnerProvider provider = 2;
+  string endpoint = 3;
+  bool enabled = 4;
+  int32 max_context_tokens = 5;
+  google.protobuf.Struct capabilities = 6;
+}
+
+message ModelRegistryResponse {
+  repeated ModelRegistryItem items = 1;
+}
+
+service ModelRunnerKernel {
+  rpc RunInference(InferenceRequest) returns (InferenceResult);
+  rpc GetInferenceStatus(InferenceRef) returns (InferenceResult);
+  rpc CancelInference(CancelInferenceRequest) returns (InferenceResult);
+  rpc ListModels(google.protobuf.Struct) returns (ModelRegistryResponse);
+}

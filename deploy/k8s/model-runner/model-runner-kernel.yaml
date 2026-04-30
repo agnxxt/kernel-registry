@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: model-runner-kernel
+  namespace: agent-kernel
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-runner-kernel
+  namespace: agent-kernel
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: model-runner-kernel
+  template:
+    metadata:
+      labels:
+        app: model-runner-kernel
+    spec:
+      serviceAccountName: model-runner-kernel
+      containers:
+      - name: model-runner-kernel
+        image: ghcr.io/agnxxt/model-runner-kernel:0.1.0
+        ports:
+        - containerPort: 7091
+          name: grpc
+        env:
+        - name: DEFAULT_PROVIDER
+          value: litellm
+        - name: LITELLM_BASE_URL
+          value: http://litellm.agent-kernel.svc.cluster.local:4000
+        - name: REQUEST_TOPIC
+          value: kernel.inference.request.v1
+        - name: RESULT_TOPIC
+          value: kernel.inference.result.v1
+        - name: AUDIT_TOPIC
+          value: kernel.inference.audit.v1
+        readinessProbe:
+          tcpSocket:
+            port: grpc
+          initialDelaySeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: grpc
+          initialDelaySeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: model-runner-kernel
+  namespace: agent-kernel
+spec:
+  selector:
+    app: model-runner-kernel
+  ports:
+  - name: grpc
+    port: 7091
+    targetPort: 7091

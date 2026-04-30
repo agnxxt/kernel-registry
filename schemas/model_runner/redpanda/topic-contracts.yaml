@@ -1,0 +1,25 @@
+version: 1
+namespace: agnxxt.kernel.modelrunner.v1
+broker: redpanda
+topics:
+  - name: kernel.inference.request.v1
+    schema_ref: schemas/model_runner/model-runner-request.schema.json
+    schema_registry_subject: kernel.inference.request.v1-value
+    compatibility: backward
+    partitions: 24
+    replication_factor: 3
+  - name: kernel.inference.result.v1
+    schema_ref: schemas/model_runner/redpanda/inference-audit-event.schema.json
+    schema_registry_subject: kernel.inference.result.v1-value
+    compatibility: backward
+    partitions: 24
+    replication_factor: 3
+    cleanup_policy: compact,delete
+  - name: kernel.inference.audit.v1
+    schema_ref: schemas/model_runner/redpanda/inference-audit-event.schema.json
+    schema_registry_subject: kernel.inference.audit.v1-value
+    compatibility: backward
+    partitions: 12
+    replication_factor: 3
+keying:
+  key: tenant_id:agent_id:request_id
