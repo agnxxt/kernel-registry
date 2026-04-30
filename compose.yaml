@@ -33,24 +33,40 @@ services:
       timeout: 5s
       retries: 10
 
-  kernel-tooling:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.20.1
+    container_name: agent-kernel-mlflow
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow.db
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+    volumes:
+      - mlflow_data:/mlflow
+    command: >
+      mlflow server 
+      --backend-store-uri sqlite:///mlflow.db 
+      --default-artifact-root /mlflow/artifacts 
+      --host 0.0.0.0
+
+  kernel-api:
     build:
       context: .
-    container_name: agent-kernel-tooling
+    container_name: agent-kernel-api
+    ports:
+      - "8000:8000"
     environment:
       DATABASE_URL: postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel
+      MLFLOW_TRACKING_URI: http://mlflow:5000
     depends_on:
       postgres:
         condition: service_healthy
-    command: >
-      bash -lc "
-      ./scripts/validate_schemas.sh &&
-      ./scripts/validate_proto.sh &&
-      alembic -c persistence/alembic.ini upgrade head &&
-      tail -f /dev/null
-      "
+      mlflow:
+        condition: service_started
+    command: uvicorn kernel_api.main:app --host 0.0.0.0 --port 8000
 
 volumes:
   pg_data:
   caddy_data:
   caddy_config:
+  mlflow_data:

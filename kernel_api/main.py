@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Dict, Any, List
 import uuid
+import json
 from datetime import datetime
 
 from kernel_engine.validator import KernelValidator
@@ -11,80 +12,117 @@ from kernel_engine.orchestrator import CognitiveOrchestrator
 from kernel_engine.watchdog import RogueWatchdog
 from kernel_engine.gatekeeper import ToolGatekeeper
 from kernel_engine.discovery import DiscoveryEngine
+from kernel_engine.identity import IdentityTrustManager
+from kernel_engine.graph_adapter import GraphAdapter
+from kernel_engine.executor import ActionExecutor
 
 app = FastAPI(title="Agent Kernel Platform", version="1.0.0")
 
-# Singleton Engine Instances
+# --- System Singleton Registry ---
 validator = KernelValidator("schemas/_semantic-extension.schema.json")
 identifier = TheoryIdentifier()
 tracker = KernelMLflowTracker()
 watchdog = RogueWatchdog()
 orchestrator = CognitiveOrchestrator(watchdog=watchdog)
 discovery = DiscoveryEngine()
-github_gatekeeper = ToolGatekeeper("GitHub")
+identity_manager = IdentityTrustManager()
+graph = GraphAdapter()
+executor = ActionExecutor()
 
-@app.get("/health")
-async def health():
-    return {"status": "active", "timestamp": datetime.utcnow().isoformat()}
+# Telemetry WebSockets
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        for connection in self.active_connections:
+            await connection.send_json(message)
+
+telemetry_manager = ConnectionManager()
+
+# --- API Endpoints ---
+
+@app.websocket("/ws/telemetry")
+async def telemetry_endpoint(websocket: WebSocket):
+    await telemetry_manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text() # Keep alive
+    except WebSocketDisconnect:
+        telemetry_manager.disconnect(websocket)
 
 @app.post("/api/v1/action")
 async def process_action(data: Dict[str, Any], background_tasks: BackgroundTasks):
     """
     Unified entry point for all governed agent actions.
     """
-    # 1. Schema Rigor
+    # 1. Schema Validation
     is_valid, err = validator.validate_artifact(data)
     if not is_valid:
         raise HTTPException(status_code=400, detail=f"Schema Violation: {err}")
 
     agent_id = data.get("agent", {}).get("name", "unknown")
-    run_id = str(uuid.uuid4())
+    action_id = str(uuid.uuid4())
+    data["id"] = action_id
 
-    # 2. Intelligent Authentication (Gatekeeping)
+    # 2. Epistemic Trust Check
+    trust_score = identity_manager.get_trust_score(agent_id)
+
+    # 3. Intelligent Authentication (Gatekeeping)
     if "github" in str(data.get("object", "")).lower():
-        auth_result = github_gatekeeper.authenticate_request(agent_id, data)
+        auth_result = ToolGatekeeper("GitHub").authenticate_request(agent_id, data)
         if not auth_result["authenticated"]:
-            return {"status": "Auth-Failed", "reason": auth_result["reason"]}
+             return {"status": "Auth-Failed", "reason": auth_result["reason"]}
 
-    # 3. Cognitive Orchestration
-    context = {"weather": "Clear", "goal_alignment": 0.85, "failure_risk": 0.3}
-    exec_result = await orchestrator.execute_plan(agent_id, data, context)
+    # 4. Cognitive Orchestration
+    context = {"weather": "Clear", "goal_alignment": 0.85, "trust_score": trust_score}
+    exec_plan = await orchestrator.execute_plan(agent_id, data, context)
     
-    # 4. Behavioral Identification & Auditing
+    # 5. Physical Execution
+    result = await executor.execute(action_id, data)
+
+    # 6. Graph Ingestion
+    graph.ingest_action(data)
+
+    # 7. Behavioral Identification & MLflow Audit
     theories = identifier.identify_behavior(data, context)
     audit_log = identifier.generate_audit_log(data, theories)
-    
-    # 5. Rogue Monitoring (Watchdog)
-    watchdog_status = watchdog.monitor_action(agent_id, data, exec_result)
+    background_tasks.add_task(tracker.log_theory_identification, agent_id, action_id, audit_log)
 
-    # 6. Lifecycle Tracking (MLflow)
-    background_tasks.add_task(tracker.log_theory_identification, agent_id, run_id, audit_log)
+    # 8. Real-time Telemetry Broadcast
+    telemetry_payload = {
+        "event": "action_processed",
+        "agent": agent_id,
+        "action_id": action_id,
+        "pathway": exec_plan.get("pathway_used"),
+        "theories": theories,
+        "trust_score": trust_score
+    }
+    background_tasks.add_task(telemetry_manager.broadcast, telemetry_payload)
 
     return {
-        "execution_id": exec_result.get("execution_id", run_id),
-        "status": exec_result["status"],
-        "watchdog_status": watchdog_status,
+        "execution_id": action_id,
+        "status": result["execution_metadata"]["status"],
         "identified_patterns": theories,
-        "metadata": {
-            "pathway": exec_result.get("pathway_used"),
-            "authenticated": True
-        }
+        "trust_score": trust_score
     }
 
-@app.post("/api/v1/admin/discover")
-async def admin_discover(app_name: str):
-    """
-    Admin-only: Trigger discovery from connected apps.
-    """
-    discovered = discovery.crawl_app(app_name)
-    return {"discovered_entities": discovered, "status": "Pending-Admin-Review"}
+@app.get("/api/v1/identity/{agent_id}")
+async def get_agent_identity(agent_id: str):
+    return {
+        "agent_id": agent_id,
+        "trust_score": identity_manager.get_trust_score(agent_id),
+        "signature": identity_manager.generate_identity_signature(agent_id)
+    }
 
-@app.post("/api/v1/admin/onboard")
-async def admin_onboard(user_id: str):
-    """
-    Admin-only: Approve and trigger user provisioning outreach.
-    """
-    outreach_action = discovery.generate_provisioning_request(user_id)
-    # In full system, this sends the outreach via CommunicateAction bus
-    return {"status": "Outreach-Sent", "action": outreach_action}
+@app.get("/api/v1/graph/query")
+async def query_graph(subject_id: str):
+    return {"subject": subject_id, "facts": graph.query_facts(subject_id)}
 
