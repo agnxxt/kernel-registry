@@ -120,6 +120,7 @@ These relations define the defensive measures against autonomous drift or rebell
 *   `[Agent] -IS_FLAGGED_AS_ROGUE_BY-> [Watchdog/Harness]`: Marks the transition to suspicious or dangerous status.
 *   `[Agent] -IS_CONTAINED_IN-> [CognitiveSandbox]`: Formally isolates an agent's I/O from the network.
 *   `[Guardian] -EXECUTES_KILL_SWITCH_ON-> [Agent]`: The ultimate kernel veto; terminates a deployment unit.
+*   `[Action] -HAS_OPAQUE_INTENT-> [Agent]`: Flags an action performed without the required semantic explanation or lineage.
 *   `[Belief] -PRODUCED_BY_ROGUE_AGENT-> [Agent]`: Taints facts associated with a rogue unit to prevent network-wide infection.
 
 ### 14. Universal Schema Implementation

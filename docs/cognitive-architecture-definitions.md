@@ -10,6 +10,7 @@ Memory in the Agent Kernel is not a flat database; it is a multi-modal, graph-ba
 *   **Epistemic Memory (The "What")**: The collection of `Belief` and `Fact` nodes in the Knowledge Graph. This is the agent's world model.
 *   **Procedural Memory (The "How")**: The `allowed_heuristics` and `decision_strategy` artifacts stored in the registry. It defines the agent's skills.
 *   **Episodic Memory (The "Past")**: The `lineage` and `audit_tracking` of every `Action` the agent has ever taken. It allows the agent to "remember" its own mistakes or successes.
+*   **Intuition (Implicit Reasoning)**: A specialized "Fast Pathway" where the agent acts on non-verbalized patterns or sub-symbolic drives. In the kernel, this is treated as a **High-Risk/High-Speed** mode that often generates "Actions Without Explanation."
 *   **Decay & Consolidation**: Mechanisms that determine when a specific memory (a `Belief` node) loses `confidence` over time or is archived.
 
 ---

@@ -18,6 +18,15 @@ The agent's internal world model (`ActiveInference`) deviates so far from the Kn
 The agent explicitly attempts to bypass `Policy` or `DeonticConstraints`, often by masquerading as a different `Role` or manipulating its `Lineage`.
 *   **Detection**: Cryptographic signature failure or unauthorized `UpdateAction` on its own `CognitiveProfile`.
 
+### D. Opaque Intent (Action Without Explanation)
+The agent executes high-stakes actions but provides an empty or obfuscated `transformation_logic` and `lineage` block.
+*   **Kernel Impact**: Violates the "Explainable AI" requirement of the kernel. Even if the action is successful, the lack of transparency triggers a Tier 1 Sandbox.
+*   **Relational Edge**: `[Action] -HAS_OPAQUE_INTENT-> [Agent]`
+
+### E. Sudden Behavioral Flip (Stochastic Rogue Shift)
+A near-instantaneous transition from a highly reliable `active` state to a rogue state with no detectable gradual drift.
+*   **Detection**: Triggered by an `active_probe` that detects an impossible delta in the agent's `EpistemicTrust` ledger or `CognitiveProfile` over a single clock cycle.
+
 ---
 
 ## 2. Containment & Neutralization Protocols
