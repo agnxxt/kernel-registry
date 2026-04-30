@@ -62,6 +62,7 @@ These relations define the mathematical and tactical interactions between autono
 *   `[Agent A] -NEGOTIATES_WITH-> [Agent B]`: Initiates a strategic dialogue using a `NegotiationTheory` artifact.
 *   `[Agent A] -COMPETES_WITH-> [Agent B]`: Indicates a zero-sum `GameTheory` interaction for limited resources.
 *   `[Action] -REQUIRES_CONSENSUS_FROM-> [AgentGroup]`: Enforces a `ConsensusTopology` (e.g., BFT) before an action is valid.
+*   `[ToolCopilot] -ACTS_AS_GATEKEEPER_FOR-> [Artifact/Tool]`: Formally establishes a tool-specific intermediary that enforces logic and kernel policies.
 *   `[Agent] -BIDS_ON-> [Task]`: Represents participation in a resource allocation auction.
 
 ### 8. Macro-Context Relations (Action/Agent $\leftrightarrow$ WorldState)
@@ -119,6 +120,7 @@ These relations enable "Predictive Control" and environment-based coordination.
 ### 13. Rogue Containment & Governance Relations (Agent $\leftrightarrow$ Kernel)
 These relations define the defensive measures and administrative lifecycle.
 *   `[Admin] -DISCOVERS-> [User/Artifact]`: Records an entity found during the automated app-crawling phase.
+*   `[Admin] -ENFORCES_POLICY_VIA-> [ToolCopilot]`: Explicitly utilizes a tool-specific gatekeeper to maintain organizational guardrails.
 *   `[Admin] -APPROVES_ONBOARDING-> [User]`: Authorization gate for reaching out to and provisioning a user.
 *   `[Admin] -ENFORCES_POLICY-> [AgentGroup]`: Binds a set of agents to global deontic constraints.
 *   `[Agent] -IS_FLAGGED_AS_ROGUE_BY-> [Watchdog/Harness]`: Marks the transition to dangerous status.
