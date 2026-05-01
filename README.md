@@ -10,6 +10,41 @@ Framework/model/cloud-agnostic kernel contracts and runtime scaffolding for:
 - secret management
 - persistence + migrations
 
+## Single-Command Guided Walkthrough
+
+Run one command to get a guided, step-by-step deployment/validation flow:
+
+```bash
+./ops/guided-walkthrough.sh --mode local
+```
+
+What the guide does:
+- Explains each step before execution.
+- Runs contract validation first.
+- Proceeds through local (Docker Compose) or Kubernetes deployment flow.
+- Optionally runs migrations and E2E smoke checks.
+
+Options and meaning:
+- `--mode local|k8s`: choose execution target.
+  - `local`: starts Docker Compose stack and runs local operational checks.
+  - `k8s`: applies production Kubernetes manifests and hardening resources.
+- `--validate-only`: run only schema/proto validation and stop.
+- `--skip-migrations`: skip Alembic upgrades (local mode only).
+- `--skip-smoke`: skip endpoint smoke validation.
+- `-h, --help`: print option help with examples.
+
+Examples:
+```bash
+# Full local guided setup + validation
+./ops/guided-walkthrough.sh --mode local
+
+# Production-style manifest apply walkthrough
+./ops/guided-walkthrough.sh --mode k8s --skip-smoke
+
+# Fast contract-only check
+./ops/guided-walkthrough.sh --validate-only
+```
+
 ## Production Quickstart
 Prerequisites:
 - Docker + Docker Compose
