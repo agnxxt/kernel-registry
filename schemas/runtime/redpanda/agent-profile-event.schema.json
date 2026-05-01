@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/agnxxt/kernel-registry/schemas/runtime/redpanda/agent-profile-event.schema.json",
+  "title": "AgentProfileLifecycleEvent",
+  "type": "object",
+  "required": ["event_id", "event_type", "event_time", "agent_id", "profile_version", "state_transition"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_type": {
+      "type": "string",
+      "enum": ["agent.profile.created", "agent.profile.updated", "agent.profile.submitted", "agent.profile.approved", "agent.profile.activated", "agent.profile.suspended", "agent.profile.retired"]
+    },
+    "event_time": { "type": "string", "format": "date-time" },
+    "agent_id": { "type": "string" },
+    "profile_version": { "type": "string" },
+    "state_transition": {
+      "type": "object",
+      "required": ["from", "to"],
+      "properties": {
+        "from": { "type": "string" },
+        "to": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "approval_snapshot": {
+      "type": "object",
+      "properties": {
+        "required_approvals": { "type": "integer" },
+        "current_approvals": { "type": "integer" },
+        "status": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "actor": { "type": "string" },
+    "change_summary": { "type": "string" }
+  },
+  "additionalProperties": false
+}

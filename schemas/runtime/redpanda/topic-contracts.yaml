@@ -1,0 +1,7 @@
+version: 1
+topics:
+  - name: kernel.agent.profile.lifecycle.v1
+    partitions: 6
+    replication_factor: 3
+    schema_registry_subject: kernel.agent.profile.lifecycle.v1-value
+    value_schema: ./agent-profile-event.schema.json
