@@ -21,7 +21,17 @@ class CognitiveModelRunner:
         """
         Executes a cognitive inference request via LiteLLM.
         """
-        model_path = f"{request_payload.get('provider', 'openai')}/{request_payload.get('model', 'gpt-4o')}"
+        provider = request_payload.get('provider', 'openai')
+        model = request_payload.get('model', 'gpt-4o')
+        
+        # If provider is local (ollama, vllm), LiteLLM uses specific formats
+        if provider in ['ollama', 'vllm', 'local']:
+            model_path = f"{provider}/{model}"
+            # Ensure custom base URL is used if provided in payload
+            if 'api_base' in request_payload:
+                 os.environ[f"{provider.upper()}_API_BASE"] = request_payload['api_base']
+        else:
+            model_path = f"{provider}/{model}" 
         
         system_prompt = self._build_governed_prompt(context)
         
