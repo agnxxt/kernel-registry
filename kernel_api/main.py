@@ -41,7 +41,7 @@ from kernel_engine.model_runner import CognitiveModelRunner
 from kernel_engine.policy_engine import PolicyEngine
 from kernel_engine.learning_loop import LearningLoop
 from kernel_engine.feature_store import CognitiveFeatureStore
-from persistence.models.identity import CanonicalIdentity
+from persistence.models.identity import CanonicalIdentity, RegistryRecord
 from persistence.db import SessionLocal
 
 app = FastAPI(title="Agent Kernel Platform", version="1.0.0")
@@ -196,6 +196,55 @@ async def admin_discover(org_name: str, username: str = Depends(get_current_admi
         "status": "Pending-Admin-Review"
     }
 
+
+
+@app.get("/api/v1/setup/status")
+async def get_setup_status():
+    sk = SecretKernel()
+    return {"initialized": sk.is_initialized()}
+
+@app.post("/api/v1/setup/init")
+async def initialize_kernel(data: Dict[str, Any]):
+    sk = SecretKernel()
+    if sk.is_initialized():
+        raise HTTPException(status_code=400, detail="Kernel already initialized")
+    
+    master_key = data.get("master_key")
+    if not master_key or len(master_key) < 8:
+        raise HTTPException(status_code=400, detail="Master key must be at least 8 characters")
+
+    # 1. Initialize with the new key
+    new_sk = SecretKernel(provided_key=master_key)
+    
+    # 2. Persist the fact that we are initialized (mark the system)
+    with SessionLocal() as session:
+        marker = RegistryRecord(
+            canonical_id="cid:kernel:system",
+            record_type="system_config",
+            status="active",
+            source="kernel:setup",
+            attributes={"initialized_at": datetime.utcnow().isoformat()}
+        )
+        session.add(marker)
+        
+        # 3. Store any initial secrets provided
+        secrets_data = data.get("secrets", {})
+        for key, val in secrets_data.items():
+            if val:
+                # Store in base64 for now as per SecretKernel._encrypt implementation
+                encrypted = base64.b64encode(val.encode()).decode()
+                record = RegistryRecord(
+                    canonical_id="cid:kernel:system",
+                    record_type="encrypted_secret",
+                    status="active",
+                    source=f"urn:agnxxt:secret:{key}",
+                    attributes={"encrypted_value": encrypted}
+                )
+                session.add(record)
+        
+        session.commit()
+    
+    return {"status": "Initialized"}
 
 @app.get("/api/v1/admin/policies")
 async def get_admin_policies(username: str = Depends(get_current_admin)):
