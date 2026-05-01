@@ -25,6 +25,21 @@ jobs:
           name: kernel-build-metadata
           path: dist/
 
+      - name: Attest build provenance (SLSA)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'dist/*'
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Keyless sign build metadata
+        env:
+          COSIGN_EXPERIMENTAL: 'true'
+        run: |
+          tar -czf dist/kernel-build-metadata.tgz dist/commit.txt dist/build_time_utc.txt
+          cosign sign-blob --yes dist/kernel-build-metadata.tgz --output-signature dist/kernel-build-metadata.sig --output-certificate dist/kernel-build-metadata.pem
+
   publish-note:
     runs-on: ubuntu-latest
     needs: package
