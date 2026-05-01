@@ -38,4 +38,14 @@ jobs:
 
       - name: Docker Compose Lint Placeholder
         run: |
-          echo "Add deploy smoke tests here (k3s/kind or container checks)."
+          docker compose config
+      - name: Install dependencies for testing
+        run: pip install requests pytest uvicorn fastapi pydantic sqlalchemy psycopg2-binary litellm
+
+      - name: Run E2E Smoke Test
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          uvicorn kernel_api.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+          pytest tests/e2e/test_platform_flow.py
+

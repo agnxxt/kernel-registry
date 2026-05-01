@@ -48,7 +48,10 @@ spec:
         - name: OFFLINE_STORE_POSTGRES_USER
           value: kernel
         - name: OFFLINE_STORE_POSTGRES_PASSWORD
-          value: kernelpass
+          valueFrom:
+              secretKeyRef:
+                name: kernel-db-secret
+                key: postgres-password
         - name: AUDIT_TOPIC
           value: kernel.featurestore.audit.v1
         readinessProbe:

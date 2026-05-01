@@ -32,7 +32,10 @@ spec:
             - containerPort: 8000
           env:
             - name: DATABASE_URL
-              value: "postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel"
+              valueFrom:
+                secretKeyRef:
+                  name: kernel-db-secret
+                  key: database-url
             - name: MLFLOW_TRACKING_URI
               value: "http://mlflow:5000"
 ---
