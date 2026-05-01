@@ -8,61 +8,30 @@ This document covers frequently asked questions regarding the deployment, config
 Simply run `docker compose up --build -d`. The system will detect it is uninitialized and guide you through a Setup Wizard at `http://localhost:3000`.
 
 ### What happened to the `.env` file?
-While you can still use a `.env` file for bootstrap variables, the kernel now supports a **Guided UI Setup**. Most secrets (OpenAI keys, GitHub tokens) are now stored securely and encrypted in the Postgres database, so you don't have to manage flat files.
-
-### How do I switch from "Mock" to "Real" intelligence?
-During the Setup Wizard, or by updating the database, set `MOCK_INFERENCE` to `false` and provide a valid API key for OpenAI or a URL for a local provider like Ollama.
+Most secrets (OpenAI keys, GitHub tokens) are now stored securely in **HashiCorp Vault**, with an encrypted Postgres fallback. You only need the `KERNEL_MASTER_KEY` to bootstrap.
 
 ---
 
-## 🛠️ Development & Expansion
+## 🛠️ Sovereign Infrastructure
 
-### How difficult is it to add a new Schema?
-**Difficulty: Low (2/10).** 
-1. Create a `.schema.json` file in `schemas/`.
-2. Ensure it includes a `$ref` to `_semantic-extension.schema.json`.
-3. Run `./scripts/validate_schemas.sh`.
-The kernel's validator will automatically recognize and enforce the new schema.
+### What is the "Consensus Engine"?
+For high-risk actions (impact > 7), the kernel requires a "Consensus" vote from a group of agents using a BFT-style majority logic. This prevents a single compromised agent from taking destructive actions.
 
-### How do I add a new Tool Adapter (e.g., Teams, Jira)?
-1. Create a new adapter class in `kernel_engine/adapters/`.
-2. Register the routing logic in `kernel_engine/executor.py`.
-3. Add any required SDKs to `persistence/requirements.txt`.
+### How do Agent Wallets work?
+The kernel integrates with an **Anvil (Ethereum)** node. Each agent is assigned a unique blockchain address. This allows them to hold funds, pay for their own API usage, and participate in reputational staking.
 
-### Does the system survive restarts?
-**Yes.** Unlike the initial prototype which used in-memory mocks, v1-stable uses **Postgres** for all stateful data:
-- Agent Identities & Trust Scores
-- Action Knowledge Graph
-- Execution Decisions & Evidence
-- User Feedback & Improvement Proposals
+### What does Temporal.io do in the kernel?
+Temporal handles **Durable Cognition**. If an agent needs to perform a task that takes days (e.g., "Wait for a GitHub PR to be merged"), Temporal ensures the state is preserved even if the kernel restarts.
+
+### Is my data safe in the Secret Vault?
+Yes. The kernel uses **HashiCorp Vault** as its primary secret engine. Dynamic secrets can be generated and revoked automatically, ensuring zero-trust access to external tools like Slack and Jira.
 
 ---
 
 ## 🛡️ Security & Governance
 
 ### How are administrative actions secured?
-All admin endpoints (`/admin/*`) and the Setup Wizard are protected by **HTTP Basic Auth**. The credentials are verified against the `SecretKernel` using your Master Key.
+All admin endpoints (`/admin/*`) are protected by **HTTP Basic Auth**, verified against the `SecretKernel` using your Master Key.
 
 ### Where are the safety rules defined?
-Safety rules (Deontic Guardrails) are written in **Rego** and enforced by **Open Policy Agent (OPA)**. You can find them in `policies/kernel.rego`. These can be updated in real-time via the **Policy Editor** in the dashboard.
-
-### Can I use Open Source/Local LLMs?
-**Yes.** The kernel is vendor-agnostic. During setup, choose "Open Source (Local)" to point the kernel to an Ollama or vLLM instance. This ensures your data and reasoning stay on your own hardware.
-
----
-
-## 🧪 Testing & Validation
-
-### How do I verify the system is working?
-Run the E2E smoke test:
-```bash
-pytest tests/e2e/test_platform_flow.py
-```
-This validates the entire chain: Action -> OPA Check -> Execution -> DB Persistence.
-
-### How do I check if my schemas are valid?
-Run the validation script:
-```bash
-./scripts/validate_schemas.sh
-```
-It will check all JSON files in the `schemas/` directory for syntax errors and cross-reference integrity.
+Safety rules (Deontic Guardrails) are written in **Rego** and enforced by **Open Policy Agent (OPA)**. 

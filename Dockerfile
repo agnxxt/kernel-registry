@@ -6,13 +6,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install system dependencies if any are needed (like curl for uvicorn etc, but keeping it minimal)
-RUN apt-get update && apt-get install -y --no-install-recommends bash && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends bash build-essential && rm -rf /var/lib/apt/lists/*
 
 COPY persistence/requirements.txt /app/persistence/requirements.txt
-RUN pip install --no-cache-dir -r /app/persistence/requirements.txt uvicorn fastapi pydantic
+RUN pip install --no-cache-dir -r /app/persistence/requirements.txt
 
 COPY . /app
 
-# Start the API server using Uvicorn
+# Default command (overridden in compose for consensus)
 CMD ["uvicorn", "kernel_api.main:app", "--host", "0.0.0.0", "--port", "8000"]

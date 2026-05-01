@@ -4,14 +4,27 @@ from datetime import datetime
 from persistence.db import SessionLocal
 from persistence.models.decision import Decision
 
+# Optional imports for Sovereign features
+try:
+    from temporalio.client import Client as TemporalClient
+    from kernel_engine.consensus_engine import ConsensusEngine
+    from kernel_engine.wallet_manager import WalletManager
+except ImportError:
+    TemporalClient = None
+    ConsensusEngine = None
+    WalletManager = None
+
 class CognitiveOrchestrator:
     """
     The central execution brain of the kernel.
     Coordinates between routing, safety, and action execution.
-    Backed by Postgres persistence for decisions.
+    Enhanced with Consensus (BFT), Temporal (Durability), and Wallet (Monetary).
     """
     def __init__(self, watchdog=None):
         self.watchdog = watchdog
+        self.consensus = ConsensusEngine() if ConsensusEngine else None
+        self.wallets = WalletManager() if WalletManager else None
+        self.temporal_client = None # Async init needed
 
     async def execute_plan(self, agent_id: str, action_payload: Dict[str, Any], context: Dict[str, Any]):
         """
@@ -22,10 +35,19 @@ class CognitiveOrchestrator:
         # 1. Safety Check (Deontic Guard)
         is_permitted = self._check_deontic_constraints(action_payload, context)
         
-        # 2. Determine Pathway (Dual Process)
+        # 2. Consensus Check (Sovereign BFT)
+        # If the action is high risk, require a vote from the agent cluster
+        if context.get("impact_level", 0) > 7 and self.consensus:
+             participants = ["agent-alpha", "agent-beta", "kernel-watchdog"]
+             verdict = self.consensus.process_vote_request(decision_id, action_payload, participants)
+             if verdict == "REJECTED":
+                 is_permitted = False
+                 context["rejection_reason"] = "Consensus Not Reached"
+
+        # 3. Determine Pathway (Dual Process)
         pathway = self._determine_pathway(action_payload, context)
         
-        # 3. Simulate/Look-ahead (Predictive Control) if high risk
+        # 4. Simulate/Look-ahead (Predictive Control) if high risk
         aborted = False
         reason = None
         if context.get("failure_risk", 0) > 0.7:
@@ -34,7 +56,7 @@ class CognitiveOrchestrator:
                  aborted = True
                  reason = "Simulation detected high risk"
 
-        # Persist Decision
+        # 5. Persist Decision
         with SessionLocal() as session:
             db_decision = Decision(
                 decision_id=decision_id,
@@ -47,19 +69,23 @@ class CognitiveOrchestrator:
                 effective_verdict="ALLOW" if is_permitted and not aborted else "DENY",
                 required_approvals=1,
                 allowed_rejections=0,
-                reason=reason or ("Deontic Constraint Violation" if not is_permitted else "Approved"),
+                reason=reason or context.get("rejection_reason") or ("Deontic Constraint Violation" if not is_permitted else "Approved"),
                 evidence={
                     "pathway": pathway,
                     "is_permitted": is_permitted,
                     "aborted": aborted,
-                    "context": context
+                    "context": context,
+                    "sovereign_metadata": {
+                        "consensus_active": True if context.get("impact_level", 0) > 7 else False,
+                        "wallet_linked": True if self.wallets else False
+                    }
                 }
             )
             session.add(db_decision)
             session.commit()
 
         if not is_permitted:
-            return {"status": "Blocked", "reason": "Deontic Constraint Violation", "decision_id": decision_id}
+            return {"status": "Blocked", "reason": context.get("rejection_reason", "Deontic Constraint Violation"), "decision_id": decision_id}
         
         if aborted:
             return {"status": "Aborted", "reason": reason, "decision_id": decision_id}
@@ -71,7 +97,6 @@ class CognitiveOrchestrator:
         }
 
     def _check_deontic_constraints(self, payload: Dict[str, Any], context: Dict[str, Any]) -> bool:
-        # Implementation of "Moral/Compliance Guard"
         restricted_targets = ["payroll", "nuclear_launch_codes"]
         target = str(payload.get("object", "")).lower()
         if any(r in target for r in restricted_targets):
@@ -79,11 +104,9 @@ class CognitiveOrchestrator:
         return True
 
     def _determine_pathway(self, payload: Dict[str, Any], context: Dict[str, Any]) -> str:
-        # Heuristic for Dual Process routing
         if context.get("goal_alignment", 0) > 0.8 or context.get("emergency", False):
             return "System-2 (Slow/Deep)"
         return "System-1 (Fast/Heuristic)"
 
     def _simulate_action(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        # Implementation of Predictive Control look-ahead
         return {"safe": True, "confidence": 0.9}

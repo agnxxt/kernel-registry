@@ -89,6 +89,60 @@ services:
       postgres:
         condition: service_healthy
 
+
+  vault:
+    image: hashicorp/vault:latest
+    container_name: agent-kernel-vault
+    ports:
+      - "8200:8200"
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=root
+      - VAULT_ADDR=http://0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+
+  temporal:
+    image: temporalio/auto-setup:1.22.4
+    container_name: agent-kernel-temporal
+    ports:
+      - "7233:7233"
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=kernel
+      - POSTGRES_PWD=kernelpass
+      - POSTGRES_SEEDS=postgres
+      - SKIP_DB_CREATE=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  temporal-ui:
+    image: temporalio/ui:2.21.3
+    container_name: agent-kernel-temporal-ui
+    ports:
+      - "8080:8080"
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+
+  blockchain:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: agent-kernel-chain
+    command: anvil --host 0.0.0.0
+    ports:
+      - "8545:8545"
+
+  consensus:
+    build:
+      context: .
+    container_name: agent-kernel-consensus
+    command: python -m kernel_engine.consensus_engine
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=redpanda:9092
+    depends_on:
+      redpanda:
+        condition: service_started
+
   kernel-api:
     build:
       context: .
