@@ -20,9 +20,13 @@ spec:
         app: feast-kernel
     spec:
       serviceAccountName: feast-kernel
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: feast-kernel
         image: ghcr.io/agnxxt/feast-kernel:0.1.0
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 7081
           name: grpc
@@ -59,6 +63,35 @@ spec:
           tcpSocket:
             port: grpc
           initialDelaySeconds: 20
+        startupProbe:
+          tcpSocket:
+            port: grpc
+          failureThreshold: 30
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: feast-kernel
+  namespace: agent-kernel
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: feast-kernel
 ---
 apiVersion: v1
 kind: Service
