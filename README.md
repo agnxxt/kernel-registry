@@ -10,72 +10,74 @@ Framework/model/cloud-agnostic kernel contracts and runtime scaffolding for:
 - secret management
 - persistence + migrations
 
-## Single-Command Guided Walkthrough
-
-Run one command to get a guided, step-by-step deployment/validation flow:
+## Quickstart (Recommended)
+Use the guided runner for a consistent, one-command setup:
 
 ```bash
 ./ops/guided-walkthrough.sh --mode local
 ```
 
-What the guide does:
-- Explains each step before execution.
-- Runs contract validation first.
-- Proceeds through local (Docker Compose) or Kubernetes deployment flow.
-- Optionally runs migrations and E2E smoke checks.
+Why this is recommended:
+- Executes steps in safe order (validate -> start -> migrate -> smoke).
+- Explains each step as it runs.
+- Supports local and Kubernetes paths with the same interface.
 
-Options and meaning:
-- `--mode local|k8s`: choose execution target.
-  - `local`: starts Docker Compose stack and runs local operational checks.
-  - `k8s`: applies production Kubernetes manifests and hardening resources.
-- `--validate-only`: run only schema/proto validation and stop.
-- `--skip-migrations`: skip Alembic upgrades (local mode only).
-- `--skip-smoke`: skip endpoint smoke validation.
-- `-h, --help`: print option help with examples.
+### Guided options
+- `--mode local|k8s`
+  - `local`: Docker Compose lifecycle (dev/test).
+  - `k8s`: Kubernetes manifest apply flow (production-style).
+- `--validate-only`: run contract checks only.
+- `--skip-migrations`: skip Alembic upgrade (local mode).
+- `--skip-smoke`: skip endpoint smoke checks.
+- `-h, --help`: print usage and examples.
 
 Examples:
 ```bash
-# Full local guided setup + validation
+# Full local bring-up and validation
 ./ops/guided-walkthrough.sh --mode local
 
-# Production-style manifest apply walkthrough
+# Kubernetes apply walkthrough without endpoint smoke
 ./ops/guided-walkthrough.sh --mode k8s --skip-smoke
 
-# Fast contract-only check
+# Contracts-only validation
 ./ops/guided-walkthrough.sh --validate-only
 ```
 
-## Production Quickstart
+## Manual Commands (Advanced / Non-guided)
+Use this only if you need explicit step control.
+
 Prerequisites:
 - Docker + Docker Compose
 - Git
 
-Run local baseline:
 ```bash
 git clone https://github.com/agnxxt/kernel-registry.git
 cd kernel-registry
+
+# Start local baseline
 docker compose up --build -d
-```
 
-Validate contracts:
-```bash
+# Validate contracts
 docker compose exec kernel-tooling bash -lc "./scripts/validate_schemas.sh && ./scripts/validate_proto.sh"
-```
 
-Run DB migrations:
-```bash
+# Run DB migrations
 docker compose exec kernel-tooling alembic -c persistence/alembic.ini upgrade head
-```
 
-Run end-to-end smoke test:
-```bash
+# Run endpoint smoke test
 ./ops/e2e-smoke.sh
-```
 
-Stop stack:
-```bash
+# Stop stack
 docker compose down
 ```
+
+## Quick Troubleshooting
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| `docker: command not found` | Docker is not installed/running | Install Docker Desktop/Engine and verify with `docker --version`. |
+| `./ops/e2e-smoke.sh` fails with connection refused | Services are not started or not healthy yet | Run `docker compose ps`, wait for healthy services, then re-run smoke test. |
+| `kubectl: command not found` | Kubernetes CLI is missing | Install `kubectl`, verify with `kubectl version --client`. |
+| `Error from server (Forbidden)` on k8s apply | RBAC/namespace permissions insufficient | Use a context with apply rights for target namespace(s). |
+| Migration command fails | DB container/tooling container not ready | Check `docker compose logs`, then retry migration step. |
 
 ## Repo Layout
 - `schemas/` protocol contracts (JSON Schema + proto)
@@ -115,21 +117,10 @@ Runtime targets:
 - Local Docker Compose for development and validation
 - Kubernetes manifests in `deploy/k8s/` for cluster deployment
 
-## Deployment
+## Deployment (Kubernetes Manual)
 
 The Agent Kernel Platform is designed for multi-cloud and hybrid environments.
 
-### 1. Docker Compose (Quickstart)
-Ideal for local testing and simulation.
-```bash
-docker compose up --build
-```
-*   **Kernel API**: http://localhost:8000
-*   **Visual Control Plane**: http://localhost:3000
-*   **MLflow Audit**: http://localhost:5000
-
-### 2. Kubernetes (Production)
-For distributed, high-availability deployments.
 ```bash
 # Apply the core platform manifests
 kubectl apply -f deploy/k8s/kernel-platform.yaml
@@ -149,4 +140,3 @@ This kernel implements state-of-the-art AI reliability frameworks:
 - **Epistemic Trust**: Dynamic credibility weighting.
 - **Intelligent Authentication**: Reasoning-based access control.
 - **Universal Schema**: Native Schema.org + JSON-LD interoperability.
-
