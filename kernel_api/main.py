@@ -176,7 +176,30 @@ async def post_feedback(action_id: str, feedback_data: Dict[str, Any]):
     result = learning.capture_feedback(action_id, feedback_data)
     return result
 
-@app.get("/api/v1/identity/{agent_id}")
+
+@app.get("/api/v1/identity/{agent_id}/did")
+async def get_agent_did(agent_id: str):
+    """
+    Returns the Decentralized Identifier (DID) and DDO for an agent.
+    """
+    with SessionLocal() as session:
+        identity = session.query(CanonicalIdentity).filter(
+            (CanonicalIdentity.canonical_id == agent_id) | 
+            (CanonicalIdentity.subject_ref == agent_id)
+        ).first()
+        
+        if not identity or not identity.did:
+            raise HTTPException(status_code=404, detail="DID not found for agent")
+            
+        from kernel_engine.did_manager import AgentDidManager
+        dm = AgentDidManager()
+        ddo = dm.create_did_document(agent_id, identity.did)
+        
+        return {
+            "did": identity.did,
+            "document": ddo
+        }
+\n@app.get("/api/v1/identity/{agent_id}")
 async def get_agent_identity(agent_id: str):
     return {
         "agent_id": agent_id,

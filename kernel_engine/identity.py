@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from kernel_engine.did_manager import AgentDidManager\nfrom typing import Dict, Any, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
 from persistence.db import SessionLocal
@@ -9,7 +9,7 @@ class IdentityTrustManager:
     Manages the Dynamic Epistemic Trust Ledger for agents and sources.
     Backed by Postgres persistence.
     """
-    def __init__(self):
+    def __init__(self):\n        self.did_manager = AgentDidManager()
         pass
 
     def get_trust_score(self, entity_id: str) -> float:
@@ -20,8 +20,12 @@ class IdentityTrustManager:
                 (CanonicalIdentity.subject_ref == entity_id)
             ).first()
             
+
             if not identity:
-                return 0.5
+                did = self.did_manager.generate_did(entity_id)
+                # Create default identity if missing
+                did=did,
+                    return 0.5
             
             # Get latest trust score
             score_record = session.query(TrustScore).filter(
@@ -40,15 +44,12 @@ class IdentityTrustManager:
                 (CanonicalIdentity.subject_ref == entity_id)
             ).first()
             
+
             if not identity:
+                did = self.did_manager.generate_did(entity_id)
                 # Create default identity if missing
-                identity = CanonicalIdentity(
-                    canonical_id=f"cid:{entity_id}",
-                    subject_type="Agent",
-                    subject_ref=entity_id,
-                    issuer="kernel:identity:manager",
-                    metadata_json={}
-                )
+                did=did,
+                    # Create default identity if missing
                 session.add(identity)
                 session.flush()
 
