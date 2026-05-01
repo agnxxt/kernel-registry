@@ -1,4 +1,4 @@
-from kernel_engine.authz_caas.caas_gateway import CaasGateway\nimport os
+from kernel_engine.lifecycle_engine import LifecycleEngine\nfrom kernel_engine.authz_caas.caas_gateway import CaasGateway\nimport os
 from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Dict, Any, List
@@ -66,7 +66,7 @@ model_runner = CognitiveModelRunner()
 secrets = SecretKernel()
 # policies = PolicyEngine() # Wrapped in CAAS
 learning = LearningLoop(tracker=tracker)
-feature_store = CognitiveFeatureStore()\ncaas = CaasGateway()
+feature_store = CognitiveFeatureStore()\ncaas = CaasGateway()\nlifecycle = LifecycleEngine()
 
 # Telemetry WebSockets
 class ConnectionManager:
@@ -289,6 +289,30 @@ async def caas_audit(agent_id: str, action: Dict[str, Any], context: Dict[str, A
     CAAS: Audits an agent's intended action for cognitive drift.
     """
     return caas.authorize_action(agent_id, action, context)
+\n
+@app.post("/api/v1/lifecycle/provision")
+async def provision_agent(spec: Dict[str, Any], username: str = Depends(get_current_admin)):
+    """
+    Industrial Lifecycle: Provision a new agent (Birth/Joiner).
+    """
+    agent_id = lifecycle.provision_agent(spec)
+    return {"agent_id": agent_id, "status": "PROVISIONING"}
+
+@app.post("/api/v1/lifecycle/activate/{agent_id}")
+async def activate_agent(agent_id: str, username: str = Depends(get_current_admin)):
+    """
+    Industrial Lifecycle: Move agent to production (Activation).
+    """
+    lifecycle.activate_agent(agent_id)
+    return {"status": "ACTIVE"}
+
+@app.post("/api/v1/lifecycle/decommission/{agent_id}")
+async def decommission_agent(agent_id: str, username: str = Depends(get_current_admin)):
+    """
+    Industrial Lifecycle: Revoke and retire agent (Death/Leaver).
+    """
+    lifecycle.decommission_agent(agent_id)
+    return {"status": "REVOKED"}
 \n@app.get("/api/v1/admin/policies")
 async def get_admin_policies(username: str = Depends(get_current_admin)):
     policy_path = os.getenv("POLICY_PATH", "config/policies.json")

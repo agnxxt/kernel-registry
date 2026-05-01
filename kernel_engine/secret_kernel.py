@@ -4,7 +4,7 @@ import base64
 import os
 from typing import Dict, Any, Optional
 from persistence.db import SessionLocal
-from persistence.models.identity import RegistryRecord
+from persistence.models.identity import RegistryRecord\nfrom persistence.models.artifact import RuntimeArtifact
 
 # Optional import for enterprise vault
 try:
@@ -41,14 +41,26 @@ class SecretKernel:
             ).first()
             return record is not None
 
-    def get_secret(self, secret_id: str) -> Optional[str]:
+
+    def get_secret(self, secret_id: str, agent_id: Optional[str] = None) -> Optional[str]:
+        """
+        Retrieves a secret with multi-tier fallback.
+        ENFORCES JIT (Just-In-Time) provisioning: only ACTIVE agents can access tool secrets.
+        """
+        if agent_id and "secret:" in secret_id:
+            with SessionLocal() as session:
+                agent = session.query(RuntimeArtifact).filter_by(artifact_id=agent_id).first()
+                if not agent or agent.lifecycle_state != "ACTIVE":
+                    print(f"JIT BLOCKED: Agent {agent_id} is not ACTIVE.")
+                    return None
+
         """
         Retrieves a secret with multi-tier fallback:
         1. Vault (KV Engine)
         2. Environment Variables
         3. Encrypted DB Registry
         """
-        # Tier 1: HashiCorp Vault
+        # Tier 1: HashiCorp Vault\n        
         if self.vault_client and self.vault_client.is_authenticated():
             try:
                 read_response = self.vault_client.secrets.kv.v2.read_secret_version(path=secret_id)
