@@ -20,9 +20,13 @@ spec:
         app: model-runner-kernel
     spec:
       serviceAccountName: model-runner-kernel
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: model-runner-kernel
         image: ghcr.io/agnxxt/model-runner-kernel:0.1.0
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 7091
           name: grpc
@@ -45,6 +49,24 @@ spec:
           tcpSocket:
             port: grpc
           initialDelaySeconds: 20
+        startupProbe:
+          tcpSocket:
+            port: grpc
+          failureThreshold: 30
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
 ---
 apiVersion: v1
 kind: Service
@@ -58,3 +80,15 @@ spec:
   - name: grpc
     port: 7091
     targetPort: 7091
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: model-runner-kernel
+  namespace: agent-kernel
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: model-runner-kernel

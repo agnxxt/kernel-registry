@@ -51,3 +51,11 @@ Design goals:
 - explicit lifecycle and environment state
 - policy, security, and SLO metadata at artifact level
 - extensible `spec` and `metadata` fields for provider-specific details
+
+
+## Agent Lifecycle & Registry Profile
+Added contracts for Entra-style agent lifecycle management:
+- `agent-profile.schema.json`: canonical profile record with attributes, relations, state fields, approvals, and version-control metadata.
+- `redpanda/agent-profile-event.schema.json`: lifecycle transition events for workflow and audit.
+- `redpanda/topic-contracts.yaml`: topic wiring for schema registry subject mapping.
+- `agent_lifecycle.proto`: protobuf messages for profile and lifecycle events.

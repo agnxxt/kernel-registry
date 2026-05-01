@@ -1,10 +1,16 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: action-adapters
+  namespace: agent-kernel
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: action-adapters
   namespace: agent-kernel
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: action-adapters
@@ -13,9 +19,14 @@ spec:
       labels:
         app: action-adapters
     spec:
+      serviceAccountName: action-adapters
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: action-adapters
         image: ghcr.io/agnxxt/action-adapters:0.1.0
+        imagePullPolicy: IfNotPresent
         env:
         - name: ENABLED_ADAPTERS
           value: git,docker,caddy
@@ -26,6 +37,43 @@ spec:
         ports:
         - containerPort: 7101
           name: grpc
+        readinessProbe:
+          tcpSocket:
+            port: grpc
+          initialDelaySeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: grpc
+          initialDelaySeconds: 20
+        startupProbe:
+          tcpSocket:
+            port: grpc
+          failureThreshold: 30
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          capabilities:
+            drop: ["ALL"]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: action-adapters
+  namespace: agent-kernel
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: action-adapters
 ---
 apiVersion: v1
 kind: Service

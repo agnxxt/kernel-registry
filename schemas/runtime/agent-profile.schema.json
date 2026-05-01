@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/agnxxt/kernel-registry/schemas/runtime/agent-profile.schema.json",
+  "title": "AgentProfileRegistryRecord",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "profile_version",
+    "schema_version",
+    "lifecycle_state",
+    "approval",
+    "attributes",
+    "relations",
+    "state_fields",
+    "timestamps"
+  ],
+  "properties": {
+    "agent_id": { "type": "string", "pattern": "^[a-zA-Z0-9._:-]{3,128}$" },
+    "tenant_id": { "type": "string" },
+    "schema_version": { "type": "string", "const": "1.0.0" },
+    "profile_version": { "type": "string", "description": "Semantic version for profile snapshot." },
+    "version_control": {
+      "type": "object",
+      "required": ["strategy", "revision", "change_reason"],
+      "properties": {
+        "strategy": { "type": "string", "enum": ["semver", "calendar", "git-sha"] },
+        "revision": { "type": "string" },
+        "previous_revision": { "type": "string" },
+        "change_reason": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": ["draft", "submitted", "under_review", "approved", "active", "suspended", "deprecated", "retired"]
+    },
+    "approval": {
+      "type": "object",
+      "required": ["approval_required", "required_approvals", "current_approvals", "status"],
+      "properties": {
+        "approval_required": { "type": "boolean" },
+        "required_approvals": { "type": "integer", "minimum": 0 },
+        "current_approvals": { "type": "integer", "minimum": 0 },
+        "status": { "type": "string", "enum": ["not_required", "pending", "approved", "rejected"] },
+        "approvers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["principal_id", "decision", "timestamp"],
+            "properties": {
+              "principal_id": { "type": "string" },
+              "decision": { "type": "string", "enum": ["approve", "reject", "abstain"] },
+              "comment": { "type": "string" },
+              "timestamp": { "type": "string", "format": "date-time" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "attributes": {
+      "type": "object",
+      "required": ["name", "description", "owner", "risk_tier", "capabilities", "policy_bindings"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "owner": { "type": "string" },
+        "risk_tier": { "type": "string", "enum": ["low", "moderate", "high", "critical"] },
+        "capabilities": { "type": "array", "items": { "type": "string" } },
+        "policy_bindings": { "type": "array", "items": { "type": "string" } },
+        "model_refs": { "type": "array", "items": { "type": "string" } },
+        "tool_refs": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["relation_type", "target_id"],
+        "properties": {
+          "relation_type": { "type": "string", "enum": ["managed_by", "depends_on", "delegates_to", "member_of", "approved_by"] },
+          "target_id": { "type": "string" },
+          "metadata": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "state_fields": {
+      "type": "object",
+      "required": ["enabled", "health_status", "compliance_status"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "health_status": { "type": "string", "enum": ["unknown", "healthy", "degraded", "unhealthy"] },
+        "compliance_status": { "type": "string", "enum": ["unknown", "compliant", "non_compliant", "waived"] },
+        "last_validation_result": { "type": "string" },
+        "drift_score": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "timestamps": {
+      "type": "object",
+      "required": ["created_at", "updated_at"],
+      "properties": {
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "approved_at": { "type": "string", "format": "date-time" },
+        "activated_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

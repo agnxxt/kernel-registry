@@ -12,6 +12,7 @@
 - [ ] Restore drill documented and tested
 
 ## Reliability
+- [ ] E2E smoke test included in release validation
 - [ ] Retry + timeout + circuit-breaker defaults documented
 - [ ] DLQ topics configured for async pipelines
 - [ ] Idempotency keys required on mutating APIs

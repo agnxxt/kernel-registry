@@ -1,0 +1,49 @@
+syntax = "proto3";
+package kernel.runtime;
+
+message ApprovalStatus {
+  bool approval_required = 1;
+  int32 required_approvals = 2;
+  int32 current_approvals = 3;
+  string status = 4;
+}
+
+message Relation {
+  string relation_type = 1;
+  string target_id = 2;
+  map<string, string> metadata = 3;
+}
+
+message StateFields {
+  bool enabled = 1;
+  string health_status = 2;
+  string compliance_status = 3;
+  string last_validation_result = 4;
+  double drift_score = 5;
+}
+
+message AgentProfileRecord {
+  string agent_id = 1;
+  string tenant_id = 2;
+  string schema_version = 3;
+  string profile_version = 4;
+  string lifecycle_state = 5;
+  ApprovalStatus approval = 6;
+  repeated string capabilities = 7;
+  repeated Relation relations = 8;
+  StateFields state_fields = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+message LifecycleEvent {
+  string event_id = 1;
+  string event_type = 2;
+  string event_time = 3;
+  string agent_id = 4;
+  string profile_version = 5;
+  string from_state = 6;
+  string to_state = 7;
+  string actor = 8;
+  string change_summary = 9;
+}
