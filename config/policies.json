@@ -1,0 +1,15 @@
+{
+  "global_policies": {
+    "no_cross_jurisdiction_transfer": true,
+    "requires_mfa_for_master_push": true,
+    "max_token_per_action": 10000,
+    "restricted_objects": ["payroll", "nuclear_launch_codes", "unauthorized_data"]
+  },
+  "deontic_guardrails": [
+    {
+      "condition": "weather == 'Raining' and 'walk' in action_string",
+      "action": "DENY",
+      "reason": "Safety Violation: Walking prohibited in rain."
+    }
+  ]
+}

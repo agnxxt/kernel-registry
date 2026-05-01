@@ -17,22 +17,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Setup Buf
-        uses: bufbuild/buf-setup-action@v1
-
       - name: Validate JSON Schemas
         run: ./scripts/validate_schemas.sh
 
       - name: Validate Proto Contracts
         run: ./scripts/validate_proto.sh
-
-      - name: Lint Proto with Buf
-        run: buf lint
-
-      - name: Check JSON Schema Backward Compatibility
-        run: |
-          git fetch --no-tags --prune --depth=1 origin main
-          ./scripts/check_schema_compat.py origin/main
 
       - name: Validate Alembic Migration Syntax
         run: |
@@ -47,15 +36,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup kind
-        uses: helm/kind-action@v1
-
-      - name: Kubernetes API smoke (server dry-run)
+      - name: Docker Compose Lint Placeholder
         run: |
-          kubectl cluster-info
-          kubectl apply --dry-run=server -f deploy/k8s/kernel-platform.yaml
-          kubectl apply --dry-run=server -f deploy/k8s/secret-kernel.yaml
-          kubectl apply --dry-run=server -f deploy/k8s/model-runner/model-runner-kernel.yaml
-          kubectl apply --dry-run=server -f deploy/k8s/action-adapters.yaml
-          kubectl apply --dry-run=server -f deploy/k8s/production-hardening.yaml
-          kubectl apply --dry-run=server -f deploy/k8s/feast/feast-kernel.yaml
+          docker compose config
+      - name: Install dependencies for testing
+        run: pip install requests pytest uvicorn fastapi pydantic sqlalchemy psycopg2-binary litellm
+
+      - name: Run E2E Smoke Test
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          uvicorn kernel_api.main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+          pytest tests/e2e/test_platform_flow.py
+

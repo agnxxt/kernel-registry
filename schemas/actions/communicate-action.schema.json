@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/agnxxt/agent-kernel/schemas/actions/communicate-action.schema.json",
+  "title": "CommunicateAction",
+  "description": "Represents an action where an agent communicates with another agent, system, or human.",
+  "type": "object",
+  "required": ["@context", "@type", "agent", "recipient", "message"],
+  "properties": {
+    "@context": {
+      "type": "string",
+      "const": "https://schema.org"
+    },
+    "@type": {
+      "type": "string",
+      "const": "CommunicateAction"
+    },
+    "agent": {
+      "type": "object",
+      "required": ["@type", "name", "identifier"],
+      "properties": {
+        "@type": { "type": "string", "const": "SoftwareApplication" },
+        "name": { "type": "string" },
+        "identifier": { "type": "string" }
+      }
+    },
+    "recipient": {
+      "type": "object",
+      "required": ["@type", "identifier"],
+      "properties": {
+        "@type": { "type": "string", "enum": ["SoftwareApplication", "Person", "Organization", "Audience"] },
+        "name": { "type": "string" },
+        "identifier": { "type": "string" }
+      }
+    },
+    "message": {
+      "type": "object",
+      "required": ["@type", "text"],
+      "properties": {
+        "@type": { "type": "string", "const": "Message" },
+        "text": { "type": "string" },
+        "about": { "type": "string" }
+      }
+    },
+    "attributes": {
+      "type": "object",
+      "properties": {
+        "negotiation_protocol": { "type": "string" },
+        "batna": { "type": "string" }
+      }
+    },
+    "gossip_payload": {
+      "$ref": "../protocol/gossip-protocol.schema.json"
+    },
+    "taxonomy": {
+      "type": "object",
+      "properties": {
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

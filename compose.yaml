@@ -1,23 +1,12 @@
 services:
-  caddy:
-    image: caddy:2.8-alpine
-    container_name: agent-kernel-caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-    depends_on:
-      - kernel-api
-      - kernel-ui
-
+  # --- INFRASTRUCTURE LAYER ---
   postgres:
     image: postgres:16-alpine
     container_name: agent-kernel-postgres
     environment:
       POSTGRES_DB: kernel
       POSTGRES_USER: kernel
-      POSTGRES_PASSWORD: kernelpass
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kernelpass}
     ports:
       - "5432:5432"
     volumes:
@@ -27,6 +16,118 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.1.1
+    container_name: agent-kernel-bus
+    command:
+      - redpanda start
+      - --overprovisioned
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --node-id 0
+      - --check=false
+      - --kafka-addr PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      - --advertise-kafka-addr PLAINTEXT://redpanda:9092,OUTSIDE://localhost:9094
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9644/metrics || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    container_name: agent-kernel-bus-ui
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+    ports:
+      - "8081:8080"
+    depends_on:
+      - redpanda
+
+  vault:
+    image: hashicorp/vault:latest
+    container_name: agent-kernel-vault
+    ports:
+      - "8200:8200"
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=root
+      - VAULT_ADDR=http://0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+
+  # --- GOVERNANCE LAYER ---
+  openfga:
+    image: openfga/openfga:latest
+    container_name: agent-kernel-authz
+    command: run
+    environment:
+      - OPENFGA_DATA_STORE_ENGINE=postgres
+      - OPENFGA_DATA_STORE_URI=postgres://kernel:kernelpass@postgres:5432/kernel?sslmode=disable
+    ports:
+      - "8082:8081"
+      - "8083:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  opa:
+    image: openpolicyagent/opa:latest
+    container_name: agent-kernel-opa
+    ports:
+      - "8181:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--log-level=debug"
+      - "/policies"
+    volumes:
+      - ./policies:/policies:ro
+
+  # --- COGNITION & OPERATIONS LAYER ---
+  temporal:
+    image: temporalio/auto-setup:1.22.4
+    container_name: agent-kernel-temporal
+    ports:
+      - "7233:7233"
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=kernel
+      - POSTGRES_PWD=kernelpass
+      - POSTGRES_SEEDS=postgres
+      - SKIP_DB_CREATE=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  temporal-ui:
+    image: temporalio/ui:2.21.3
+    container_name: agent-kernel-temporal-ui
+    ports:
+      - "8084:8080"
+    environment:
+      - TEMPORAL_ADDRESS: temporal:7233
+
+  blockchain:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: agent-kernel-chain
+    command: anvil --host 0.0.0.0
+    ports:
+      - "8545:8545"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: agent-kernel-audit-jaeger
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.20.1
@@ -39,6 +140,7 @@ services:
     volumes:
       - mlflow_data:/mlflow
 
+  # --- KERNEL CORE SERVICES ---
   kernel-api:
     build:
       context: .
@@ -46,13 +148,42 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel}
       MLFLOW_TRACKING_URI: http://mlflow:5000
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      VAULT_ADDR: http://vault:8200
+      FGA_API_URL: http://openfga:8081
     depends_on:
       postgres:
         condition: service_healthy
-      mlflow:
-        condition: service_started
+      redpanda:
+        condition: service_healthy
+
+  watchdog-responder:
+    build:
+      context: .
+    container_name: agent-kernel-watchdog
+    command: python -m kernel_engine.cyber_cai.watchdog_responder
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=redpanda:9092
+      - DATABASE_URL=postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel
+    depends_on:
+      redpanda:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  consensus-engine:
+    build:
+      context: .
+    container_name: agent-kernel-consensus
+    command: python -m kernel_engine.consensus_engine
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=redpanda:9092
+    depends_on:
+      redpanda:
+        condition: service_healthy
 
   kernel-ui:
     build:

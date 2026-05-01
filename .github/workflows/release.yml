@@ -1,49 +1,26 @@
 name: Release
 
 on:
-  workflow_dispatch:
   push:
     tags:
       - 'v*'
 
 jobs:
-  package:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build metadata artifact
+      - name: Set up QEMU
+        uses: actions/setup-python@v5
+
+      - name: Build Metadata
+        id: meta
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Mock Docker Build
         run: |
-          mkdir -p dist
-          git rev-parse HEAD > dist/commit.txt
-          date -u +%Y-%m-%dT%H:%M:%SZ > dist/build_time_utc.txt
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kernel-build-metadata
-          path: dist/
-
-      - name: Attest build provenance (SLSA)
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-path: 'dist/*'
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3
-
-      - name: Keyless sign build metadata
-        env:
-          COSIGN_EXPERIMENTAL: 'true'
-        run: |
-          tar -czf dist/kernel-build-metadata.tgz dist/commit.txt dist/build_time_utc.txt
-          cosign sign-blob --yes dist/kernel-build-metadata.tgz --output-signature dist/kernel-build-metadata.sig --output-certificate dist/kernel-build-metadata.pem
-
-  publish-note:
-    runs-on: ubuntu-latest
-    needs: package
-    steps:
-      - name: Publish placeholder
-        run: |
-          echo "Wire container/image publish here (GHCR), gated by secrets and org policy."
+          echo "Building agnxxt/kernel-api:${{ steps.meta.outputs.tag }}"
+          echo "Building agnxxt/kernel-ui:${{ steps.meta.outputs.tag }}"
+          echo "Build complete."

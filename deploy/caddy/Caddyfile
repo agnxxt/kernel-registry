@@ -1,0 +1,5 @@
+:80 {
+    reverse_proxy /api/* kernel-api:8000
+    reverse_proxy /ws/* kernel-api:8000
+    reverse_proxy /* kernel-ui:3000
+}
