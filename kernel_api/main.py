@@ -120,7 +120,9 @@ async def process_action(data: Dict[str, Any], background_tasks: BackgroundTasks
     features = feature_store.get_agent_features(agent_id)
 
     # 3. Policy Evaluation (Deontic Constraints)
-    context = {"weather": "Clear", "goal_alignment": 0.85, "trust_score": trust_score, "is_authorized_owner": True}
+    # Identify current user for FGA check (default to admin for now)
+    current_user = "admin"
+    context = {"weather": "Clear", "goal_alignment": 0.85, "trust_score": trust_score, "user_id": current_user}
     policy_result = caas.pre_access_audit(agent_id, data, context)
     if not policy_result["authorized"]:
         return {"status": "CAAS-Blocked", "reason": policy_result["reason"]}
