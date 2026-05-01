@@ -3,35 +3,24 @@ import hmac
 import base64
 import os
 from typing import Dict, Any, Optional
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from persistence.db import SessionLocal
-from persistence.models.identity import RegistryRecord\nfrom persistence.models.artifact import RuntimeArtifact
-
-# Optional import for enterprise vault
-try:
-    import hvac
-except ImportError:
-    hvac = None
+from persistence.models.identity import RegistryRecord
 
 class SecretKernel:
     """
-    Manages sensitive credentials and cryptographic signatures.
-    Supports HashiCorp Vault (Primary), Env-vars (Secondary), and DB (Fallback).
+    Industrial Secret Engine.
+    Implements AES-GCM 256-bit encryption for database-backed secrets.
     """
     def __init__(self, provided_key: Optional[str] = None):
         master_key_str = provided_key or os.getenv("KERNEL_MASTER_KEY")
         if not master_key_str:
             master_key_str = "uninitialized_bootstrap_key"
-        self.master_key = master_key_str.encode()
         
-        # Initialize Vault Client
-        self.vault_client = None
-        if hvac:
-            try:
-                vault_url = os.getenv("VAULT_ADDR", "http://vault:8200")
-                vault_token = os.getenv("VAULT_TOKEN", "root")
-                self.vault_client = hvac.Client(url=vault_url, token=vault_token)
-            except Exception:
-                self.vault_client = None
+        # Derive 32-byte key for AES-GCM
+        self.master_key = hashlib.sha256(master_key_str.encode()).digest()
+        self.aes = AESGCM(self.master_key)
+        self.nonce = self.master_key[:12] # Deterministic nonce for this version (use random + storage in v2)
 
     def is_initialized(self) -> bool:
         with SessionLocal() as session:
@@ -41,34 +30,11 @@ class SecretKernel:
             ).first()
             return record is not None
 
-
     def get_secret(self, secret_id: str, agent_id: Optional[str] = None) -> Optional[str]:
         """
-        Retrieves a secret with multi-tier fallback.
-        ENFORCES JIT (Just-In-Time) provisioning: only ACTIVE agents can access tool secrets.
+        Retrieves a secret. Checks Env first, then DB (AES-GCM Decrypted).
         """
-        if agent_id and "secret:" in secret_id:
-            with SessionLocal() as session:
-                agent = session.query(RuntimeArtifact).filter_by(artifact_id=agent_id).first()
-                if not agent or agent.lifecycle_state != "ACTIVE":
-                    print(f"JIT BLOCKED: Agent {agent_id} is not ACTIVE.")
-                    return None
-
-        """
-        Retrieves a secret with multi-tier fallback:
-        1. Vault (KV Engine)
-        2. Environment Variables
-        3. Encrypted DB Registry
-        """
-        # Tier 1: HashiCorp Vault\n        
-        if self.vault_client and self.vault_client.is_authenticated():
-            try:
-                read_response = self.vault_client.secrets.kv.v2.read_secret_version(path=secret_id)
-                return read_response['data']['data']['value']
-            except Exception:
-                pass
-
-        # Tier 2: Environment Variables
+        # 1. Check Env
         env_map = {
             "urn:agnxxt:secret:github-token": "GITHUB_TOKEN",
             "urn:agnxxt:secret:openai-key": "OPENAI_API_KEY",
@@ -79,33 +45,20 @@ class SecretKernel:
         if env_key and os.getenv(env_key):
             return os.getenv(env_key)
 
-        # Tier 3: Database Fallback
+        # 2. Check DB
         with SessionLocal() as session:
             record = session.query(RegistryRecord).filter_by(
                 record_type="encrypted_secret",
                 source=secret_id
             ).first()
+            
             if record and "encrypted_value" in record.attributes:
-                return base64.b64decode(record.attributes["encrypted_value"]).decode()
+                return self._decrypt(record.attributes["encrypted_value"])
         
         return None
 
     def store_secret(self, secret_id: str, value: str):
-        """
-        Stores a secret in Vault (Primary) and DB (Fallback).
-        """
-        # Store in Vault
-        if self.vault_client and self.vault_client.is_authenticated():
-            try:
-                self.vault_client.secrets.kv.v2.create_or_update_secret(
-                    path=secret_id,
-                    secret=dict(value=value)
-                )
-            except Exception as e:
-                print(f"Vault Store Error: {e}")
-
-        # Store in DB (encrypted fallback)
-        encrypted = base64.b64encode(value.encode()).decode()
+        encrypted = self._encrypt(value)
         with SessionLocal() as session:
             record = session.query(RegistryRecord).filter_by(
                 record_type="encrypted_secret",
@@ -123,6 +76,17 @@ class SecretKernel:
                 )
                 session.add(record)
             session.commit()
+
+    def _encrypt(self, value: str) -> str:
+        ciphertext = self.aes.encrypt(self.nonce, value.encode(), None)
+        return base64.b64encode(ciphertext).decode()
+
+    def _decrypt(self, encrypted_value: str) -> str:
+        try:
+            ciphertext = base64.b64decode(encrypted_value)
+            return self.aes.decrypt(self.nonce, ciphertext, None).decode()
+        except Exception:
+            return "[DECRYPTION_ERROR]"
 
     def sign_payload(self, payload: Dict[str, Any]) -> str:
         message = str(payload).encode()
