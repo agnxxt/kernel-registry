@@ -32,6 +32,11 @@ Run DB migrations:
 docker compose exec kernel-tooling alembic -c persistence/alembic.ini upgrade head
 ```
 
+Run end-to-end smoke test:
+```bash
+./ops/e2e-smoke.sh
+```
+
 Stop stack:
 ```bash
 docker compose down

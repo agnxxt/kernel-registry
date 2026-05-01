@@ -1,7 +1,19 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-kernel
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kernel-api
+  namespace: agent-kernel
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: kernel-api
+  namespace: agent-kernel
   labels:
     app: kernel-api
 spec:
@@ -15,6 +27,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kernel-api
+  namespace: agent-kernel
 spec:
   replicas: 2
   selector:
@@ -25,21 +38,78 @@ spec:
       labels:
         app: kernel-api
     spec:
+      serviceAccountName: kernel-api
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: kernel-api
-          image: agnxxt/kernel-api:latest
+          image: agnxxt/kernel-api:v0.1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
           env:
             - name: DATABASE_URL
-              value: "postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel"
+              valueFrom:
+                secretKeyRef:
+                  name: kernel-api-secrets
+                  key: database_url
             - name: MLFLOW_TRACKING_URI
-              value: "http://mlflow:5000"
+              value: "http://mlflow.agent-kernel.svc.cluster.local:5000"
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          startupProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            failureThreshold: 30
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kernel-api
+  namespace: agent-kernel
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: kernel-api
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kernel-ui
+  namespace: agent-kernel
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: kernel-ui
+  namespace: agent-kernel
   labels:
     app: kernel-ui
 spec:
@@ -53,8 +123,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kernel-ui
+  namespace: agent-kernel
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: kernel-ui
@@ -63,11 +134,67 @@ spec:
       labels:
         app: kernel-ui
     spec:
+      serviceAccountName: kernel-ui
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: kernel-ui
-          image: agnxxt/kernel-ui:latest
+          image: agnxxt/kernel-ui:v0.1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
           env:
             - name: NEXT_PUBLIC_API_URL
-              value: "http://kernel-api:8000"
+              value: "http://kernel-api.agent-kernel.svc.cluster.local:8000"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          startupProbe:
+            httpGet:
+              path: /
+              port: 3000
+            failureThreshold: 30
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kernel-ui
+  namespace: agent-kernel
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: kernel-ui
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kernel-api-secrets
+  namespace: agent-kernel
+type: Opaque
+stringData:
+  database_url: "postgresql+psycopg2://kernel:CHANGE_ME@postgres.agent-kernel.svc.cluster.local:5432/kernel"
