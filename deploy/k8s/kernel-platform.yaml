@@ -197,4 +197,4 @@ metadata:
   namespace: agent-kernel
 type: Opaque
 stringData:
-  database_url: "postgresql+psycopg2://kernel:CHANGE_ME@postgres.agent-kernel.svc.cluster.local:5432/kernel"
+  database_url: "postgresql+psycopg2://kernel:kernelpass@postgres.agent-kernel.svc.cluster.local:5432/kernel"

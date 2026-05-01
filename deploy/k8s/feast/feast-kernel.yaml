@@ -4,6 +4,15 @@ metadata:
   name: feast-kernel
   namespace: agent-kernel
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: feast-kernel-secrets
+  namespace: agent-kernel
+type: Opaque
+stringData:
+  offline_store_postgres_password: "kernelpass"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
