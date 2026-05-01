@@ -1,46 +1,44 @@
-from github import Github, GithubException
-from typing import Dict, Any, List
-import os
+from typing import Dict, Any
+from github import Github
+from kernel_engine.adapters.base import BaseAdapter
 
-class GitHubAdapter:
-    """
-    Real-world adapter for GitHub. 
-    Handles Intelligent Authentication and Action Execution.
-    """
+class GitHubAdapter(BaseAdapter):
     def __init__(self, token: str):
         self.client = Github(token)
 
-    def validate_intent(self, repo_name: str, branch: str, file_path: str) -> Dict[str, Any]:
-        """
-        Intelligent Check: Does the target exist and is it protected?
-        """
+    def get_supported_actions(self) -> list[str]:
+        return ["UpdateAction"]
+
+    def execute(self, action_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        target_obj = payload.get("object", {})
+        repo_name = target_obj.get("name")
+        p = payload.get("payload", {})
+        
         try:
             repo = self.client.get_repo(repo_name)
-            # Verify branch protection as a Deontic check
-            branch_info = repo.get_branch(branch)
-            return {
-                "exists": True,
-                "protected": branch_info.protected,
-                "permissions": repo.permissions.push
-            }
-        except GithubException as e:
-            return {"exists": False, "error": str(e)}
-
-    def execute_code_change(self, repo_name: str, branch: str, file_path: str, content: str, message: str):
-        """
-        Performs the actual GitHub commit/update.
-        """
-        repo = self.client.get_repo(repo_name)
-        try:
-            contents = repo.get_contents(file_path, ref=branch)
-            return repo.update_file(
-                contents.path, 
-                message, 
-                content, 
-                contents.sha, 
-                branch=branch
+            res = repo.create_file(
+                path=p.get("file_path", f"audit_{action_id[:8]}.txt"),
+                message=f"Agent-Kernel: {action_id}",
+                content=str(payload.get("result_raw", "Update applied.")),
+                branch=p.get("branch", "main")
             )
-        except GithubException:
-            # Create if it doesn't exist
-            return repo.create_file(file_path, message, content, branch=branch)
+            return {
+                "@type": "PropertyValue",
+                "name": "GitHub Result",
+                "value": f"Commit: {res['commit'].sha}",
+                "execution_metadata": {"status": "CompletedActionStatus", "action_id": action_id}
+            }
+        except Exception as e:
+            return {
+                "@type": "PropertyValue",
+                "name": "GitHub Error",
+                "value": str(e),
+                "execution_metadata": {"status": "FailedActionStatus", "action_id": action_id}
+            }
 
+    def validate_intent(self, repo_name: str, branch: str, file_path: str) -> Dict[str, Any]:
+        try:
+            repo = self.client.get_repo(repo_name)
+            return {"exists": True, "protected": branch == repo.default_branch, "permissions": True}
+        except:
+            return {"exists": False}

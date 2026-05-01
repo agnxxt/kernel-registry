@@ -61,17 +61,17 @@
         "framework_signature": {
           "type": "object",
           "properties": {
-            "name": { "type": "string" }, # e.g. LangChain, CrewAI
+            "name": { "type": "string" }, 
             "version": { "type": "string" },
-            "language": { "type": "string" } # e.g. Python, Go, Node.js
+            "language": { "type": "string" } 
           }
         },
         "model_signature": {
           "type": "object",
           "description": "Defines the specific LLM(s) powering the agent.",
           "properties": {
-            "primary_model": { "type": "string" }, # e.g. gpt-4o, claude-3-7-sonnet
-            "provider": { "type": "string" }, # e.g. OpenAI, Anthropic, Ollama
+            "primary_model": { "type": "string" }, 
+            "provider": { "type": "string" }, 
             "fallback_models": { "type": "array", "items": { "type": "string" } },
             "context_window_limit": { "type": "integer" }
           }

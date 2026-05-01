@@ -9,7 +9,7 @@ export default function Dashboard() {
   const { events, isConnected } = useTelemetry('ws://localhost:8000/ws/telemetry');
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-200 p-8 font-sans">
+    <main className="p-8">
       {/* Header */}
       <header className="flex items-center justify-between mb-8 border-b border-slate-800 pb-6">
         <div>
