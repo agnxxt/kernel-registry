@@ -8,6 +8,8 @@ The Agent Kernel is a high-reliability, model-agnostic governance layer for Fron
 - **Physical Adapters**: Governed execution for GitHub, Slack, and Jira.
 - **Cognitive Control Plane**: Real-time observability and policy management.
 
+**[Read the Project FAQ](./docs/FAQ.md)**
+
 ## 🚀 Quickstart
 
 ### 1. Prerequisites
