@@ -70,6 +70,25 @@ services:
       postgres:
         condition: service_healthy
 
+
+  feast:
+    image: python:3.12-slim
+    container_name: agent-kernel-feast
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - FEAST_REPO_PATH=feature_repo
+    command:
+      - bash
+      - -c
+      - "pip install 'feast[postgres]' && feast -c feature_repo ui --host 0.0.0.0 --port 8888"
+    ports:
+      - "8888:8888"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   kernel-api:
     build:
       context: .

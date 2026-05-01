@@ -1,0 +1,19 @@
+project: kernel_features
+registry: data/registry.db
+provider: local
+online_store:
+    type: postgres
+    host: postgres
+    port: 5432
+    database: kernel
+    user: kernel
+    password: kernelpass
+    schema: public
+offline_store:
+    type: postgres
+    host: postgres
+    port: 5432
+    database: kernel
+    user: kernel
+    password: kernelpass
+    schema: public
