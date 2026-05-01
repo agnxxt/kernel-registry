@@ -20,6 +20,12 @@ class CanonicalIdentity(Base):
     domain: Mapped[str] = mapped_column(String(32), default="INTERNAL", nullable=False) # INTERNAL, EXTERNAL, VENDOR, CUSTOMER, PROJECT
     sponsor_id: Mapped[str | None] = mapped_column(String(128), ForeignKey("canonical_identity.canonical_id"))
     
+    # CIAM & Time-Bound Federated Grants
+    grant_type: Mapped[str] = mapped_column(String(32), default="PERMANENT") # PERMANENT, TIME_BOUND, EPHEMERAL
+    grant_start_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    grant_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    consent_metadata: Mapped[dict | None] = mapped_column(JSON) # Scopes, data sharing agreements
+    
     key_id: Mapped[str | None] = mapped_column(String(256))
     metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
