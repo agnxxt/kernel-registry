@@ -1,4 +1,4 @@
-import os
+from kernel_engine.caas.gateway import CaasGateway\nimport os
 from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Dict, Any, List
@@ -28,16 +28,16 @@ def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
     return credentials.username
 
 from kernel_engine.validator import KernelValidator
-from kernel_engine.theory_identifier import TheoryIdentifier
+from kernel_engine.cai.meta_cognition import TheoryIdentifier
 from kernel_engine.mlflow_tracker import KernelMLflowTracker
 from kernel_engine.orchestrator import CognitiveOrchestrator
-from kernel_engine.watchdog import RogueWatchdog
+from kernel_engine.cai.watchdog import RogueWatchdog
 from kernel_engine.gatekeeper import ToolGatekeeper
 from kernel_engine.discovery import DiscoveryEngine
 from kernel_engine.identity import IdentityTrustManager
 from kernel_engine.graph_adapter import GraphAdapter
 from kernel_engine.executor import ActionExecutor
-from kernel_engine.model_runner import CognitiveModelRunner
+from kernel_engine.caas.service import CognitiveModelRunner
 from kernel_engine.policy_engine import PolicyEngine
 from kernel_engine.learning_loop import LearningLoop
 from kernel_engine.feature_store import CognitiveFeatureStore
@@ -66,7 +66,7 @@ model_runner = CognitiveModelRunner()
 secrets = SecretKernel()
 policies = PolicyEngine()
 learning = LearningLoop(tracker=tracker)
-feature_store = CognitiveFeatureStore()
+feature_store = CognitiveFeatureStore()\ncaas = CaasGateway()
 
 # Telemetry WebSockets
 class ConnectionManager:
@@ -252,7 +252,21 @@ async def initialize_kernel(data: Dict[str, Any]):
     
     return {"status": "Initialized"}
 
-@app.get("/api/v1/admin/policies")
+
+@app.post("/api/v1/caas/reason")
+async def caas_reason(agent_id: str, prompt: str, context: Dict[str, Any] = {}):
+    """
+    CAAS: Provides governed reasoning to an agent.
+    """
+    return await caas.reason(agent_id, prompt, context)
+
+@app.post("/api/v1/caas/audit")
+async def caas_audit(agent_id: str, action: Dict[str, Any], context: Dict[str, Any] = {}):
+    """
+    CAAS: Audits an agent's intended action for cognitive drift.
+    """
+    return caas.audit_intent(agent_id, action, context)
+\n@app.get("/api/v1/admin/policies")
 async def get_admin_policies(username: str = Depends(get_current_admin)):
     policy_path = os.getenv("POLICY_PATH", "config/policies.json")
     try:
