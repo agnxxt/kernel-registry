@@ -1,4 +1,4 @@
-import os
+from kernel_engine.telemetry import tracer\nimport os
 
 from kernel_engine.adapters.slack_adapter import SlackAdapter
 from kernel_engine.adapters.jira_adapter import JiraAdapter
@@ -16,7 +16,7 @@ class ActionExecutor:
     def __init__(self):
         self.secrets = SecretKernel()
 
-    async def execute(self, action_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, action_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:\n        with tracer.start_as_current_span("kernel.physical_execution") as span:\n            span.set_attribute("action_id", action_id)\n            span.set_attribute("tool", str(payload.get("object", {}).get("name", "unknown")))
         """
         Executes the approved action.
         """

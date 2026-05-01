@@ -44,6 +44,12 @@ from kernel_engine.feature_store import CognitiveFeatureStore
 from persistence.models.identity import CanonicalIdentity, RegistryRecord
 from persistence.db import SessionLocal
 
+
+from kernel_engine.telemetry import setup_telemetry
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+tracer = setup_telemetry("kernel-api")
+
 app = FastAPI(title="Agent Kernel Platform", version="1.0.0")
 
 # --- System Singleton Registry ---

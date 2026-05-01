@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from kernel_engine.telemetry import tracer\nfrom typing import Dict, Any, List
 import uuid
 from datetime import datetime
 from persistence.db import SessionLocal
@@ -26,7 +26,7 @@ class CognitiveOrchestrator:
         self.wallets = WalletManager() if WalletManager else None
         self.temporal_client = None # Async init needed
 
-    async def execute_plan(self, agent_id: str, action_payload: Dict[str, Any], context: Dict[str, Any]):
+    async def execute_plan(self, agent_id: str, action_payload: Dict[str, Any], context: Dict[str, Any]):\n        with tracer.start_as_current_span("kernel.execute_plan") as span:\n            span.set_attribute("agent_id", agent_id)\n            span.set_attribute("action_type", action_payload.get("@type", "Action"))
         """
         Orchestrates the lifecycle of an action and persists the decision.
         """

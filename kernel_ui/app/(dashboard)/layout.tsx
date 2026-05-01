@@ -1,4 +1,4 @@
-import { Cpu, LayoutDashboard, Users, ShieldCheck } from "lucide-react";
+import { Cpu, LayoutDashboard, Users, ShieldCheck, History } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardLayout({
@@ -27,6 +27,11 @@ export default function DashboardLayout({
           <Link href="/policies" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors group">
             <ShieldCheck size={18} className="text-slate-400 group-hover:text-blue-400" />
             <span className="text-sm font-medium">Policies</span>
+          </Link>
+        
+          <Link href="/audit" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors group">
+            <History size={18} className="text-slate-400 group-hover:text-blue-400" />
+            <span className="text-sm font-medium">Audit Trail</span>
           </Link>
         </nav>
 
