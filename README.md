@@ -98,10 +98,13 @@ For distributed, high-availability deployments.
 ```bash
 # Apply the core platform manifests
 kubectl apply -f deploy/k8s/kernel-platform.yaml
+kubectl apply -f deploy/k8s/production-hardening.yaml
 
 # Apply specialized cognitive planes
 kubectl apply -f deploy/k8s/model-runner/
 kubectl apply -f deploy/k8s/secret-kernel.yaml
+kubectl apply -f deploy/k8s/feast/
+kubectl apply -f deploy/k8s/action-adapters.yaml
 ```
 
 ## Cognitive Features
