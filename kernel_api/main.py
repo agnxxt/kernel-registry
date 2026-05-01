@@ -63,7 +63,7 @@ orchestrator = CognitiveOrchestrator(watchdog=watchdog)
 discovery = DiscoveryEngine()
 identity_manager = IdentityTrustManager()
 graph = GraphAdapter()
-executor = ActionExecutor()
+executor = ActionExecutor(caas_gateway=caas)
 model_runner = CognitiveModelRunner()
 secrets = SecretKernel()
 # policies = PolicyEngine() # Wrapped in CAAS
@@ -121,7 +121,7 @@ async def process_action(data: Dict[str, Any], background_tasks: BackgroundTasks
 
     # 3. Policy Evaluation (Deontic Constraints)
     context = {"weather": "Clear", "goal_alignment": 0.85, "trust_score": trust_score, "is_authorized_owner": True}
-    policy_result = caas.authorize_action(agent_id, data, context)
+    policy_result = caas.pre_access_audit(agent_id, data, context)
     if not policy_result["authorized"]:
         return {"status": "CAAS-Blocked", "reason": policy_result["reason"]}
 
@@ -166,10 +166,10 @@ async def process_action(data: Dict[str, Any], background_tasks: BackgroundTasks
 
     return {
         "execution_id": action_id,
-        "status": result["execution_metadata"]["status"],
+        "status": result["execution_metadata"].get("status"),
         "identified_patterns": theories,
         "trust_score": trust_score,
-        "policy_id": policy_result["policy_id"]
+        "policy_id": policy_result.get("policy_id")
     }
 
 @app.post("/api/v1/feedback")
@@ -295,19 +295,19 @@ async def initialize_kernel(data: Dict[str, Any]):
     return {"status": "Initialized"}
 
 
-@app.post("/api/v1/caas/reason")
-async def caas_reason(agent_id: str, prompt: str, context: Dict[str, Any] = {}):
+@app.post("/api/v1/caas/audit_cot")
+async def caas_audit_cot(agent_id: str, reasoning: str):
     """
-    CAAS: Provides governed reasoning to an agent.
+    CAAS: Audits an agent's internal reasoning process.
     """
     return caas.audit_reasoning(agent_id, reasoning)
 
-@app.post("/api/v1/caas/audit")
-async def caas_audit(agent_id: str, action: Dict[str, Any], context: Dict[str, Any] = {}):
+@app.post("/api/v1/caas/authorize")
+async def caas_authorize(agent_id: str, action: Dict[str, Any], context: Dict[str, Any] = {}):
     """
-    CAAS: Audits an agent's intended action for cognitive drift.
+    CAAS: Performs multi-layer continuous authorization check.
     """
-    return caas.authorize_action(agent_id, action, context)
+    return caas.pre_access_audit(agent_id, action, context)
 
 
 @app.post("/api/v1/lifecycle/provision")

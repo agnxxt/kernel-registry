@@ -1,37 +1,55 @@
-from kernel_engine.telemetry import tracer\nimport os
-
+from kernel_engine.telemetry import tracer
+import os
+import asyncio
+from typing import Dict, Any, Optional
 from kernel_engine.adapters.slack_adapter import SlackAdapter
 from kernel_engine.adapters.jira_adapter import JiraAdapter
-import asyncio
-import os
-from typing import Dict, Any
 from kernel_engine.adapters.github_adapter import GitHubAdapter
 from kernel_engine.secret_kernel import SecretKernel
 
 class ActionExecutor:
     """
     Dispatches approved tasks to physical APIs or tool copilots.
-    Now integrates with real GitHub execution.
+    Implements POST-ACCESS Auditing to detect data leaks or policy drift.
     """
-    def __init__(self):
+    def __init__(self, caas_gateway: Optional[Any] = None):
         self.secrets = SecretKernel()
+        self.caas = caas_gateway
 
-    async def execute(self, action_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:\n        with tracer.start_as_current_span("kernel.physical_execution") as span:\n            span.set_attribute("action_id", action_id)\n            span.set_attribute("tool", str(payload.get("object", {}).get("name", "unknown")))
-        """
-        Executes the approved action.
-        """
+    async def execute(self, action_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        with tracer.start_as_current_span("kernel.physical_execution") as span:
+            span.set_attribute("action_id", action_id)
+            tool_name = str(payload.get("object", {}).get("name", "unknown"))
+            span.set_attribute("tool", tool_name)
+
+            # 1. Execution Logic (Physical Adapters)
+            result = await self._dispatch_physical_call(action_id, payload)
+
+            # 2. Post-Access Audit (Fine-Grained Governance)
+            if self.caas:
+                agent_id = payload.get("agent", {}).get("name", "unknown")
+                post_audit = self.caas.post_access_audit(agent_id, payload, result, {})
+                if not post_audit["authorized"]:
+                    # Violation detected after the fact (e.g. data leak)
+                    # We return the violation result and flag it for the responder
+                    result["execution_metadata"]["status"] = "PostAuditViolation"
+                    result["execution_metadata"]["violation_reason"] = post_audit["reason"]
+                    # Optionally: Wipe sensitive value from result before returning to agent
+                    result["value"] = "[REDACTED: POST-ACCESS POLICY VIOLATION]"
+            
+            return result
+
+    async def _dispatch_physical_call(self, action_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         action_type = payload.get("@type", "Action")
         target_obj = payload.get("object", {})
         repo_name = target_obj.get("name")
         
-        # 1. Real GitHub Execution Logic
+        # 1. GitHub Execution
         if action_type == "UpdateAction" and repo_name:
             token = self.secrets.get_secret("urn:agnxxt:secret:github-token")
             adapter = GitHubAdapter(token)
-            
             p = payload.get("payload", {})
             try:
-                # Perform real file update
                 res = adapter.execute_code_change(
                     repo_name=repo_name,
                     branch=p.get("branch", "main"),
@@ -53,7 +71,6 @@ class ActionExecutor:
                     "execution_metadata": {"status": "FailedActionStatus", "action_id": action_id}
                 }
 
-        
         # 2. Slack Execution
         if action_type == "CommunicateAction" and "slack" in str(payload.get("recipient", "")).lower():
             token = self.secrets.get_secret("urn:agnxxt:secret:slack-token") or os.getenv("SLACK_TOKEN")
@@ -78,12 +95,10 @@ class ActionExecutor:
                 "execution_metadata": {"status": "CompletedActionStatus", "action_id": action_id}
             }
 
-        # 4. Production handling for non-GitHub actions.
+        # Fallback
         if os.getenv("MOCK_INFERENCE", "true").lower() == "false":
-            # In real production, unmapped actions should raise or defer to a real provider
             raise NotImplementedError(f"Action type {action_type} lacks a physical execution adapter.")
             
-        # 3. Fallback for scaffolding/testing
         await asyncio.sleep(0.1) 
         return {
             "@type": "PropertyValue",
