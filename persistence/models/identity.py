@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from persistence.db import Base
 
@@ -11,14 +11,21 @@ class CanonicalIdentity(Base):
     __tablename__ = "canonical_identity"
 
     canonical_id: Mapped[str] = mapped_column(String(128), primary_key=True)
-    subject_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    subject_type: Mapped[str] = mapped_column(String(32), nullable=False) # Human, Agent, Organization
     subject_ref: Mapped[str] = mapped_column(String(128), nullable=False)
     issuer: Mapped[str] = mapped_column(String(128), nullable=False)
     did: Mapped[str | None] = mapped_column(String(256))
+    
+    # Federated Sponsorship Model
+    domain: Mapped[str] = mapped_column(String(32), default="INTERNAL", nullable=False) # INTERNAL, EXTERNAL, VENDOR, CUSTOMER, PROJECT
+    sponsor_id: Mapped[str | None] = mapped_column(String(128), ForeignKey("canonical_identity.canonical_id"))
+    
     key_id: Mapped[str | None] = mapped_column(String(256))
     metadata_json: Mapped[dict] = mapped_column("metadata", JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
 
+    # Self-referential relationship for sponsorship
+    sponsor = relationship("CanonicalIdentity", remote_side=[canonical_id])
 
 class VerifiableCredential(Base):
     __tablename__ = "verifiable_credential"

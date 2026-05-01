@@ -1,4 +1,6 @@
-from kernel_engine.lifecycle_engine import LifecycleEngine\nfrom kernel_engine.authz_caas.caas_gateway import CaasGateway\nimport os
+from kernel_engine.lifecycle_engine import LifecycleEngine
+from kernel_engine.authz_caas.caas_gateway import CaasGateway
+import os
 from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Dict, Any, List
@@ -66,7 +68,9 @@ model_runner = CognitiveModelRunner()
 secrets = SecretKernel()
 # policies = PolicyEngine() # Wrapped in CAAS
 learning = LearningLoop(tracker=tracker)
-feature_store = CognitiveFeatureStore()\ncaas = CaasGateway()\nlifecycle = LifecycleEngine()
+feature_store = CognitiveFeatureStore()
+caas = CaasGateway()
+lifecycle = LifecycleEngine()
 
 # Telemetry WebSockets
 class ConnectionManager:
@@ -177,6 +181,20 @@ async def post_feedback(action_id: str, feedback_data: Dict[str, Any]):
     return result
 
 
+
+@app.post("/api/v1/identity/register")
+async def register_agent_identity(spec: Dict[str, Any], username: str = Depends(get_current_admin)):
+    """
+    Federated Identity: Register an agent with Domain and Sponsor metadata.
+    """
+    identity = identity_manager.register_identity(spec)
+    return {
+        "canonical_id": identity.canonical_id,
+        "domain": identity.domain,
+        "sponsor_id": identity.sponsor_id,
+        "did": identity.did
+    }
+
 @app.get("/api/v1/identity/{agent_id}/did")
 async def get_agent_did(agent_id: str):
     """
@@ -199,7 +217,8 @@ async def get_agent_did(agent_id: str):
             "did": identity.did,
             "document": ddo
         }
-\n@app.get("/api/v1/identity/{agent_id}")
+
+@app.get("/api/v1/identity/{agent_id}")
 async def get_agent_identity(agent_id: str):
     return {
         "agent_id": agent_id,
@@ -289,7 +308,8 @@ async def caas_audit(agent_id: str, action: Dict[str, Any], context: Dict[str, A
     CAAS: Audits an agent's intended action for cognitive drift.
     """
     return caas.authorize_action(agent_id, action, context)
-\n
+
+
 @app.post("/api/v1/lifecycle/provision")
 async def provision_agent(spec: Dict[str, Any], username: str = Depends(get_current_admin)):
     """
@@ -313,7 +333,8 @@ async def decommission_agent(agent_id: str, username: str = Depends(get_current_
     """
     lifecycle.decommission_agent(agent_id)
     return {"status": "REVOKED"}
-\n@app.get("/api/v1/admin/policies")
+
+@app.get("/api/v1/admin/policies")
 async def get_admin_policies(username: str = Depends(get_current_admin)):
     policy_path = os.getenv("POLICY_PATH", "config/policies.json")
     try:
