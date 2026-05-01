@@ -39,6 +39,37 @@ services:
     volumes:
       - mlflow_data:/mlflow
 
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.1.1
+    container_name: agent-kernel-bus
+    command:
+      - redpanda start
+      - --overprovisioned
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --node-id 0
+      - --check=false
+      - --kafka-addr PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      - --advertise-kafka-addr PLAINTEXT://redpanda:9092,OUTSIDE://localhost:9094
+    ports:
+      - "9094:9094"
+
+  openfga:
+    image: openfga/openfga:latest
+    container_name: agent-kernel-authz
+    command: run
+    environment:
+      - OPENFGA_DATA_STORE_ENGINE=postgres
+      - OPENFGA_DATA_STORE_URI=postgres://kernel:kernelpass@postgres:5432/kernel?sslmode=disable
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   kernel-api:
     build:
       context: .
