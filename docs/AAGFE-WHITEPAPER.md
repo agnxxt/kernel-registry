@@ -21,8 +21,12 @@ Authorization is no longer a one-time "Login" event. It is a continuous loop:
 - **Pre-Access Gate**: Validates intent and drift score *before* tool access.
 - **Post-Access Gate**: Audits tool output for data leaks and reasoning faithfulness *after* execution.
 
+### 4. Theoretical Grounding & Verified Engineering
+AAGFE distinguishes between **Verified Engineering** (backed by industry-standard research like Zanzibar and NIST Zero Trust) and **Experimental R&D**. The core Kernel implementation strictly enforces research-backed governance, while speculative cognitive frameworks are isolated for empirical validation.
+
 ### Conclusion
 AAGFE establishes a new standard for AI safety, moving beyond prompt engineering into formal, infrastructure-level governance.
 
 ---
 © 2026 OpenAutonomyx Research Team
+[Full Bibliography](./references.bib)
