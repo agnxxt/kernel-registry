@@ -154,6 +154,21 @@ services:
     environment:
       - COLLECTOR_OTLP_ENABLED=true
 
+
+  watchdog-responder:
+    build:
+      context: .
+    container_name: agent-kernel-watchdog
+    command: python -m kernel_engine.watchdog_responder
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=redpanda:9092
+      - DATABASE_URL=postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel
+    depends_on:
+      redpanda:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+
   kernel-api:
     build:
       context: .

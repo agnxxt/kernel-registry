@@ -1,4 +1,4 @@
-from kernel_engine.telemetry import tracer\nfrom typing import Dict, Any, List
+from kernel_engine.event_bus import EventBus\nfrom kernel_engine.telemetry import tracer\nfrom typing import Dict, Any, List
 import uuid
 from datetime import datetime
 from persistence.db import SessionLocal
@@ -24,7 +24,7 @@ class CognitiveOrchestrator:
         self.watchdog = watchdog
         self.consensus = ConsensusEngine() if ConsensusEngine else None
         self.wallets = WalletManager() if WalletManager else None
-        self.temporal_client = None # Async init needed
+        self.temporal_client = None # Async init needed\n        self.bus = EventBus()
 
     async def execute_plan(self, agent_id: str, action_payload: Dict[str, Any], context: Dict[str, Any]):\n        with tracer.start_as_current_span("kernel.execute_plan") as span:\n            span.set_attribute("agent_id", agent_id)\n            span.set_attribute("action_type", action_payload.get("@type", "Action"))
         """
@@ -84,7 +84,7 @@ class CognitiveOrchestrator:
             session.add(db_decision)
             session.commit()
 
-        if not is_permitted:
+        # Replaced via patch
             return {"status": "Blocked", "reason": context.get("rejection_reason", "Deontic Constraint Violation"), "decision_id": decision_id}
         
         if aborted:

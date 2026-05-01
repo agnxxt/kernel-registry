@@ -20,11 +20,12 @@ For high-risk actions (impact > 7), the kernel requires a "Consensus" vote from 
 ### How do Agent Wallets work?
 The kernel integrates with an **Anvil (Ethereum)** node. Each agent is assigned a unique blockchain address. This allows them to hold funds, pay for their own API usage, and participate in reputational staking.
 
-### What does Temporal.io do in the kernel?
-Temporal handles **Durable Cognition**. If an agent needs to perform a task that takes days (e.g., "Wait for a GitHub PR to be merged"), Temporal ensures the state is preserved even if the kernel restarts.
-
-### Is my data safe in the Secret Vault?
-Yes. The kernel uses **HashiCorp Vault** as its primary secret engine. Dynamic secrets can be generated and revoked automatically, ensuring zero-trust access to external tools like Slack and Jira.
+### What is the "Watchdog Responder"?
+The **Watchdog Responder** is the active component of the immune system. While OpenTelemetry collects data, the Responder listens to the event bus in real-time. If a violation is detected (e.g., an OPA block), it automatically:
+1. **Lowers** the agent's trust score.
+2. **Suspends** the agent's lifecycle in the registry.
+3. **Notifies** admins via Slack/Webhooks.
+4. **Broadcasts** a rogue alert to other agents.
 
 ---
 
