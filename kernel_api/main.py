@@ -1,4 +1,4 @@
-from kernel_engine.caas.gateway import CaasGateway\nimport os
+from kernel_engine.authz_caas.caas_gateway import CaasGateway\nimport os
 from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Dict, Any, List
@@ -28,16 +28,16 @@ def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
     return credentials.username
 
 from kernel_engine.validator import KernelValidator
-from kernel_engine.cai.meta_cognition import TheoryIdentifier
+from kernel_engine.cyber_cai.meta_cognition import TheoryIdentifier
 from kernel_engine.mlflow_tracker import KernelMLflowTracker
 from kernel_engine.orchestrator import CognitiveOrchestrator
-from kernel_engine.cai.watchdog import RogueWatchdog
+from kernel_engine.cyber_cai.watchdog import RogueWatchdog
 from kernel_engine.gatekeeper import ToolGatekeeper
 from kernel_engine.discovery import DiscoveryEngine
 from kernel_engine.identity import IdentityTrustManager
 from kernel_engine.graph_adapter import GraphAdapter
 from kernel_engine.executor import ActionExecutor
-from kernel_engine.caas.service import CognitiveModelRunner
+from kernel_engine.cyber_cai.model_runner import CognitiveModelRunner
 from kernel_engine.policy_engine import PolicyEngine
 from kernel_engine.learning_loop import LearningLoop
 from kernel_engine.feature_store import CognitiveFeatureStore
@@ -64,7 +64,7 @@ graph = GraphAdapter()
 executor = ActionExecutor()
 model_runner = CognitiveModelRunner()
 secrets = SecretKernel()
-policies = PolicyEngine()
+# policies = PolicyEngine() # Wrapped in CAAS
 learning = LearningLoop(tracker=tracker)
 feature_store = CognitiveFeatureStore()\ncaas = CaasGateway()
 
@@ -117,9 +117,9 @@ async def process_action(data: Dict[str, Any], background_tasks: BackgroundTasks
 
     # 3. Policy Evaluation (Deontic Constraints)
     context = {"weather": "Clear", "goal_alignment": 0.85, "trust_score": trust_score, "is_authorized_owner": True}
-    policy_result = policies.evaluate_action(agent_id, data, context)
-    if not policy_result["allowed"]:
-        return {"status": "Policy-Blocked", "reason": policy_result["reason"]}
+    policy_result = caas.authorize_action(agent_id, data, context)
+    if not policy_result["authorized"]:
+        return {"status": "CAAS-Blocked", "reason": policy_result["reason"]}
 
     # 4. Intelligent Authentication (Gatekeeping)
     if "github" in str(data.get("object", "")).lower():
@@ -281,14 +281,14 @@ async def caas_reason(agent_id: str, prompt: str, context: Dict[str, Any] = {}):
     """
     CAAS: Provides governed reasoning to an agent.
     """
-    return await caas.reason(agent_id, prompt, context)
+    return caas.audit_reasoning(agent_id, reasoning)
 
 @app.post("/api/v1/caas/audit")
 async def caas_audit(agent_id: str, action: Dict[str, Any], context: Dict[str, Any] = {}):
     """
     CAAS: Audits an agent's intended action for cognitive drift.
     """
-    return caas.audit_intent(agent_id, action, context)
+    return caas.authorize_action(agent_id, action, context)
 \n@app.get("/api/v1/admin/policies")
 async def get_admin_policies(username: str = Depends(get_current_admin)):
     policy_path = os.getenv("POLICY_PATH", "config/policies.json")
