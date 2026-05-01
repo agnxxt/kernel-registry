@@ -54,6 +54,20 @@ services:
       mlflow:
         condition: service_started
 
+
+  opa:
+    image: openpolicyagent/opa:latest
+    container_name: agent-kernel-opa
+    ports:
+      - "8181:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--log-level=debug"
+      - "/policies"
+    volumes:
+      - ./policies:/policies:ro
+
   kernel-ui:
     build:
       context: ./kernel_ui

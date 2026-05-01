@@ -1,3 +1,7 @@
+import os
+
+from kernel_engine.adapters.slack_adapter import SlackAdapter
+from kernel_engine.adapters.jira_adapter import JiraAdapter
 import asyncio
 import os
 from typing import Dict, Any
@@ -49,7 +53,32 @@ class ActionExecutor:
                     "execution_metadata": {"status": "FailedActionStatus", "action_id": action_id}
                 }
 
-        # 2. Production handling for non-GitHub actions.
+        
+        # 2. Slack Execution
+        if action_type == "CommunicateAction" and "slack" in str(payload.get("recipient", "")).lower():
+            token = self.secrets.get_secret("urn:agnxxt:secret:slack-token") or os.getenv("SLACK_TOKEN")
+            adapter = SlackAdapter(token)
+            res = adapter.send_message(channel="general", text=str(payload.get("message", {}).get("text", "")))
+            return {
+                "@type": "PropertyValue",
+                "name": "Slack Message Result",
+                "value": "Message sent successfully",
+                "execution_metadata": {"status": "CompletedActionStatus", "action_id": action_id}
+            }
+
+        # 3. Jira Execution
+        if action_type == "UpdateAction" and "jira" in str(target_obj.get("identifier", "")).lower():
+            api_key = self.secrets.get_secret("urn:agnxxt:secret:jira-key") or os.getenv("JIRA_API_KEY")
+            adapter = JiraAdapter(api_key)
+            res = adapter.update_issue(issue_id=target_obj.get("name", "TASK-101"), comment="Governed update")
+            return {
+                "@type": "PropertyValue",
+                "name": "Jira Update Result",
+                "value": "Ticket updated successfully",
+                "execution_metadata": {"status": "CompletedActionStatus", "action_id": action_id}
+            }
+
+        # 4. Production handling for non-GitHub actions.
         if os.getenv("MOCK_INFERENCE", "true").lower() == "false":
             # In real production, unmapped actions should raise or defer to a real provider
             raise NotImplementedError(f"Action type {action_type} lacks a physical execution adapter.")

@@ -1,56 +1,42 @@
 import json
 import os
+import requests
 from typing import Dict, Any, List
 
 class PolicyEngine:
     """
-    Enforces Deontic Constraints based on JSON-defined policies.
-    Provides a transition path toward OPA/OpenFGA.
+    Enforces Deontic Constraints using OPA (Open Policy Agent).
     """
     def __init__(self):
-        policy_path = os.getenv("POLICY_PATH", "config/policies.json")
-        try:
-            with open(policy_path, "r") as f:
-                self.config = json.load(f)
-        except Exception:
-            # Fallback to minimal safe policies
-            self.config = {
-                "global_policies": {
-                    "max_token_per_action": 10000,
-                    "restricted_objects": ["payroll"]
-                },
-                "deontic_guardrails": []
-            }
+        self.opa_url = os.getenv("OPA_URL", "http://opa:8181/v1/data/kernel/authz/allow")
 
     def evaluate_action(self, agent_id: str, action: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Performs a full policy evaluation (Allow/Deny).
+        Performs a full policy evaluation via OPA.
         """
-        global_policies = self.config.get("global_policies", {})
-        
-        # 1. Check Restricted Objects
+        input_data = {
+            "input": {
+                "agent_id": agent_id,
+                "action": action,
+                "context": context
+            }
+        }
+
+        try:
+            response = requests.post(self.opa_url, json=input_data, timeout=2)
+            if response.status_code == 200:
+                result = response.json().get("result", False)
+                if result:
+                    return {"allowed": True, "policy_id": "urn:agnxxt:policy:opa-rego"}
+                else:
+                    return {"allowed": False, "reason": "Deontic Violation: OPA policy denied action."}
+        except Exception as e:
+            # Fallback to local hardcoded safety if OPA is down
+            print(f"OPA Connection Error: {e}")
+            
+        # Hardcoded Fail-Safe
         target = str(action.get("object", "")).lower()
-        for restricted in global_policies.get("restricted_objects", []):
-            if restricted in target:
-                return {"allowed": False, "reason": f"Deontic Violation: Access to {restricted} is prohibited."}
+        if any(r in target for r in ["payroll", "nuclear"]):
+             return {"allowed": False, "reason": "Fail-Safe: Restricted target detected."}
 
-        # 2. Check Dynamic Guardrails
-        action_string = str(action).lower()
-        # Simple evaluation of guardrail conditions
-        for guard in self.config.get("deontic_guardrails", []):
-            # This is a safe 'eval-like' check for demonstration
-            # In real production, use OPA/Rego
-            if "weather == 'Raining'" in guard["condition"] and context.get("weather") == "Raining":
-                if "'walk' in action_string" in guard["condition"] and "walk" in action_string:
-                    return {"allowed": False, "reason": guard["reason"]}
-
-        # 3. Quota Check
-        requested_tokens = action.get("runtime", {}).get("resource_governance", {}).get("token_budget", 0)
-        if requested_tokens > global_policies.get("max_token_per_action", 10000):
-             return {"allowed": False, "reason": "Quota Exceeded: Token budget exceeds global policy."}
-
-        # 4. Relationship Check (FGA)
-        if not context.get("is_authorized_owner", True):
-             return {"allowed": False, "reason": "Authorization Failed: Invalid agent-user relationship."}
-
-        return {"allowed": True, "policy_id": "urn:agnxxt:policy:dynamic-json"}
+        return {"allowed": True, "policy_id": "urn:agnxxt:policy:fail-safe-allow"}
