@@ -1,8 +1,8 @@
-# Agent Kernel Platform
+# AGenNext Kernels
 
 **Version: 1.0.4-stable**
 
-The Agent Kernel is a high-reliability, model-agnostic governance layer for Frontier AI Agents. It provides:
+Agent Kernels is a runtime- and cloud-agnostic Agent Kernel by Autonomyx. It provides:
 - **Deontic Guardrails**: Policy enforcement via Open Policy Agent (OPA).
 - **Persistent Memory**: Durable storage of identities, trust, and decisions in Postgres.
 - **Physical Adapters**: Governed execution for GitHub, Slack, and Jira.
@@ -41,6 +41,10 @@ docker compose up --build -d
 - **Identity Manager**: http://localhost:3000/identity
 
 *Note: Administrative endpoints require Basic Auth (Username: `admin`, Password: your `KERNEL_MASTER_KEY`).*
+
+
+## 🔌 Runtime Integration Bridges
+Bridge templates for Python, Node.js/TypeScript, Go, Java, .NET, and Rust are available in `integrations/runtime-bridges/`.
 
 ## 🛡️ Governance (OPA)
 The kernel uses OPA to enforce safety. Policies are defined in `policies/kernel.rego`. You can update guardrails in real-time via the **Policy Editor** in the dashboard.
