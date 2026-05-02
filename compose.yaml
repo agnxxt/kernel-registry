@@ -111,7 +111,7 @@ services:
     ports:
       - "8084:8080"
     environment:
-      - TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_ADDRESS: temporal:7233
 
   blockchain:
     image: ghcr.io/foundry-rs/foundry:latest
