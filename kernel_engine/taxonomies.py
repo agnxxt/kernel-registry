@@ -395,6 +395,28 @@ TAXONOMIES = {
             "changelog": {"description": "Changelog"},
         }
     },
+    "topics": {
+        "name": "Topics",
+        "description": "Subject matter topics",
+        "values": {
+            "artificial_intelligence": {"description": "AI"},
+            "machine_learning": {"description": "Machine Learning"},
+            "data_science": {"description": "Data Science"},
+            "programming": {"description": "Programming"},
+            "security": {"description": "Security"},
+            "cloud_computing": {"description": "Cloud"},
+            "devops": {"description": "DevOps"},
+            "blockchain": {"description": "Blockchain"},
+            "iot": {"description": "IoT"},
+            "robotics": {"description": "Robotics"},
+            "quantum": {"description": "Quantum computing"},
+            "biotech": {"description": "Biotech"},
+            "finance": {"description": "Finance"},
+            "healthcare": {"description": "Healthcare"},
+            "education": {"description": "Education"},
+            "marketing": {"description": "Marketing"},
+        }
+    },
 }
 
 
