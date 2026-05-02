@@ -359,6 +359,24 @@ TAXONOMIES = {
             "hybrid": {"description": "Hybrid memory"},
         }
     },
+    "tool_type": {
+        "name": "Tool Type",
+        "description": "Tool/function classification",
+        "values": {
+            "function": {"description": "Function call"},
+            "api": {"description": "API call"},
+            "search": {"description": "Search tool"},
+            "browser": {"description": "Browser automation"},
+            "code_executor": {"description": "Code execution"},
+            "database": {"description": "Database query"},
+            "file": {"description": "File operation"},
+            "http": {"description": "HTTP request"},
+            "mcp": {"description": "MCP tool"},
+            "agent": {"description": "Sub-agent"},
+            "webhook": {"description": "Webhook"},
+            "stream": {"description": "Stream processor"},
+        }
+    },
 }
 
 
