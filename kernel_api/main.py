@@ -2203,3 +2203,48 @@ async def get_thing_actions(thing_type: str, tenant_id: str = Depends(get_tenant
     from kernel_engine.schema_things import ThingVocabulary
     actions = ThingVocabulary.get_actions_for_type(thing_type)
     return {"thing_type": thing_type, "actions": actions}
+
+
+# --- Taxonomies ---
+
+@app.get("/api/v1/taxonomies")
+async def list_taxonomies(tenant_id: str = Depends(get_tenant_id)):
+    """
+    List all taxonomies.
+    """
+    from kernel_engine.taxonomies import TaxonomyRegistry
+    return {"taxonomies": TaxonomyRegistry.list_taxonomies()}
+
+
+@app.get("/api/v1/taxonomies/{taxonomy}")
+async def get_taxonomy(taxonomy: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get taxonomy.
+    """
+    from kernel_engine.taxonomies import TaxonomyRegistry
+    spec = TaxonomyRegistry.get_taxonomy(taxonomy)
+    if not spec:
+        raise HTTPException(status_code=404, detail="Taxonomy not found")
+    return spec
+
+
+@app.get("/api/v1/taxonomies/{taxonomy}/values")
+async def get_taxonomy_values(taxonomy: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get taxonomy values.
+    """
+    from kernel_engine.taxonomies import TaxonomyRegistry
+    values = TaxonomyRegistry.get_values(taxonomy)
+    if not values:
+        raise HTTPException(status_code=404, detail="Taxonomy not found")
+    return {"taxonomy": taxonomy, "values": values}
+
+
+@app.get("/api/v1/taxonomies/{taxonomy}/validate")
+async def validate_value(taxonomy: str, value: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Validate taxonomy value.
+    """
+    from kernel_engine.taxonomies import TaxonomyRegistry
+    valid = TaxonomyRegistry.validate(taxonomy, value)
+    return {"taxonomy": taxonomy, "value": value, "valid": valid}
