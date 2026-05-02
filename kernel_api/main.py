@@ -48,6 +48,10 @@ from kernel_engine.graph_adapter import GraphAdapter
 from kernel_engine.executor import ActionExecutor
 from kernel_engine.cyber_cai.model_runner import CognitiveModelRunner
 from kernel_engine.policy_engine import PolicyEngine
+from kernel_engine.authzen import AuthzenEngine, AuthzRequest, RBACBackend
+from kernel_engine.anp import PeerRegistry, ServiceDiscovery, GossipProtocol
+from kernel_engine.acp import MessageProtocol, MessageType, Message
+from kernel_engine.rate_limiter import RateLimiter
 from kernel_engine.learning_loop import LearningLoop
 from kernel_engine.feature_store import CognitiveFeatureStore
 from persistence.models.identity import CanonicalIdentity, RegistryRecord
@@ -78,6 +82,22 @@ learning = LearningLoop(tracker=tracker)
 feature_store = CognitiveFeatureStore()
 caas = CaasGateway()
 lifecycle = LifecycleEngine()
+
+# Protocol engines for multi-agent execution
+# Authzen - Authorization/RBAC for agent actions
+authzen_engine = AuthzenEngine()
+rbac_backend = RBACBackend()
+
+# ANP - Agent Network Protocol (peer discovery, gossip)
+peer_registry = PeerRegistry()
+service_discovery = ServiceDiscovery()
+gossip_protocol = GossipProtocol(fanout=3)
+
+# ACP - Agent Communication Protocol (messaging)
+message_protocol = MessageProtocol(agent_id="kernel")
+
+# Rate limiting across agents
+rate_limiter = RateLimiter()
 
 # Telemetry WebSockets
 class ConnectionManager:
@@ -469,3 +489,189 @@ async def admin_onboard(user_id: str, username: str = Depends(get_current_admin)
     outreach_action = discovery.generate_provisioning_request(user_id)
     # In a full system, this would be dispatched to the A2A communication bus.
     return {"status": "Outreach-Sent", "action": outreach_action}
+
+
+# ============================================================
+# Authzen - Authorization Protocol Endpoints
+# ============================================================
+
+class AuthzRequestModel(BaseModel):
+    subject: str
+    action: str
+    resource: str
+    context: Dict[str, Any] = {}
+
+class AuthzResponseModel(BaseModel):
+    decision: str
+    effect: str
+    policy_ids: List[str]
+
+@app.post("/api/v1/authz/authorize", response_model=AuthzResponseModel)
+async def authorize_request(request: AuthzRequestModel, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Authzen: Authorize an agent action against policies.
+    """
+    authz_request = AuthzRequest(
+        subject=request.subject,
+        action=request.action,
+        resource=request.resource,
+        context=request.context
+    )
+    
+    response = authzen_engine.authorize(authz_request)
+    return AuthzResponseModel(
+        decision=response.decision.value,
+        effect=response.effect.value,
+        policy_ids=response.policy_ids
+    )
+
+@app.post("/api/v1/authz/policies")
+async def create_policy(policy_id: str, subject: str = "*", action: str = "*", 
+                      resource: str = "*", effect: str = "permit",
+                      tenant_id: str = Depends(get_tenant_id)):
+    """
+    Authzen: Create authorization policy.
+    """
+    from kernel_engine.authzen import AuthzPolicy
+    policy = AuthzPolicy(policy_id)
+    policy.add_rule(subject, action, resource, effect)
+    authzen_engine.add_policy(policy)
+    return {"status": "created", "policy_id": policy_id}
+
+@app.post("/api/v1/authz/rbac/roles/{role_id}/permissions")
+async def grant_permission(role_id: str, action: str, resource: str,
+                         tenant_id: str = Depends(get_tenant_id)):
+    """
+    Authzen: Grant RBAC permission to role.
+    """
+    rbac_backend.grant_permission(role_id, action, resource)
+    return {"status": "granted", "role_id": role_id}
+
+@app.post("/api/v1/authz/rbac/roles/{role_id}/members")
+async def assign_role(role_id: str, agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Authzen: Assign agent to role.
+    """
+    rbac_backend.assign_role(role_id, agent_id)
+    return {"status": "assigned", "role_id": role_id, "agent_id": agent_id}
+
+@app.get("/api/v1/authz/rbac/agents/{agent_id}/permissions")
+async def check_permissions(agent_id: str, action: str, resource: str,
+                          tenant_id: str = Depends(get_tenant_id)):
+    """
+    Authzen: Check if agent has permission.
+    """
+    has_permission = rbac_backend.has_permission(agent_id, action, resource)
+    return {"agent_id": agent_id, "action": action, "resource": resource, 
+            "allowed": has_permission}
+
+
+# ============================================================
+# ANP - Agent Network Protocol Endpoints  
+# ============================================================
+
+class PeerRegisterModel(BaseModel):
+    peer_id: str
+    address: str
+    metadata: Dict[str, Any] = {}
+
+@app.post("/api/v1/anp/peers", response_model=Dict)
+async def register_peer(peer: PeerRegisterModel, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ANP: Register a peer agent.
+    """
+    result = peer_registry.register(peer.peer_id, peer.address)
+    return {"peer_id": result.peer_id, "state": result.state.value, "reputation": result.reputation}
+
+@app.get("/api/v1/anp/peers")
+async def list_peers(limit: int = 10, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ANP: Get active peers.
+    """
+    peers = peer_registry.get_peers(limit)
+    return [{"peer_id": p.peer_id, "address": p.address, "reputation": p.reputation} for p in peers]
+
+@app.post("/api/v1/anp/services")
+async def register_service(service: str, agent_id: str, endpoint: str,
+                        tenant_id: str = Depends(get_tenant_id)):
+    """
+    ANP: Register a service.
+    """
+    service_discovery.register(service, agent_id, endpoint)
+    return {"status": "registered", "service": service, "agent_id": agent_id}
+
+@app.get("/api/v1/anp/services/{service}")
+async def discover_service(service: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ANP: Discover services.
+    """
+    endpoints = service_discovery.discover(service)
+    return {"service": service, "endpoints": endpoints}
+
+@app.post("/api/v1/anp/gossip")
+async def gossip_propagate(message_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ANP: Propagate message via gossip.
+    """
+    peers = peer_registry.get_peers(limit=10)
+    peer_ids = [p.peer_id for p in peers]
+    selected = gossip_protocol.propagate(message_id, peer_ids)
+    return {"message_id": message_id, "propagated_to": selected}
+
+
+# ============================================================
+# ACP - Agent Communication Protocol Endpoints
+# ============================================================
+
+class MessageSendModel(BaseModel):
+    receiver: str
+    content: Any
+    msg_type: str = "request"
+    priority: int = 2
+
+@app.post("/api/v1/acp/messages")
+async def send_message(message: MessageSendModel, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ACP: Send message to agent.
+    """
+    msg_type = MessageType(message.msg_type)
+    msg = await message_protocol.send(message.receiver, message.content, msg_type)
+    return {"message_id": msg.message_id, "status": "sent"}
+
+@app.post("/api/v1/acp/broadcast")
+async def broadcast_message(content: Any, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ACP: Broadcast message to all agents.
+    """
+    msg = await message_protocol.broadcast(content)
+    return {"message_id": msg.message_id, "status": "broadcast"}
+
+@app.post("/api/v1/acp/sessions")
+async def create_session(peer_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ACP: Create communication session.
+    """
+    session = message_protocol.create_session(peer_id)
+    return {"session_id": session.session_id, "state": session.state.value}
+
+@app.get("/api/v1/acp/sessions")
+async def list_sessions(tenant_id: str = Depends(get_tenant_id)):
+    """
+    ACP: List active sessions.
+    """
+    return [{"session_id": s.session_id, "agent_id": s.agent_id, "peer_id": s.peer_id}
+            for s in message_protocol.sessions.values()]
+
+
+# ============================================================
+# Rate Limiting
+# ============================================================
+
+@app.post("/api/v1/ratelimit/check")
+async def check_rate_limit(agent_id: str, action: str, limit: int = 100,
+                        tenant_id: str = Depends(get_tenant_id)):
+    """
+    Check rate limit for agent action.
+    """
+    allowed = rate_limiter.check(tenant_id, agent_id, action, limit)
+    return {"agent_id": agent_id, "action": action, "allowed": allowed}
