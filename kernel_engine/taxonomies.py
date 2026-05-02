@@ -377,6 +377,24 @@ TAXONOMIES = {
             "stream": {"description": "Stream processor"},
         }
     },
+    "category": {
+        "name": "Category",
+        "description": "Content/organization category",
+        "values": {
+            "news": {"description": "News"},
+            "blog": {"description": "Blog post"},
+            "document": {"description": "Document"},
+            "product": {"description": "Product"},
+            "service": {"description": "Service"},
+            "user": {"description": "User content"},
+            "system": {"description": "System content"},
+            "faq": {"description": "FAQ"},
+            "tutorial": {"description": "Tutorial"},
+            "reference": {"description": "Reference"},
+            "api_doc": {"description": "API documentation"},
+            "changelog": {"description": "Changelog"},
+        }
+    },
 }
 
 
