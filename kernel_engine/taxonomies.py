@@ -433,6 +433,22 @@ TAXONOMIES = {
             "experimental": {"description": "Experimental"},
         }
     },
+    "place_type": {
+        "name": "Place Type",
+        "description": "Type of place/location",
+        "values": {
+            "country": {"description": "Country"},
+            "region": {"description": "Region/State"},
+            "city": {"description": "City"},
+            "address": {"description": "Street address"},
+            "virtual": {"description": "Virtual location"},
+            "datacenter": {"description": "Data center"},
+            "edge": {"description": "Edge location"},
+            "office": {"description": "Office"},
+            "home": {"description": "Home"},
+            "mobile": {"description": "Mobile"},
+        }
+    },
 }
 
 
