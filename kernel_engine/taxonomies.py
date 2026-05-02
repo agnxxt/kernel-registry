@@ -417,6 +417,22 @@ TAXONOMIES = {
             "marketing": {"description": "Marketing"},
         }
     },
+    "tags": {
+        "name": "Tags",
+        "description": "Flexible tagging system",
+        "values": {
+            "featured": {"description": "Featured"},
+            "trending": {"description": "Trending"},
+            "popular": {"description": "Popular"},
+            "new": {"description": "New"},
+            "recommended": {"description": "Recommended"},
+            "verified": {"description": "Verified"},
+            "premium": {"description": "Premium"},
+            "beta": {"description": "Beta"},
+            "deprecated": {"description": "Deprecated"},
+            "experimental": {"description": "Experimental"},
+        }
+    },
 }
 
 
