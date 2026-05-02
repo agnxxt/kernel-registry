@@ -1,5 +1,15 @@
 # API Documentation
 
+## Authentication
+
+All endpoints require Basic Auth:
+
+```
+Authorization: Basic base64(username:password)
+```
+
+---
+
 ## POST /execute
 
 Execute an agent task.
@@ -8,22 +18,44 @@ Execute an agent task.
 
 ```json
 {
-  "task": "string"
+  "task": "Create a GitHub issue",
+  "metadata": {
+    "priority": "high"
+  }
 }
 ```
-
-### Headers
-- Authorization: Basic Auth
 
 ### Response
 
 ```json
 {
   "status": "success",
-  "decision_id": "uuid"
+  "decision_id": "uuid",
+  "policy": "allowed"
 }
 ```
 
+---
+
+## GET /decisions/{id}
+
+Retrieve decision details.
+
+### Response
+
+```json
+{
+  "id": "uuid",
+  "task": "...",
+  "result": "...",
+  "policy": "allowed"
+}
+```
+
+---
+
 ## Notes
-- All requests are policy-evaluated
-- Responses include traceable decisions
+
+- Every request goes through OPA policy evaluation
+- All decisions are persisted
+- Full audit trail available
