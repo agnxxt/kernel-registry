@@ -1036,3 +1036,203 @@ async def check_abac_all(request: ABACCheckRequest, tenant_id: str = Depends(get
         request.subject, request.resource, request.action, request.environment
     )
     return {"results": results}
+
+
+# ============================================================
+# Identity vs Account Distinction
+# ============================================================
+
+from kernel_engine.identity_v2 import (
+    IdentityManager, Identity, Account, Principal,
+    IdentityType, AccountType, IdentityStatus
+)
+
+# Identity manager singleton
+identity_manager = IdentityManager()
+
+
+# --- Identity Endpoints ---
+
+class IdentityCreate(BaseModel):
+    identifier: str
+    identity_type: str = "uuid"
+    display_name: str = ""
+    metadata: Dict[str, Any] = {}
+
+
+@app.post("/api/v1/identity")
+async def create_identity(data: IdentityCreate, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Create identity (the persistent 'who').
+    """
+    identity = identity_manager.create_identity(
+        identifier=data.identifier,
+        identity_type=data.identity_type,
+        display_name=data.display_name,
+        metadata=data.metadata,
+    )
+    return identity.to_dict()
+
+
+@app.get("/api/v1/identity/{identity_id}")
+async def get_identity(identity_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get identity.
+    """
+    identity = identity_manager.get_identity(identity_id)
+    if not identity:
+        raise HTTPException(status_code=404, detail="Identity not found")
+    return identity.to_dict()
+
+
+@app.get("/api/v1/identity/by-identifier/{identifier}")
+async def get_identity_by_identifier(identifier: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get identity by identifier.
+    """
+    identity = identity_manager.get_identity_by_identifier(identifier)
+    if not identity:
+        raise HTTPException(status_code=404, detail="Identity not found")
+    return identity.to_dict()
+
+
+@app.put("/api/v1/identity/{identity_id}")
+async def update_identity(identity_id: str, display_name: str = None,
+                     metadata: Dict[str, Any] = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Update identity.
+    """
+    updates = {}
+    if display_name:
+        updates["display_name"] = display_name
+    if metadata:
+        updates["metadata"] = metadata
+    
+    identity = identity_manager.update_identity(identity_id, **updates)
+    if not identity:
+        raise HTTPException(status_code=404, detail="Identity not found")
+    return identity.to_dict()
+
+
+@app.post("/api/v1/identity/{identity_id}/deactivate")
+async def deactivate_identity(identity_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Deactivate identity.
+    """
+    result = identity_manager.deactivate_identity(identity_id)
+    return {"status": "deactivated" if result else "not_found", "identity_id": identity_id}
+
+
+@app.get("/api/v1/identity")
+async def list_identities(status: str = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    List identities.
+    """
+    identities = identity_manager.list_identities(status)
+    return {"identities": [i.to_dict() for i in identities], "total": len(identities)}
+
+
+# --- Account Endpoints ---
+
+class AccountCreate(BaseModel):
+    identity_id: str
+    account_type: str = "password"
+    credential: str = ""
+    metadata: Dict[str, Any] = {}
+    primary: bool = False
+
+
+@app.post("/api/v1/account")
+async def create_account(data: AccountCreate, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Create account (credential for identity).
+    """
+    account = identity_manager.create_account(
+        identity_id=data.identity_id,
+        account_type=data.account_type,
+        credential=data.credential,
+        metadata=data.metadata,
+        primary=data.primary,
+    )
+    return account.to_dict()
+
+
+@app.get("/api/v1/account/{account_id}")
+async def get_account(account_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get account.
+    """
+    account = identity_manager.get_account(account_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+    return account.to_dict()
+
+
+@app.get("/api/v1/account/identity/{identity_id}")
+async def get_accounts_for_identity(identity_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get all accounts for identity.
+    """
+    accounts = identity_manager.get_accounts_for_identity(identity_id)
+    return {"accounts": [a.to_dict() for a in accounts]}
+
+
+@app.post("/api/v1/account/{account_id}/deactivate")
+async def deactivate_account(account_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Deactivate account.
+    """
+    result = identity_manager.deactivate_account(account_id)
+    return {"status": "deactivated" if result else "not_found", "account_id": account_id}
+
+
+# --- Authentication Endpoints ---
+
+class AuthRequest(BaseModel):
+    identifier: str
+    account_type: str = "password"
+    credential: str = ""
+
+
+@app.post("/api/v1/auth/login")
+async def login(request: AuthRequest, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Authenticate and get principal.
+    """
+    principal = identity_manager.authenticate(
+        identifier=request.identifier,
+        account_type=request.account_type,
+        credential=request.credential,
+    )
+    if not principal:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    return principal.to_dict()
+
+
+@app.post("/api/v1/auth/logout")
+async def logout(principal_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Logout principal.
+    """
+    result = identity_manager.logout(principal_id)
+    return {"status": "logged_out" if result else "not_found"}
+
+
+@app.get("/api/v1/auth/principal/{principal_id}")
+async def get_principal(principal_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get principal.
+    """
+    principal = identity_manager.get_principal(principal_id)
+    if not principal:
+        raise HTTPException(status_code=404, detail="Principal not valid")
+    return principal.to_dict()
+
+
+@app.post("/api/v1/auth/refresh")
+async def refresh_token(principal_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Refresh principal session.
+    """
+    result = identity_manager.refresh_principal(principal_id)
+    return {"status": "refreshed" if result else "expired"}
