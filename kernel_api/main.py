@@ -2170,3 +2170,36 @@ async def authorize_action(auto_id: str, action_type: str, resource: str,
     """
     result = auto_pki.authorize_action(auto_id, action_type, resource, obj)
     return result
+
+
+# --- Schema.org Things ---
+
+@app.get("/api/v1/schema/things")
+async def list_schema_things(category: str = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    List all schema.org thing types.
+    """
+    from kernel_engine.schema_things import ThingVocabulary
+    return {"things": ThingVocabulary.list_types(category)}
+
+
+@app.get("/api/v1/schema/things/{thing_type}")
+async def get_schema_thing(thing_type: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get thing specification.
+    """
+    from kernel_engine.schema_things import ThingVocabulary
+    spec = ThingVocabulary.get_type_spec(thing_type)
+    if not spec:
+        raise HTTPException(status_code=404, detail="Thing type not found")
+    return spec
+
+
+@app.get("/api/v1/schema/things/{thing_type}/actions")
+async def get_thing_actions(thing_type: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get actions for thing type.
+    """
+    from kernel_engine.schema_things import ThingVocabulary
+    actions = ThingVocabulary.get_actions_for_type(thing_type)
+    return {"thing_type": thing_type, "actions": actions}
