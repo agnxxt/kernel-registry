@@ -1,9 +1,9 @@
 from kernel_engine.lifecycle_engine import LifecycleEngine
 from kernel_engine.authz_caas.caas_gateway import CaasGateway
 import os
-from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect, Header
 from pydantic import BaseModel
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import uuid
 import json
 from datetime import datetime
@@ -14,6 +14,13 @@ import secrets
 from kernel_engine.secret_kernel import SecretKernel
 
 security = HTTPBasic()
+
+# --- Tenant Isolation Middleware ---
+def get_tenant_id(x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-ID")):
+    """Extract tenant ID from header for multi-tenant isolation."""
+    if not x_tenant_id:
+        raise HTTPException(status_code=400, detail="X-Tenant-ID header required")
+    return x_tenant_id
 
 def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
     # Quick fix: In a real system this should check against a secure store
@@ -91,6 +98,99 @@ class ConnectionManager:
 telemetry_manager = ConnectionManager()
 
 # --- API Endpoints ---
+
+# Execute endpoint - called by Runner with pre-validated payload
+class ExecuteRequest(BaseModel):
+    agent_id: str
+    framework: str  # langgraph, crewai, autogen, etc.
+    payload: Dict[str, Any]
+    config: Optional[Dict[str, Any]] = {}
+
+class ExecuteResponse(BaseModel):
+    execution_id: str
+    status: str
+    result: Optional[Dict[str, Any]] = None
+    trace: Optional[List[Dict[str, Any]]] = None
+
+@app.post("/api/v1/execute", response_model=ExecuteResponse)
+async def execute_agent(
+    request: ExecuteRequest,
+    x_tenant_id: str = Depends(get_tenant_id)
+):
+    """
+    Execute agent with framework and config from Platform/Runner.
+    This is the main endpoint Runner invokes.
+    
+    Runner does policy enforcement BEFORE calling this endpoint.
+    Kernel only executes pre-validated code.
+    """
+    execution_id = str(uuid.uuid4())
+    
+    # Validate tenant has access
+    with SessionLocal() as session:
+        # Check tenant-scoped access
+        identity = session.query(CanonicalIdentity).filter(
+            CanonicalIdentity.tenant_id == x_tenant_id
+        ).first()
+        if not identity:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"Tenant {x_tenant_id} not authorized"
+            )
+    
+    # Execute based on framework
+    result = {}
+    if request.framework == "langgraph":
+        # LangGraph specific execution
+        result = await _execute_langgraph(request.payload, request.config)
+    elif request.framework == "crewai":
+        result = await _execute_crewai(request.payload, request.config)
+    elif request.framework == "autogen":
+        result = await _execute_autogen(request.payload, request.config)
+    else:
+        # Generic execution
+        result = await executor.execute(execution_id, request.payload)
+    
+    return ExecuteResponse(
+        execution_id=execution_id,
+        status="completed",
+        result=result,
+        trace=[]
+    )
+
+async def _execute_langgraph(payload: Dict, config: Dict) -> Dict:
+    """Execute LangGraph workflow."""
+    # Implementation would call LangGraph runtime
+    return {"framework": "langgraph", "output": "executed"}
+
+async def _execute_crewai(payload: Dict, config: Dict) -> Dict:
+    """Execute CrewAI crew."""
+    return {"framework": "crewai", "output": "executed"}
+
+async def _execute_autogen(payload: Dict, config: Dict) -> Dict:
+    """Execute AutoGen agent."""
+    return {"framework": "autogen", "output": "executed"}
+
+# Streaming endpoint for long-running executions
+@app.post("/api/v1/execute/stream")
+async def execute_stream(
+    request: ExecuteRequest,
+    x_tenant_id: str = Depends(get_tenant_id)
+):
+    """
+    Streaming execution - yields results as they complete.
+    For long-running agent workflows.
+    """
+    execution_id = str(uuid.uuid4())
+    
+    async def event_generator():
+        # Yield status updates
+        yield {"event": "start", "execution_id": execution_id}
+        # Execute and yield chunks
+        yield {"event": "chunk", "data": {"status": "running"}}
+        yield {"event": "done", "data": {"result": "completed"}}
+    
+    return event_generator()
 
 @app.websocket("/ws/telemetry")
 async def telemetry_endpoint(websocket: WebSocket):

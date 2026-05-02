@@ -11,6 +11,7 @@ class CanonicalIdentity(Base):
     __tablename__ = "canonical_identity"
 
     canonical_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)  # Multi-tenant isolation
     subject_type: Mapped[str] = mapped_column(String(32), nullable=False) # Human, Agent, Organization
     subject_ref: Mapped[str] = mapped_column(String(128), nullable=False)
     issuer: Mapped[str] = mapped_column(String(128), nullable=False)
