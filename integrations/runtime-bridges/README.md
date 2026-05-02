@@ -70,13 +70,3 @@ Production checklist for Agentfield integration:
 4. telemetry correlation IDs between Agentfield runs and kernel events
 
 If you share your Agentfield runtime version and deployment mode (cloud/self-hosted), we can provide a concrete adapter mapping.
-
-
-## Design goals for native runtime
-
-To justify a first-party runtime, the integration layer should optimize for:
-
-- **Consistent cross-runtime behavior**: identical lifecycle semantics (`init`, `invoke`, `stream`, `close`), error codes, retries, and timeout handling regardless of language runtime.
-- **Kernel-native observability and compliance**: built-in telemetry correlation, audit events, policy decision traces, and enforcement hooks as first-class runtime behavior.
-
-These goals keep bridge implementations predictable while preserving governance guarantees across Python, Node.js, Go, Java, .NET, and Rust ecosystems.
