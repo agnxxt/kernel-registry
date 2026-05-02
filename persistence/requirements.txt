@@ -8,7 +8,7 @@ fastapi==0.115.11
 uvicorn==0.34.0
 litellm>=1.0.0
 PyGithub==2.6.0
-slack_sdk>=3.0.0
+slack_sdk>=3.41.0
 jira>=3.0.0
 confluent-kafka>=2.0.0
 openfga-sdk>=0.3.0
