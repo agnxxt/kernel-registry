@@ -935,3 +935,104 @@ async def read_tuples(object: str = None, relation: str = None,
     """
     tuples = fga.read(object, relation, user, model_id)
     return {"tuples": [t.to_dict() for t in tuples]}
+
+
+# ============================================================
+# ABAC - Attribute-Based Access Control
+# ============================================================
+
+from kernel_engine.abac import ABACEngine, ABACPolicy, Attribute, AttributeType, AttributeOperator, Condition, ConditionType, AttributeExtractor
+
+# ABAC singleton
+abac_engine = ABACEngine()
+
+
+class ABACPolicyCreate(BaseModel):
+    name: str
+    description: str = ""
+    subjects: List[Dict[str, Any]] = []
+    resources: List[Dict[str, Any]] = []
+    environments: List[Dict[str, Any]] = []
+    actions: List[str] = []
+    priority: int = 0
+    enabled: bool = True
+
+
+@app.post("/api/v1/abac/policies")
+async def create_abac_policy(policy: ABACPolicyCreate, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ABAC: Create policy.
+    """
+    p = ABACPolicy(
+        name=policy.name,
+        description=policy.description,
+        subjects=policy.subjects,
+        resources=policy.resources,
+        environments=policy.environments,
+        actions=policy.actions,
+        priority=policy.priority,
+        enabled=policy.enabled,
+    )
+    abac_engine.add_policy(p)
+    return {"policy_id": p.policy_id, "name": p.name, "status": "created"}
+
+
+@app.get("/api/v1/abac/policies")
+async def list_abac_policies(tenant_id: str = Depends(get_tenant_id)):
+    """
+    ABAC: List policies.
+    """
+    policies = abac_engine.list_policies()
+    return [{"policy_id": p.policy_id, "name": p.name, "priority": p.priority, 
+             "enabled": p.enabled} for p in policies]
+
+
+@app.get("/api/v1/abac/policies/{policy_id}")
+async def get_abac_policy(policy_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ABAC: Get policy.
+    """
+    policy = abac_engine.get_policy(policy_id)
+    if not policy:
+        raise HTTPException(status_code=404, detail="Policy not found")
+    return {"policy_id": policy.policy_id, "name": policy.name, 
+            "description": policy.description, "actions": policy.actions,
+            "priority": policy.priority, "enabled": policy.enabled}
+
+
+@app.delete("/api/v1/abac/policies/{policy_id}")
+async def delete_abac_policy(policy_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ABAC: Delete policy.
+    """
+    abac_engine.remove_policy(policy_id)
+    return {"status": "deleted", "policy_id": policy_id}
+
+
+class ABACCheckRequest(BaseModel):
+    subject: Dict[str, Any]
+    resource: Dict[str, Any]
+    action: str
+    environment: Dict[str, Any] = {}
+
+
+@app.post("/api/v1/abac/check")
+async def check_abac(request: ABACCheckRequest, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ABAC: Check authorization.
+    """
+    allowed = abac_engine.authorize(
+        request.subject, request.resource, request.action, request.environment
+    )
+    return {"allowed": allowed, "action": request.action}
+
+
+@app.post("/api/v1/abac/check/all")
+async def check_abac_all(request: ABACCheckRequest, tenant_id: str = Depends(get_tenant_id)):
+    """
+    ABAC: Evaluate all policies.
+    """
+    results = abac_engine.evaluate_all(
+        request.subject, request.resource, request.action, request.environment
+    )
+    return {"results": results}
