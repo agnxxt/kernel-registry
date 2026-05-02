@@ -32,6 +32,12 @@ Frameworks focus on reasoning. This focuses on control.
 
 ---
 
+## 🌉 Runtime Bridges
+
+AGenNext Kernel provides language-agnostic bridge templates for integrating external runtimes. See [integrations/runtime-bridges](/integrations/runtime-bridges/) for Python, Node.js, Go, Java, .NET, and Rust templates.
+
+---
+
 ## 🚀 Quickstart
 
 ```bash
