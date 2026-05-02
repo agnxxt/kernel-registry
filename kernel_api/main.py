@@ -820,3 +820,118 @@ async def translate_modality(message: A2AMessageModel, target_modality: str,
     return {"original_modality": message.modality,
             "target_modality": target_modality,
             "content": translated.content}
+
+
+# ============================================================
+# OpenFGA - Fine-Grained Authorization
+# ============================================================
+
+from kernel_engine.openfga import FGA, FGAModel, TypeDefinition, RelationDef, RelationType, Tuple, FGAChecker
+
+# FGA singleton
+fga = FGA()
+
+
+class FGAModelCreate(BaseModel):
+    types: List[Dict[str, Any]]
+    schema_version: str = "1.1"
+
+
+@app.post("/api/v1/fga/models")
+async def create_fga_model(model: FGAModelCreate, tenant_id: str = Depends(get_tenant_id)):
+    """
+    OpenFGA: Create authorization model.
+    """
+    fga_model = FGAModel(schema_version=model.schema_version)
+    
+    for td in model.types:
+        tdef = TypeDefinition(type=td["type"])
+        for rn, rd in td.get("relations", {}).items():
+            rtypes = {RelationType(rt) for rt in rd.get("relation_types", [])}
+            tdef.relations[rn] = RelationDef(rn, rtypes, rd.get("rewrite", {}))
+        fga_model.types[td["type"]] = tdef
+    
+    model_id = fga.create_model(fga_model)
+    return {"model_id": model_id, "status": "created"}
+
+
+@app.get("/api/v1/fga/models")
+async def list_fga_models(tenant_id: str = Depends(get_tenant_id)):
+    """
+    OpenFGA: List models.
+    """
+    return [{"model_id": m.model_id, "types": list(m.types.keys())} 
+            for m in fga.models.values()]
+
+
+@app.get("/api/v1/fga/models/{model_id}")
+async def get_fga_model(model_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    OpenFGA: Get model.
+    """
+    model = fga.get_model(model_id)
+    if not model:
+        raise HTTPException(status_code=404, detail="Model not found")
+    return model.to_dict()
+
+
+class TupleWriteRequest(BaseModel):
+    object: str
+    relation: str
+    user: str
+
+
+@app.post("/api/v1/fga/write")
+async def write_tuples(tuple: TupleWriteRequest, model_id: str = None,
+                     tenant_id: str = Depends(get_tenant_id)):
+    """
+    OpenFGA: Write authorization tuple.
+    """
+    t = Tuple(tuple.object, tuple.relation, tuple.user)
+    
+    store = fga.tuple_stores.get(model_id or fga.default_model_id)
+    if not store:
+        raise HTTPException(status_code=400, detail="No model configured")
+    
+    checker = FGAChecker()
+    checker.model = fga.get_model(model_id)
+    checker.tuple_store = store
+    checker.write(t)
+    
+    return {"status": "written", "tuple": tuple.dict()}
+
+
+@app.post("/api/v1/fga/delete")
+async def delete_tuple(tuple: TupleWriteRequest, model_id: str = None,
+                     tenant_id: str = Depends(get_tenant_id)):
+    """
+    OpenFGA: Delete authorization tuple.
+    """
+    t = Tuple(tuple.object, tuple.relation, tuple.user)
+    
+    store = fga.tuple_stores.get(model_id or fga.default_model_id)
+    if store:
+        store.delete(t)
+    
+    return {"status": "deleted", "tuple": tuple.dict()}
+
+
+@app.post("/api/v1/fga/check")
+async def check_permission(object: str, relation: str, user: str, 
+                       model_id: str = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    OpenFGA: Check permission.
+    """
+    allowed = fga.check(object, relation, user, model_id)
+    return {"allowed": allowed, "object": object, "relation": relation, "user": user}
+
+
+@app.get("/api/v1/fga/read")
+async def read_tuples(object: str = None, relation: str = None,
+                  user: str = None, model_id: str = None,
+                  tenant_id: str = Depends(get_tenant_id)):
+    """
+    OpenFGA: Read tuples.
+    """
+    tuples = fga.read(object, relation, user, model_id)
+    return {"tuples": [t.to_dict() for t in tuples]}
