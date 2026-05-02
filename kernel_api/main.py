@@ -675,3 +675,148 @@ async def check_rate_limit(agent_id: str, action: str, limit: int = 100,
     """
     allowed = rate_limiter.check(tenant_id, agent_id, action, limit)
     return {"agent_id": agent_id, "action": action, "allowed": allowed}
+
+
+# ============================================================
+# A2A - Agent to Agent Protocol Endpoints
+# ============================================================
+
+from kernel_engine.a2a import A2AMessage, AgentInfo, A2ARegistry, A2ARouter, TranslationEngine
+
+# A2A singletons
+a2a_registry = A2ARegistry()
+a2a_router = A2ARouter()
+translation_engine = TranslationEngine()
+
+
+class AgentRegisterModel(BaseModel):
+    agent_id: str
+    name: str
+    framework: str = "custom"
+    language: str = "python"
+    capabilities: List[str] = []
+    cloud: str = "aws"
+    endpoint: str = ""
+
+
+@app.post("/api/v1/a2a/agents", response_model=Dict)
+async def register_agent(agent: AgentRegisterModel, tenant_id: str = Depends(get_tenant_id)):
+    """
+    A2A: Register agent in registry.
+    """
+    info = AgentInfo(
+        agent_id=agent.agent_id,
+        name=agent.name,
+        framework=agent.framework,
+        language=agent.language,
+        capabilities=agent.capabilities,
+        cloud=agent.cloud,
+        endpoint=agent.endpoint,
+    )
+    urn = a2a_registry.register(info)
+    return {"agent_id": agent.agent_id, "urn": urn}
+
+
+@app.get("/api/v1/a2a/agents")
+async def discover_agents(framework: str = None, language: str = None,
+                    cloud: str = None, capability: str = None,
+                    tenant_id: str = Depends(get_tenant_id)):
+    """
+    A2A: Discover agents by criteria.
+    """
+    agents = a2a_registry.discover(framework, language, cloud, capability)
+    return [{"agent_id": a.agent_id, "name": a.name, "urn": a.urn, 
+             "framework": a.framework, "language": a.language}
+            for a in agents]
+
+
+@app.get("/api/v1/a2a/agents/{agent_id}")
+async def get_agent(agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    A2A: Get agent info.
+    """
+    agent = a2a_registry.get(agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    return {"agent_id": agent.agent_id, "name": agent.name, 
+            "urn": agent.urn, "framework": agent.framework}
+
+
+class A2AMessageModel(BaseModel):
+    sender: str
+    recipient: str
+    content: Any
+    modality: str = "text"
+    language: str = "python"
+    context: Dict[str, Any] = {}
+
+
+@app.post("/api/v1/a2a/messages")
+async def send_a2a_message(message: A2AMessageModel, tenant_id: str = Depends(get_tenant_id)):
+    """
+    A2A: Send agent-to-agent message.
+    """
+    msg = A2AMessage(
+        sender=message.sender,
+        recipient=message.recipient,
+        content=message.content,
+        modality=message.modality,
+        language=message.language,
+        framework_metadata=message.context,
+    )
+    message_id = await a2a_router.send(msg)
+    return {"message_id": message_id, "status": "sent"}
+
+
+@app.post("/api/v1/a2a/broadcast")
+async def broadcast_a2a_message(message: A2AMessageModel, 
+                           tenant_id: str = Depends(get_tenant_id)):
+    """
+    A2A: Broadcast to agents matching filter.
+    """
+    filter_dict = {}
+    if message.context.get("framework"):
+        filter_dict["framework"] = message.context["framework"]
+    if message.context.get("language"):
+        filter_dict["language"] = message.context["language"]
+    
+    msg = A2AMessage(
+        sender=message.sender,
+        recipient="*",
+        content=message.content,
+        modality=message.modality,
+        language=message.language,
+        framework_metadata=message.context,
+    )
+    message_ids = await a2a_router.broadcast(msg, filter_dict or None)
+    return {"broadcast_count": len(message_ids), "message_ids": message_ids}
+
+
+@app.get("/api/v1/a2a/messages/{agent_id}")
+async def get_message_history(agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    A2A: Get message history for agent.
+    """
+    history = a2a_router.get_history(agent_id)
+    return [{"message_id": m.message_id, "sender": m.sender, 
+             "content": m.content, "modality": m.modality}
+            for m in history[-10:]]  # Last 10
+
+
+@app.post("/api/v1/a2a/translate")
+async def translate_modality(message: A2AMessageModel, target_modality: str,
+                       tenant_id: str = Depends(get_tenant_id)):
+    """
+    A2A: Translate between modalities.
+    """
+    msg = A2AMessage(
+        sender=message.sender,
+        recipient=message.recipient,
+        content=message.content,
+        modality=message.modality,
+        language=message.language,
+    )
+    translated = await translation_engine.translate(msg, target_modality)
+    return {"original_modality": message.modality,
+            "target_modality": target_modality,
+            "content": translated.content}
