@@ -14,22 +14,24 @@ import hashlib
 
 
 class IdentityType(Enum):
-    DID = "did"              # Decentralized Identifier
-    EMAIL = "email"          # Email address
-    PHONE = "phone"        # Phone number
-    UUID = "uuid"          # System UUID
-    SSO = "sso"            # SSO provider
-    AGENT = "agent"        # Agent identity
+    DID = "did"              # Decentralized Identifier (preferred)
+    UUID = "uuid"          # System UUID (preferred)
+    SUBJECT = "subject"    # JWT/OIDC subject claim (preferred)
+    # Note: Email is NOT an identity - it's an account/credential
 
 
 class AccountType(Enum):
     PASSWORD = "password"  # Password credential
-    OAuth = "oauth"        # OAuth provider
+    EMAIL = "email"       # Email account (verification)
+    PHONE = "phone"      # Phone account (verification)
+    OAUTH = "oauth"        # OAuth provider
     SAML = "saml"          # SAML provider
     API_KEY = "api_key"    # API key
     JWT = "jwt"            # JWT token
     MFA = "mfa"           # MFA/2FA
-    passkey = "passkey"   # WebAuthn passkey
+    PASSKEY = "passkey"   # WebAuthn passkey
+    # Note: Email/PHONE are accounts, not identities
+    # Identity = DID/UUID/SUBJECT
 
 
 class IdentityStatus(Enum):
