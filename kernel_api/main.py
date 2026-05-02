@@ -2012,3 +2012,128 @@ async def caas_evaluate(agent_id: str, action: str, resource: str,
     """
     result = caas_client.evaluate_policy(agent_id, action, resource)
     return result
+
+
+# ============================================================
+# Autonomys (Authonomyx) Identity Protocol
+# ============================================================
+
+from kernel_engine.autonomys import AutoPKI, AutoAuthZ, AutoIDType, AutoID
+
+auto_pki = AutoPKI()
+auto_authz = AutoAuthZ()
+
+
+# --- Auto ID (Core) ---
+
+@app.post("/api/v1/auto/identity")
+async def create_auto_id(public_id: str, id_type: str = "agent",
+                      public_key: str = "", tenant_id: str = Depends(get_tenant_id)):
+    """
+    Self-issue Auto ID.
+    """
+    try:
+        auto_id = auto_pki.self_issue(public_id, id_type, public_key)
+        return auto_id.to_dict()
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/v1/auto/identity/{auto_id}")
+async def get_auto_id(auto_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get Auto ID.
+    """
+    auto_id = auto_pki.get(auto_id)
+    if not auto_id:
+        raise HTTPException(status_code=404, detail="Auto ID not found")
+    return auto_id.to_dict()
+
+
+@app.post("/api/v1/auto/identity/{auto_id}/issue")
+async def issue_auto_id(auto_id: str, public_id: str, id_type: str = "agent",
+                       public_key: str = "", tenant_id: str = Depends(get_tenant_id)):
+    """
+    Issue Auto ID (delegate identity).
+    """
+    try:
+        new_auto_id = auto_pki.issue(public_id, auto_id, id_type, public_key)
+        return new_auto_id.to_dict()
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/v1/auto/identity/{auto_id}/suspend")
+async def suspend_auto_id(auto_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Suspend Auto ID.
+    """
+    result = auto_pki.suspend(auto_id)
+    return {"status": "suspended" if result else "not_found"}
+
+
+@app.post("/api/v1/auto/identity/{auto_id}/reactivate")
+async def reactivate_auto_id(auto_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Reactivate Auto ID.
+    """
+    result = auto_pki.reactivate(auto_id)
+    return {"status": "active" if result else "not_found"}
+
+
+# --- Authorization ---
+
+@app.post("/api/v1/auto/authorize")
+async def auto_authorize(auto_id: str, resource: str, action: str,
+                   tenant_id: str = Depends(get_tenant_id)):
+    """
+    Authorize action.
+    """
+    result = auto_authz.authorize(auto_id, resource, action)
+    return result
+
+
+# --- Delegation ---
+
+@app.post("/api/v1/auto/delegation")
+async def create_delegation(issuer_auto_id: str, delegate_auto_id: str,
+                       scope: List[str] = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Create delegation.
+    """
+    try:
+        delegation = auto_pki.delegate(issuer_auto_id, delegate_auto_id, scope or [])
+        return {"delegation_id": delegation.delegation_id, "valid": delegation.is_valid()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/v1/auto/delegation/{delegate_auto_id}")
+async def verify_delegation(delegate_auto_id: str, scope: str,
+                        tenant_id: str = Depends(get_tenant_id)):
+    """
+    Verify delegation.
+    """
+    result = auto_authz.delegate_authorize(delegate_auto_id, "", scope)
+    return result
+
+
+# --- Capabilities ---
+
+@app.post("/api/v1/auto/capability")
+async def grant_capability(auto_id: str, resource: str,
+                        actions: List[str] = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Grant capability.
+    """
+    cap = auto_pki.grant_capability(auto_id, resource, actions or [])
+    return {"cap_id": cap.cap_id, "resource": resource}
+
+
+@app.get("/api/v1/auto/capability/{auto_id}")
+async def list_capabilities(auto_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    List capabilities.
+    """
+    caps = auto_pki.list_capabilities(auto_id)
+    return {"capabilities": [{"resource": c.resource, "actions": c.actions} for c in caps]}
