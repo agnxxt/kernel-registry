@@ -129,6 +129,7 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["object", "result", "instrument"],
+            "acceptable_values": ["SoftwareApplication", "DataFeed", "Article", "Product", "Service"],
         },
         "ReadAction": {
             "parent": "Action", 
@@ -136,6 +137,7 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["object", "result"],
+            "acceptable_values": ["Thing", "Data", "Text", "ImageObject"],
         },
         "UpdateAction": {
             "parent": "Action",
@@ -143,6 +145,7 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing", 
             "properties": ["object", "result", "targetCollection"],
+            "acceptable_values": ["Thing", "Data", "Product"],
         },
         "DeleteAction": {
             "parent": "Action",
@@ -150,6 +153,7 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["object", "instrument"],
+            "acceptable_values": ["Thing", "Data", "Product"],
         },
         
         # Communication
@@ -159,6 +163,8 @@ class ActionVocabulary:
             "object_type": "Message",
             "result": "Message",
             "properties": ["about", "recipient", "language"],
+            "acceptable_values": ["Message", "Comment", "Conversation"],
+            "relations": ["sender", "recipient", "inReplyTo", "about"],
         },
         "SendAction": {
             "parent": "TransferAction",
@@ -166,6 +172,8 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["recipient", "deliveryMethod"],
+            "acceptable_values": ["Message", "Product", "Parcel"],
+            "relations": ["sender", "recipient", "deliveryMethod"],
         },
         "ReceiveAction": {
             "parent": "Action",
@@ -173,6 +181,8 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["sender", "deliveryMethod"],
+            "acceptable_values": ["Message", "Product", "Parcel"],
+            "relations": ["sender", "receiver"],
         },
         
         # Trade
@@ -182,6 +192,8 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["seller", "buyer", "price", "priceCurrency"],
+            "acceptable_values": ["Product", "Service", "Membership"],
+            "relations": ["seller", "buyer", "broker", "offer"],
         },
         "SellAction": {
             "parent": "TradeAction", 
@@ -189,6 +201,8 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["seller", "buyer", "price", "priceCurrency"],
+            "acceptable_values": ["Product", "Service"],
+            "relations": ["seller", "buyer", "broker"],
         },
         "GiveAction": {
             "parent": "TransferAction",
@@ -196,6 +210,8 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["recipient", "giver", "receiver"],
+            "acceptable_values": ["Thing", "Product", "Award"],
+            "relations": ["giver", "recipient", "receiver"],
         },
         
         # Control
@@ -204,30 +220,40 @@ class ActionVocabulary:
             "description": "Activate something",
             "object_type": "Thing",
             "properties": ["instrument"],
+            "acceptable_values": ["SoftwareApplication", "Device"],
+            "relations": ["instrument", "target"],
         },
         "DeactivateAction": {
             "parent": "ControlAction",
             "description": "Deactivate something",
             "object_type": "Thing",
             "properties": ["instrument"],
+            "acceptable_values": ["SoftwareApplication", "Device"],
+            "relations": ["instrument", "target"],
         },
         "StartAction": {
             "parent": "ControlAction",
             "description": "Start something",
             "object_type": "Thing",
             "properties": ["instrument"],
+            "acceptable_values": ["SoftwareApplication", "Process", "Task"],
+            "relations": ["target", "instrument"],
         },
         "StopAction": {
             "parent": "ControlAction", 
             "description": "Stop something",
             "object_type": "Thing", 
             "properties": ["instrument"],
+            "acceptable_values": ["SoftwareApplication", "Process", "Task"],
+            "relations": ["target", "instrument"],
         },
         "PauseAction": {
             "parent": "ControlAction",
             "description": "Pause something",
             "object_type": "Thing",
             "properties": ["instrument"],
+            "acceptable_values": ["SoftwareApplication", "Process"],
+            "relations": ["target"],
         },
         
         # Transfer
@@ -237,6 +263,8 @@ class ActionVocabulary:
             "object_type": "SoftwareApplication",
             "result": "SoftwareApplication", 
             "properties": ["fromLocation", "toLocation"],
+            "acceptable_values": ["SoftwareApplication", "Data", "ImageObject"],
+            "relations": ["fromLocation", "toLocation", "downloadUrl"],
         },
         "UploadAction": {
             "parent": "TransferAction",
@@ -244,6 +272,8 @@ class ActionVocabulary:
             "object_type": "SoftwareApplication",
             "result": "SoftwareApplication",
             "properties": ["fromLocation", "toLocation"],
+            "acceptable_values": ["Data", "MediaObject", "ImageObject"],
+            "relations": ["fromLocation", "toLocation"],
         },
         "TransferAction": {
             "parent": "Action",
@@ -251,6 +281,8 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["fromLocation", "toLocation"],
+            "acceptable_values": ["Thing", "Data"],
+            "relations": ["fromLocation", "toLocation", "carrier"],
         },
         
         # Discovery
@@ -260,6 +292,8 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["object"],
+            "acceptable_values": ["Thing", "Place", "Person"],
+            "relations": ["object", "instrument"],
         },
         "FindAction": {
             "parent": "DiscoverAction",
@@ -267,6 +301,8 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["found"],
+            "acceptable_values": ["Thing", "Person", "Place"],
+            "relations": ["found", "searcher"],
         },
         "SearchAction": {
             "parent": "Action",
@@ -274,6 +310,8 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["query", "targetCollection"],
+            "acceptable_values": ["Thing", "Product", "Article"],
+            "relations": ["query", "targetCollection", "searcher"],
         },
         
         # Install/Uninstall
@@ -283,12 +321,16 @@ class ActionVocabulary:
             "object_type": "SoftwareApplication",
             "result": "SoftwareApplication",
             "properties": ["downloadUrl", "installUrl"],
+            "acceptable_values": ["SoftwareApplication", "BrowserExtension"],
+            "relations": ["downloadUrl", "installUrl", "targetPlatform"],
         },
         "UnInstallAction": {
             "parent": "ControlAction",
             "description": "Uninstall software",
             "object_type": "SoftwareApplication",
             "properties": ["targetCollection"],
+            "acceptable_values": ["SoftwareApplication"],
+            "relations": ["target", "installer"],
         },
         
         # Agent-specific
@@ -298,6 +340,8 @@ class ActionVocabulary:
             "object_type": "SoftwareApplication",
             "result": "Thing",
             "properties": ["agent", "input", "output", "context"],
+            "acceptable_values": ["SoftwareApplication", "Task"],
+            "relations": ["agent", "input", "output", "context", "runtime"],
         },
         "AgentDelegateAction": {
             "parent": "Action",
@@ -305,6 +349,8 @@ class ActionVocabulary:
             "object_type": "SoftwareApplication",
             "result": "Thing",
             "properties": ["delegate", "scope", "constraints"],
+            "acceptable_values": ["SoftwareApplication", "Agent"],
+            "relations": ["principal", "delegate", "scope", "constraints"],
         },
         "AgentImpersonateAction": {
             "parent": "Action",
@@ -312,6 +358,8 @@ class ActionVocabulary:
             "object_type": "SoftwareApplication",
             "result": "Thing",
             "properties": ["principal", "delegate", "scope"],
+            "acceptable_values": ["SoftwareApplication", "Agent"],
+            "relations": ["principal", "delegate", "scope", "authorizedBy"],
         },
         "AuthorizeAction": {
             "parent": "Action",
@@ -319,7 +367,22 @@ class ActionVocabulary:
             "object_type": "Thing",
             "result": "Thing",
             "properties": ["recipient", "scope"],
+            "acceptable_values": ["Action", "Agent"],
+            "relations": ["recipient", "scope", "witness"],
         },
+    }
+    
+    # Common relations across all actions
+    COMMON_RELATIONS = {
+        "agent": {"type": "Thing", "description": "Direct performer"},
+        "object": {"type": "Thing", "description": "Thing acted upon"},
+        "result": {"type": "Thing", "description": "Outcome of action"},
+        "instrument": {"type": "Thing", "description": "Tool used"},
+        "location": {"type": "Place", "description": "Where action occurred"},
+        "startTime": {"type": "DateTime", "description": "When started"},
+        "endTime": {"type": "DateTime", "description": "When ended"},
+        "error": {"type": "Thing", "description": "Error if action failed"},
+        "actionStatus": {"type": "ActionStatus", "description": "Current status"},
     }
     
     @classmethod
