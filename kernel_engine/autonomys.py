@@ -235,6 +235,20 @@ class AutoPKI:
         """List capabilities"""
         return self.capabilities.get(auto_id, [])
     
+    def validate_action(self, action_type: str) -> bool:
+        """Validate schema.org action type"""
+        from kernel_engine.schema_actions import ActionVocabulary
+        return ActionVocabulary.validate_action(action_type)
+    
+    def authorize_action(self, auto_id: str, action_type: str,
+                      resource: str, obj: str = None) -> Dict:
+        """Authorize with schema.org action validation"""
+        if not self.validate_action(action_type):
+            return {"allowed": False, "reason": "invalid_action_type"}
+        if not self.check_capability(auto_id, resource, action_type):
+            return {"allowed": False, "reason": "no_capability"}
+        return {"allowed": True, "action_type": action_type}
+    
     # ============ Authentication ============
     
     def authenticate(self, auto_id: str, challenge: str = "") -> bool:

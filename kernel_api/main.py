@@ -2137,3 +2137,36 @@ async def list_capabilities(auto_id: str, tenant_id: str = Depends(get_tenant_id
     """
     caps = auto_pki.list_capabilities(auto_id)
     return {"capabilities": [{"resource": c.resource, "actions": c.actions} for c in caps]}
+
+
+# --- Schema.org Actions ---
+
+@app.get("/api/v1/schema/actions")
+async def list_schema_actions(tenant_id: str = Depends(get_tenant_id)):
+    """
+    List all schema.org action types.
+    """
+    from kernel_engine.schema_actions import ActionVocabulary
+    return {"actions": ActionVocabulary.list_actions()}
+
+
+@app.get("/api/v1/schema/actions/{action_type}")
+async def get_schema_action(action_type: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get action specification.
+    """
+    from kernel_engine.schema_actions import ActionVocabulary
+    spec = ActionVocabulary.get_action_spec(action_type)
+    if not spec:
+        raise HTTPException(status_code=404, detail="Action not found")
+    return spec
+
+
+@app.post("/api/v1/auto/authorize/action")
+async def authorize_action(auto_id: str, action_type: str, resource: str,
+                       obj: str = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Authorize with schema.org action validation.
+    """
+    result = auto_pki.authorize_action(auto_id, action_type, resource, obj)
+    return result
