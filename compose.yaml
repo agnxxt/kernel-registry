@@ -1,5 +1,4 @@
 services:
-  # --- INFRASTRUCTURE LAYER ---
   postgres:
     image: postgres:16-alpine
     container_name: agent-kernel-postgres
@@ -16,174 +15,123 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
-  redpanda:
-    image: docker.redpanda.com/redpandadata/redpanda:v24.1.1
-    container_name: agent-kernel-bus
-    command:
-      - redpanda start
-      - --overprovisioned
-      - --smp 1
-      - --memory 1G
-      - --reserve-memory 0M
-      - --node-id 0
-      - --check=false
-      - --kafka-addr PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
-      - --advertise-kafka-addr PLAINTEXT://redpanda:9092,OUTSIDE://localhost:9094
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: agent-kernel-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc -w 2 localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: agent-kernel-kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     ports:
       - "9092:9092"
       - "9094:9094"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9644/metrics || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list > /dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
 
-  redpanda-console:
-    image: docker.redpanda.com/redpandadata/console:latest
-    container_name: agent-kernel-bus-ui
+  neo4j:
+    image: neo4j:5.25-community
+    container_name: agent-kernel-neo4j
     environment:
-      KAFKA_BROKERS: redpanda:9092
+      NEO4J_AUTH: neo4j/password1234
     ports:
-      - "8081:8080"
-    depends_on:
-      - redpanda
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    restart: unless-stopped
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.20.1
+    container_name: agent-kernel-mlflow
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    restart: unless-stopped
 
   vault:
-    image: hashicorp/vault:latest
+    image: hashicorp/vault:1.17
     container_name: agent-kernel-vault
     ports:
       - "8200:8200"
     environment:
-      - VAULT_DEV_ROOT_TOKEN_ID=root
-      - VAULT_ADDR=http://0.0.0.0:8200
-    cap_add:
-      - IPC_LOCK
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_ADDR: http://0.0.0.0:8200
+    cap_add: ["IPC_LOCK"]
+    restart: unless-stopped
 
-  # --- GOVERNANCE LAYER ---
   openfga:
-    image: openfga/openfga:latest
+    image: openfga/openfga:v1.8.4
     container_name: agent-kernel-authz
     command: run
     environment:
-      - OPENFGA_DATA_STORE_ENGINE=postgres
-      - OPENFGA_DATA_STORE_URI=postgres://kernel:kernelpass@postgres:5432/kernel?sslmode=disable
+      OPENFGA_DATA_STORE_ENGINE: postgres
+      OPENFGA_DATA_STORE_URI: postgres://kernel:${POSTGRES_PASSWORD:-kernelpass}@postgres:5432/kernel?sslmode=disable
     ports:
       - "8082:8081"
       - "8083:8082"
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
 
-  opa:
-    image: openpolicyagent/opa:latest
-    container_name: agent-kernel-opa
-    ports:
-      - "8181:8181"
-    command:
-      - "run"
-      - "--server"
-      - "--log-level=debug"
-      - "/policies"
-    volumes:
-      - ./policies:/policies:ro
-
-  # --- COGNITION & OPERATIONS LAYER ---
-  temporal:
-    image: temporalio/auto-setup:1.22.4
-    container_name: agent-kernel-temporal
-    ports:
-      - "7233:7233"
-    environment:
-      - DB=postgresql
-      - DB_PORT=5432
-      - POSTGRES_USER=kernel
-      - POSTGRES_PWD=kernelpass
-      - POSTGRES_SEEDS=postgres
-      - SKIP_DB_CREATE=true
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  temporal-ui:
-    image: temporalio/ui:2.21.3
-    container_name: agent-kernel-temporal-ui
-    ports:
-      - "8084:8080"
-    environment:
-      - TEMPORAL_ADDRESS: temporal:7233
-
-  blockchain:
-    image: ghcr.io/foundry-rs/foundry:latest
-    container_name: agent-kernel-chain
-    command: anvil --host 0.0.0.0
-    ports:
-      - "8545:8545"
-
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: agent-kernel-audit-jaeger
-    ports:
-      - "16686:16686"
-      - "4317:4317"
-    environment:
-      - COLLECTOR_OTLP_ENABLED=true
-
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.20.1
-    container_name: agent-kernel-mlflow
-    ports:
-      - "5000:5000"
-    environment:
-      - MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow.db
-      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
-    volumes:
-      - mlflow_data:/mlflow
-
-  # --- KERNEL CORE SERVICES ---
   kernel-api:
     build:
       context: .
     container_name: agent-kernel-api
+    command: bash -lc "python scripts/wait_for_services.py && uvicorn kernel_api.main:app --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel}
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
-      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
-      VAULT_ADDR: http://vault:8200
-      FGA_API_URL: http://openfga:8081
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI:-http://mlflow:5000}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      VAULT_ADDR: ${VAULT_ADDR:-http://vault:8200}
+      FGA_API_URL: ${FGA_API_URL:-http://openfga:8081}
+      POSTGRES_PORT: 5432
+      KAFKA_PORT: 9092
+      WAIT_TIMEOUT: ${WAIT_TIMEOUT:-90}
     depends_on:
       postgres:
         condition: service_healthy
-      redpanda:
+      kafka:
         condition: service_healthy
-
-  watchdog-responder:
-    build:
-      context: .
-    container_name: agent-kernel-watchdog
-    command: python -m kernel_engine.cyber_cai.watchdog_responder
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=redpanda:9092
-      - DATABASE_URL=postgresql+psycopg2://kernel:kernelpass@postgres:5432/kernel
-    depends_on:
-      redpanda:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-
-  consensus-engine:
-    build:
-      context: .
-    container_name: agent-kernel-consensus
-    command: python -m kernel_engine.consensus_engine
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=redpanda:9092
-    depends_on:
-      redpanda:
-        condition: service_healthy
+      mlflow:
+        condition: service_started
+      neo4j:
+        condition: service_started
+    restart: unless-stopped
 
   kernel-ui:
     build:
@@ -195,7 +143,9 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:8000
     depends_on:
       - kernel-api
+    restart: unless-stopped
 
 volumes:
   pg_data:
+  neo4j_data:
   mlflow_data:
