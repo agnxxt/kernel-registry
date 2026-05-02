@@ -1236,3 +1236,122 @@ async def refresh_token(principal_id: str, tenant_id: str = Depends(get_tenant_i
     """
     result = identity_manager.refresh_principal(principal_id)
     return {"status": "refreshed" if result else "expired"}
+
+
+# ============================================================
+# Zingg Identity Resolver
+# ============================================================
+
+from kernel_engine.zingg import ZinggResolver, DIDResolver, DIDMethod, KeyType, KeyPurpose
+
+# Resolver singletons
+zingg_resolver = ZinggResolver()
+did_resolver = DIDResolver()
+
+
+class DIDCreate(BaseModel):
+    controller: str = ""
+    verification_keys: List[Dict[str, Any]] = []
+    services: List[Dict[str, Any]] = []
+
+
+@app.post("/api/v1/did")
+async def create_did(data: DIDCreate, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Create Zingg DID.
+    """
+    did = zingg_resolver.create_did(
+        controller_did=data.controller,
+        verification_keys=data.verification_keys,
+        services=data.services,
+    )
+    return {"did": did}
+
+
+@app.get("/api/v1/did/{did}")
+async def resolve_did(did: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Resolve DID to document.
+    """
+    doc = zingg_resolver.resolve_to_dict(did)
+    if not doc:
+        raise HTTPException(status_code=404, detail="DID not found")
+    return doc
+
+
+@app.put("/api/v1/did/{did}")
+async def update_did(did: str, verification_keys: List[Dict[str, Any]] = None,
+                  services: List[Dict[str, Any]] = None,
+                  tenant_id: str = Depends(get_tenant_id)):
+    """
+    Update DID document.
+    """
+    result = zingg_resolver.update(did, verification_keys, services)
+    if not result:
+        raise HTTPException(status_code=404, detail="DID not found")
+    doc = zingg_resolver.resolve_to_dict(did)
+    return doc
+
+
+@app.post("/api/v1/did/{did}/deactivate")
+async def deactivate_did(did: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Deactivate DID.
+    """
+    result = zingg_resolver.deactivate(did)
+    return {"status": "deactivated" if result else "not_found", "did": did}
+
+
+@app.get("/api/v1/did/{did}/services")
+async def get_did_services(did: str, service_type: str = None,
+                       tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get DID service endpoints.
+    """
+    if service_type:
+        services = zingg_resolver.get_services(did, service_type)
+    else:
+        services = zingg_resolver.get_services(did)
+    
+    return {"services": [
+        {"id": s.id, "type": s.service_type, "endpoint": s.endpoint}
+        for s in services
+    ]}
+
+
+@app.get("/api/v1/did/{did}/agent")
+async def get_agent_endpoint(did: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get agent execution endpoint.
+    """
+    endpoint = zingg_resolver.get_agent_endpoint(did)
+    return {"did": did, "agent_endpoint": endpoint}
+
+
+@app.post("/api/v1/did/{did}/delegate")
+async def delegate_did(did: str, delegate_did: str,
+                    tenant_id: str = Depends(get_tenant_id)):
+    """
+    Delegate DID to another identity.
+    """
+    result = zingg_resolver.delegate(did, delegate_did)
+    return {"status": "delegated" if result else "error", 
+            "delegator": did, "delegate": delegate_did}
+
+
+@app.get("/api/v1/did/{did}/delegate")
+async def get_delegation_chain(did: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get delegation chain.
+    """
+    chain = zingg_resolver.get_delegation_chain(did)
+    return {"did": did, "chain": chain}
+
+
+@app.get("/api/v1/did")
+async def list_dids(controller: str = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    List DIDs.
+    """
+    dids = zingg_resolver.list_dids(controller)
+    return {"dids": dids, "count": len(dids)}
