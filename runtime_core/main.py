@@ -90,8 +90,9 @@ def invoke(
     if len(req.payload.keys()) > MAX_PAYLOAD_KEYS:
         raise HTTPException(status_code=413, detail="payload too large")
 
-    if x_idempotency_key and x_idempotency_key in _idempotency_results:
-        return _idempotency_results[x_idempotency_key]
+    cache_key = f"{session_id}:{x_idempotency_key}" if x_idempotency_key else None
+    if cache_key and cache_key in _idempotency_results:
+        return _idempotency_results[cache_key]
 
     result = {
         "status": "accepted",
@@ -109,8 +110,8 @@ def invoke(
             payload={"action": req.action},
         )
     )
-    if x_idempotency_key:
-        _idempotency_results[x_idempotency_key] = result
+    if cache_key:
+        _idempotency_results[cache_key] = result
     return result
 
 

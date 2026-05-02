@@ -2,7 +2,7 @@
   "name": "agennext-dotnet-bridge",
   "version": "0.1.0",
   "runtime": "dotnet",
-  "entrypoint": "../../dotnet/bridge.cs",
+  "entrypoint": "../../dotnet/Bridge.cs",
   "capabilities": [
     "init",
     "invoke",
