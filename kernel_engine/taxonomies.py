@@ -449,6 +449,27 @@ TAXONOMIES = {
             "mobile": {"description": "Mobile"},
         }
     },
+    "job_role": {
+        "name": "Job Role",
+        "description": "Professional roles",
+        "values": {
+            "developer": {"description": "Developer"},
+            "designer": {"description": "Designer"},
+            "manager": {"description": "Manager"},
+            "analyst": {"description": "Analyst"},
+            "engineer": {"description": "Engineer"},
+            "architect": {"description": "Architect"},
+            "admin": {"description": "Administrator"},
+            "consultant": {"description": "Consultant"},
+            "executive": {"description": "Executive"},
+            "specialist": {"description": "Specialist"},
+            "lead": {"description": "Lead"},
+            "director": {"description": "Director"},
+            "vp": {"description": "VP"},
+            "cto": {"description": "CTO"},
+            "ciso": {"description": "CISO"},
+        }
+    },
 }
 
 
