@@ -1355,3 +1355,660 @@ async def list_dids(controller: str = None, tenant_id: str = Depends(get_tenant_
     """
     dids = zingg_resolver.list_dids(controller)
     return {"dids": dids, "count": len(dids)}
+
+
+# ============================================================
+# OIDC - OpenID Connect
+# ============================================================
+
+from kernel_engine.oidc import OIDCClient, OIDCProvider, TokenSet
+
+# OIDC client singleton
+oidc_client = OIDCClient()
+
+
+@app.get("/api/v1/oidc/.well-known/openid-configuration")
+async def oidc_discovery(tenant_id: str = Depends(get_tenant_id)):
+    """
+    OIDC Discovery endpoint.
+    """
+    issuer = "https://agent.example.com"
+    return oidc_client.discover(issuer)
+
+
+@app.get("/api/v1/oidc/authorize")
+async def oidc_authorize(state: str = "", nonce: str = "",
+                      scope: str = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Create OIDC authorization URL.
+    """
+    url = oidc_client.create_authorization_url(state=state, nonce=nonce, scope=scope)
+    return {"authorization_url": url}
+
+
+@app.post("/api/v1/oidc/token")
+async def oidc_token_exchange(code: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Exchange authorization code for tokens.
+    """
+    tokens = oidc_client.exchange_code(code)
+    return {"access_token": tokens.access_token, "token_type": tokens.token_type,
+            "expires_in": tokens.expires_in, "refresh_token": tokens.refresh_token,
+            "id_token": tokens.id_token}
+
+
+@app.post("/api/v1/oidc/refresh")
+async def oidc_refresh(refresh_token: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Refresh tokens.
+    """
+    tokens = oidc_client.refresh(refresh_token)
+    return {"access_token": tokens.access_token, "expires_in": tokens.expires_in}
+
+
+@app.get("/api/v1/oidc/userinfo")
+async def oidc_userinfo(access_token: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get userinfo (agent info).
+    """
+    try:
+        info = oidc_client.get_userinfo(access_token)
+        return info
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+# ============================================================
+# Entra ID - Microsoft Azure AD
+# ============================================================
+
+from kernel_engine.entra import EntraClient, EntraApplication
+
+# Entra client singleton
+entra_client = EntraClient()
+
+
+class EntraAppCreate(BaseModel):
+    display_name: str
+    app_type: str = "web"
+    scope: List[str] = []
+
+
+@app.post("/api/v1/entra/applications")
+async def register_entra_app(data: EntraAppCreate, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Register application in Entra ID.
+    """
+    app = entra_client.register_application(
+        display_name=data.display_name,
+        app_type=data.app_type,
+        scope=data.scope,
+    )
+    return {"app_id": app.app_id, "object_id": app.object_id, "display_name": app.display_name}
+
+
+@app.get("/api/v1/entra/applications/{app_id}")
+async def get_entra_app(app_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get application.
+    """
+    app = entra_client.get_application(app_id)
+    if not app:
+        raise HTTPException(status_code=404, detail="App not found")
+    return {"app_id": app.app_id, "object_id": app.object_id, "display_name": app.display_name}
+
+
+@app.post("/api/v1/entra/applications/{app_id}/sp")
+async def create_entra_sp(app_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Create service principal.
+    """
+    sp = entra_client.create_service_principal(app_id)
+    return {"sp_object_id": sp.sp_object_id, "app_id": sp.app_id}
+
+
+@app.post("/api/v1/entra/token")
+async def acquire_entra_token(app_id: str, scope: str = None, 
+                        tenant_id: str = Depends(get_tenant_id)):
+    """
+    Acquire token for application.
+    """
+    try:
+        token = entra_client.acquire_token(app_id, oauth2_scopes=scope)
+        return {"access_token": token.access_token, "expires_at": token.expires_at}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.post("/api/v1/entra/token/validate")
+async def validate_entra_token(access_token: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Validate token and get claims.
+    """
+    result = entra_client.validate_token(access_token)
+    if not result.get("active"):
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return result
+
+
+@app.get("/api/v1/entra/agent/id")
+async def get_entra_agent_id(access_token: str = None, id_token: str = None,
+                        tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get agent ID from Entra token.
+    """
+    agent_id = entra_client.get_agent_id(access_token=access_token, id_token=id_token)
+    if not agent_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return {"agent_id": agent_id}
+
+
+@app.get("/api/v1/entra/agent/roles")
+async def get_entra_agent_roles(access_token: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get agent's roles.
+    """
+    roles = entra_client.get_agent_roles(access_token)
+    return {"roles": roles}
+
+
+# ============================================================
+# Entra Agent Lifecycle Management
+# ============================================================
+
+class EntraLifecycle:
+    """Entra agent lifecycle operations"""
+    
+    def __init__(self, entra_client: EntraClient):
+        self.entra = entra_client
+        self.agents: Dict[str, Dict] = {}  # agent_id -> agent state
+    
+    # ============ Lifecycle States ============
+    
+    APPROVED = "approved"       # Agent approved but not provisioned
+    PROVISIONING = "provisioning"   # Being created
+    ACTIVE = "active"         # Running and authorized
+    SUSPENDED = "suspended"  # Temporarily disabled
+    DISABLED = "disabled"     # Stopped and deprovisioned
+    
+    def provision(self, app_id: str, agent_config: Dict) -> Dict:
+        """Provision new agent"""
+        import uuid
+        
+        agent_id = f"agent_{uuid.uuid4().hex[:12]}"
+        
+        # Create service principal
+        sp = self.entra.create_service_principal(app_id)
+        
+        # Assign roles
+        for role in agent_config.get("roles", ["Agent"]):
+            self.entra.assign_app_role(sp.sp_object_id, role)
+        
+        # Register agent
+        self.agents[agent_id] = {
+            "agent_id": agent_id,
+            "app_id": app_id,
+            "sp_object_id": sp.sp_object_id,
+            "state": self.PROVISIONING,
+            "config": agent_config,
+            "created_at": datetime.now().isoformat(),
+        }
+        
+        return self.agents[agent_id]
+    
+    def activate(self, agent_id: str) -> Dict:
+        """Activate agent"""
+        if agent_id not in self.agents:
+            raise ValueError(f"Agent {agent_id} not found")
+        
+        self.agents[agent_id]["state"] = self.ACTIVE
+        return self.agents[agent_id]
+    
+    def suspend(self, agent_id: str) -> Dict:
+        """Suspend agent"""
+        if agent_id not in self.agents:
+            raise ValueError(f"Agent {agent_id} not found")
+        
+        self.agents[agent_id]["state"] = self.SUSPENDED
+        return self.agents[agent_id]
+    
+    def disable(self, agent_id: str) -> Dict:
+        """Disable/deprovision agent"""
+        if agent_id not in self.agents:
+            raise ValueError(f"Agent {agent_id} not found")
+        
+        self.agents[agent_id]["state"] = self.DISABLED
+        return self.agents[agent_id]
+    
+    def get(self, agent_id: str) -> Dict:
+        """Get agent status"""
+        return self.agents.get(agent_id)
+    
+    def list(self, state: str = None) -> List[Dict]:
+        """List agents"""
+        if state:
+            return [a for a in self.agents.values() if a["state"] == state]
+        return list(self.agents.values())
+
+
+lifecycle = EntraLifecycle(entra_client)
+
+
+class AgentProvisionRequest(BaseModel):
+    app_id: str
+    roles: List[str] = []
+    config: Dict[str, Any] = {}
+
+
+@app.post("/api/v1/entra/agent/provision")
+async def provision_entra_agent(data: AgentProvisionRequest, 
+                           tenant_id: str = Depends(get_tenant_id)):
+    """
+    Provision new Entra agent.
+    """
+    agent = lifecycle.provision(data.app_id, {
+        "roles": data.roles,
+        **data.config
+    })
+    return agent
+
+
+@app.post("/api/v1/entra/agent/{agent_id}/activate")
+async def activate_entra_agent(agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Activate agent.
+    """
+    try:
+        agent = lifecycle.activate(agent_id)
+        return agent
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.post("/api/v1/entra/agent/{agent_id}/suspend")
+async def suspend_entra_agent(agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Suspend agent.
+    """
+    try:
+        agent = lifecycle.suspend(agent_id)
+        return agent
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.post("/api/v1/entra/agent/{agent_id}/disable")
+async def disable_entra_agent(agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Disable/deprovision agent.
+    """
+    try:
+        agent = lifecycle.disable(agent_id)
+        return agent
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.get("/api/v1/entra/agent/{agent_id}")
+async def get_entra_agent(agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get agent status.
+    """
+    agent = lifecycle.get(agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    return agent
+
+
+@app.get("/api/v1/entra/agents")
+async def list_entra_agents(state: str = None, tenant_id: str = Depends(get_tenant_id)):
+    """
+    List Entra agents.
+    """
+    agents = lifecycle.list(state)
+    return {"agents": agents, "count": len(agents)}
+
+
+# ============================================================
+# Entra Governance Toolkit
+# ============================================================
+
+from kernel_engine.entra_governance import GovernanceToolkit, ComplianceFramework, PolicyType
+
+governance = GovernanceToolkit()
+
+
+# --- Policy Endpoints ---
+
+class PolicyCreate(BaseModel):
+    name: str
+    policy_type: str
+    rules: List[str] = []
+    enforcement: str = "audit"
+
+
+@app.post("/api/v1/entra/governance/policies")
+async def create_governance_policy(data: PolicyCreate, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Create governance policy.
+    """
+    policy = governance.create_policy(data.name, data.policy_type, data.rules, data.enforcement)
+    return {"policy_id": policy.policy_id, "name": policy.name}
+
+
+@app.get("/api/v1/entra/governance/policies")
+async def list_governance_policies(tenant_id: str = Depends(get_tenant_id)):
+    """
+    List policies.
+    """
+    policies = governance.list_policies()
+    return {"policies": [{"id": p.policy_id, "name": p.name, "type": p.policy_type} 
+                        for p in policies]}
+
+
+@app.post("/api/v1/entra/governance/evaluate")
+async def evaluate_governance(agent_id: str, action: str, 
+                         context: Dict[str, Any] = {}, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Evaluate policy for action.
+    """
+    result = governance.evaluate_policy(agent_id, action, context)
+    return result
+
+
+# --- Access Review Endpoints ---
+
+class ReviewSchedule(BaseModel):
+    agent_id: str
+    reviewer: str
+    frequency: str = "monthly"
+
+
+@app.post("/api/v1/entra/governance/reviews")
+async def schedule_review(data: ReviewSchedule, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Schedule access review.
+    """
+    review = governance.schedule_review(data.agent_id, data.reviewer, data.frequency)
+    return {"review_id": review.review_id, "agent_id": review.agent_id}
+
+
+@app.get("/api/v1/entra/governance/reviews/pending")
+async def get_pending_reviews(tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get pending reviews.
+    """
+    reviews = governance.get_pending_reviews()
+    return {"reviews": [{"review_id": r.review_id, "agent_id": r.agent_id} for r in reviews]}
+
+
+@app.post("/api/v1/entra/governance/reviews/{review_id}/complete")
+async def complete_review(review_id: str, approved: bool, notes: str = "",
+                   tenant_id: str = Depends(get_tenant_id)):
+    """
+    Complete access review.
+    """
+    result = governance.complete_review(review_id, approved, notes)
+    return {"status": "completed" if result else "not_found"}
+
+
+# --- Risk Scoring ---
+
+@app.post("/api/v1/entra/governance/risk")
+async def calculate_risk(agent_id: str, activity: List[Dict[str, Any]] = [],
+                     tenant_id: str = Depends(get_tenant_id)):
+    """
+    Calculate agent risk score.
+    """
+    risk = governance.calculate_risk(agent_id, activity)
+    return {"agent_id": risk.agent_id, "score": risk.score, "factors": risk.factors}
+
+
+@app.get("/api/v1/entra/governance/risk/{agent_id}")
+async def get_risk_score(agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get risk score.
+    """
+    risk = governance.get_risk_score(agent_id)
+    if not risk:
+        raise HTTPException(status_code=404, detail="No risk score")
+    return {"agent_id": risk.agent_id, "score": risk.score, "factors": risk.factors}
+
+
+# --- Consent ---
+
+class ConsentGrant(BaseModel):
+    principal_id: str
+    resource: str
+    scope: List[str] = []
+    granted_by: str
+    expires_days: int = 30
+
+
+@app.post("/api/v1/entra/governance/consent")
+async def grant_consent(data: ConsentGrant, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Grant consent.
+    """
+    consent = governance.grant_consent(data.principal_id, data.resource, 
+                                   data.scope, data.granted_by, data.expires_days)
+    return consent.to_dict() if hasattr(consent, 'to_dict') else {"consent_id": consent.consent_id}
+
+
+@app.delete("/api/v1/entra/governance/consent/{consent_id}")
+async def revoke_consent(consent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Revoke consent.
+    """
+    result = governance.revoke_consent(consent_id)
+    return {"status": "revoked" if result else "not_found"}
+
+
+@app.get("/api/v1/entra/governance/consent/check")
+async def check_consent(principal_id: str, resource: str, scope: str,
+                     tenant_id: str = Depends(get_tenant_id)):
+    """
+    Check consent.
+    """
+    result = governance.check_consent(principal_id, resource, scope)
+    return {"granted": result}
+
+
+# --- Audit ---
+
+@app.get("/api/v1/entra/governance/audit")
+async def get_audit_log(agent_id: str = None, limit: int = 100,
+                     tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get audit log.
+    """
+    log = governance.get_audit_log(agent_id, limit)
+    return {"entries": log, "count": len(log)}
+
+
+# --- Compliance ---
+
+@app.get("/api/v1/entra/governance/compliance/{framework}")
+async def check_compliance(framework: str, agent_id: str,
+                       tenant_id: str = Depends(get_tenant_id)):
+    """
+    Check compliance.
+    """
+    result = governance.check_compliance(framework, agent_id)
+    return result
+
+
+# ============================================================
+# CAAS - Cloud Agent Authorization Service (OpenAGX)
+# ============================================================
+
+from kernel_engine.caas import CAASClient, OpenAGXProvider, GrantType, Scope
+
+caas_client = CAASClient()
+openagx_provider = OpenAGXProvider()
+
+
+# --- Discovery ---
+
+@app.get("/api/v1/caas/.well-known/openid-configuration")
+async def caas_discovery(tenant_id: str = Depends(get_tenant_id)):
+    """
+    OpenAGX/CAAS discovery.
+    """
+    return openagx_provider.discover()
+
+
+# --- Agent Registration ---
+
+@app.post("/api/v1/caas/agents")
+async def register_caas_agent(agent_id: str, metadata: Dict[str, Any] = {},
+                          tenant_id: str = Depends(get_tenant_id)):
+    """
+    Register agent in CAAS.
+    """
+    agent = openagx_provider.register_agent(agent_id, metadata)
+    return agent
+
+
+@app.get("/api/v1/caas/agents/{agent_id}")
+async def get_caas_agent(agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get agent.
+    """
+    agent = openagx_provider.get_agent(agent_id)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    return agent
+
+
+# --- Authorization ---
+
+class CAAuthorizeRequest(BaseModel):
+    agent_id: str
+    resource_owner: str
+    scope: List[str] = []
+
+
+@app.post("/api/v1/caas/authorize")
+async def caas_authorize(data: CAAuthorizeRequest, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Authorize agent.
+    """
+    grant = caas_client.authorize(data.agent_id, data.resource_owner, data.scope)
+    return {"grant_id": grant.grant_id, "expires_in": grant.expires_at}
+
+
+@app.post("/api/v1/caas/token")
+async def caas_token_exchange(grant_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Exchange grant for token.
+    """
+    try:
+        token = caas_client.exchange(grant_id)
+        return token
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# --- Token Operations ---
+
+@app.post("/api/v1/caas/introspect")
+async def caas_introspect(access_token: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Introspect token.
+    """
+    result = caas_client.introspect(access_token)
+    return result
+
+
+@app.post("/api/v1/caas/validate")
+async def caas_validate(access_token: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Validate token.
+    """
+    result = caas_client.validate(access_token)
+    return result
+
+
+@app.post("/api/v1/caas/revoke")
+async def caas_revoke(access_token: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Revoke token.
+    """
+    result = caas_client.revoke(access_token)
+    return {"status": "revoked" if result else "not_found"}
+
+
+@app.post("/api/v1/caas/scope/check")
+async def caas_check_scope(access_token: str, required_scope: str,
+                        tenant_id: str = Depends(get_tenant_id)):
+    """
+    Check scope.
+    """
+    result = caas_client.require_scope(access_token, required_scope)
+    return {"has_scope": result}
+
+
+# --- Delegation ---
+
+class CADelegationRequest(BaseModel):
+    from_agent: str
+    to_agent: str
+    scope: List[str] = []
+
+
+@app.post("/api/v1/caas/delegation")
+async def caas_delegate(data: CADelegationRequest, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Delegate agent access.
+    """
+    grant = caas_client.delegate(data.from_agent, data.to_agent, data.scope)
+    return {"grant_id": grant.grant_id}
+
+
+@app.get("/api/v1/caas/delegation/{agent_id}")
+async def caas_delegation_chain(agent_id: str, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Get delegation chain.
+    """
+    chain = caas_client.get_delegation_chain(agent_id)
+    return {"chain": chain}
+
+
+# --- Impersonation ---
+
+class CAImpersonateRequest(BaseModel):
+    agent_id: str
+    target_agent: str
+    scope: List[str] = []
+
+
+@app.post("/api/v1/caas/impersonate")
+async def caas_impersonate(data: CAImpersonateRequest, tenant_id: str = Depends(get_tenant_id)):
+    """
+    Impersonate another agent.
+    """
+    grant = caas_client.impersonate(data.agent_id, data.target_agent, data.scope)
+    return {"grant_id": grant.grant_id}
+
+
+# --- Policy ---
+
+@app.post("/api/v1/caas/policies/{policy_name}")
+async def set_caas_policy(policy_name: str, policy: Dict[str, Any],
+                        tenant_id: str = Depends(get_tenant_id)):
+    """
+    Set policy.
+    """
+    caas_client.set_policy(policy_name, policy)
+    return {"status": "set", "policy": policy_name}
+
+
+@app.get("/api/v1/caas/evaluate")
+async def caas_evaluate(agent_id: str, action: str, resource: str,
+                       tenant_id: str = Depends(get_tenant_id)):
+    """
+    Evaluate policy.
+    """
+    result = caas_client.evaluate_policy(agent_id, action, resource)
+    return result
