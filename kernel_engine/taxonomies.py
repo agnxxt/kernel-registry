@@ -129,6 +129,9 @@ TAXONOMIES = {
             "education": {"description": "Education"},
             "legal": {"description": "Legal"},
             "marketing": {"description": "Marketing"},
+            "insurance": {"description": "Insurance"},
+            "realestate": {"description": "Real Estate"},
+            "government": {"description": "Government"},
         }
     },
     "risk_level": {
@@ -152,6 +155,9 @@ TAXONOMIES = {
             "pci": {"description": "PCI DSS"},
             "iso27001": {"description": "ISO 27001"},
             "nist": {"description": "NIST"},
+            "ferpa": {"description": "FERPA"},
+            "coppa": {"description": "COPPA"},
+            "sox": {"description": "SOX"},
         }
     },
     "data_classification": {
@@ -164,6 +170,8 @@ TAXONOMIES = {
             "restricted": {"description": "Restricted data"},
             "pii": {"description": "Personal data"},
             "phi": {"description": "Health data"},
+            "spi": {"description": "Sensitive personal data"},
+            "classified": {"description": "Classified data"},
         }
     },
     "agent_status": {
@@ -175,6 +183,180 @@ TAXONOMIES = {
             "suspended": {"description": "Suspended"},
             "disabled": {"description": "Disabled"},
             "decommissioned": {"description": "Decommissioned"},
+        }
+    },
+    
+    # NEW TAXONOMIES
+    
+    "runtime": {
+        "name": "Runtime",
+        "description": "Agent runtime environment",
+        "values": {
+            "openai": {"description": "OpenAI"},
+            "anthropic": {"description": "Anthropic"},
+            "google": {"description": "Google AI"},
+            "cohere": {"description": "Cohere"},
+            "local": {"description": "Local model"},
+            "hybrid": {"description": "Hybrid"},
+        }
+    },
+    "framework": {
+        "name": "Framework",
+        "description": "Agent framework",
+        "values": {
+            "langchain": {"description": "LangChain"},
+            "llamaindex": {"description": "LlamaIndex"},
+            "crewai": {"description": "CrewAI"},
+            "autogen": {"description": "AutoGen"},
+            "pydanticai": {"description": "PydanticAI"},
+            "mastra": {"description": "Mastra"},
+            "custom": {"description": "Custom"},
+        }
+    },
+    "model_provider": {
+        "name": "Model Provider",
+        "description": "LLM provider",
+        "values": {
+            "openai": {"description": "OpenAI"},
+            "anthropic": {"description": "Anthropic"},
+            "google": {"description": "Google"},
+            "cohere": {"description": "Cohere"},
+            "mistral": {"description": "Mistral"},
+            "meta": {"description": "Meta"},
+            "aws": {"description": "AWS"},
+            "azure": {"description": "Azure OpenAI"},
+            "local": {"description": "Local/huggingface"},
+        }
+    },
+    "model_size": {
+        "name": "Model Size",
+        "description": "Model size category",
+        "values": {
+            "small": {"description": "<1B parameters"},
+            "medium": {"description": "1-10B parameters"},
+            "large": {"description": "10-100B parameters"},
+            "xlarge": {"description": ">100B parameters"},
+        }
+    },
+    "auth_method": {
+        "name": "Auth Method",
+        "description": "Authentication method",
+        "values": {
+            "password": {"description": "Password"},
+            "oauth": {"description": "OAuth"},
+            "api_key": {"description": "API Key"},
+            "jwt": {"description": "JWT"},
+            "saml": {"description": "SAML"},
+            "mfa": {"description": "Multi-factor"},
+            "passkey": {"description": "Passkey/WebAuthn"},
+            "did": {"description": "DID/Decentralized"},
+        }
+    },
+    "authorization": {
+        "name": "Authorization",
+        "description": "Authorization model",
+        "values": {
+            "rbac": {"description": "Role-based"},
+            "abac": {"description": "Attribute-based"},
+            "fga": {"description": "Fine-grained (Zanzibar)"},
+            "policy": {"description": "Policy-based"},
+            "capability": {"description": "Capability-based"},
+        }
+    },
+    "scope": {
+        "name": "Scope",
+        "description": "Permission scope",
+        "values": {
+            "read": {"description": "Read access"},
+            "write": {"description": "Write access"},
+            "execute": {"description": "Execute access"},
+            "admin": {"description": "Admin access"},
+            "delegate": {"description": "Delegate access"},
+            "audit": {"description": "Audit access"},
+        }
+    },
+    "action_status": {
+        "name": "Action Status",
+        "description": "Status of an action",
+        "values": {
+            "PotentialActionStatus": {"description": "Not yet started"},
+            "ActiveActionStatus": {"description": "In progress"},
+            "CompletedActionStatus": {"description": "Completed"},
+            "FailedActionStatus": {"description": "Failed"},
+            "AbandonedActionStatus": {"description": "Abandoned"},
+        }
+    },
+    "deployment": {
+        "name": "Deployment",
+        "description": "Deployment environment",
+        "values": {
+            "development": {"description": "Development"},
+            "staging": {"description": "Staging"},
+            "production": {"description": "Production"},
+            "dr": {"description": "Disaster recovery"},
+            "edge": {"description": "Edge"},
+        }
+    },
+    "cloud": {
+        "name": "Cloud Provider",
+        "description": "Cloud infrastructure",
+        "values": {
+            "aws": {"description": "AWS"},
+            "gcp": {"description": "Google Cloud"},
+            "azure": {"description": "Azure"},
+            "private": {"description": "Private cloud"},
+            "onprem": {"description": "On-premise"},
+            "hybrid": {"description": "Hybrid"},
+        }
+    },
+    "event_type": {
+        "name": "Event Type",
+        "description": "Event classification",
+        "values": {
+            "start": {"description": "Start event"},
+            "stop": {"description": "Stop event"},
+            "complete": {"description": "Completion event"},
+            "error": {"description": "Error event"},
+            "timeout": {"description": "Timeout event"},
+            "rate_limit": {"description": "Rate limit event"},
+            "auth_failure": {"description": "Auth failure"},
+            "health_check": {"description": "Health check"},
+        }
+    },
+    "log_level": {
+        "name": "Log Level",
+        "description": "Logging level",
+        "values": {
+            "trace": {"description": "Trace"},
+            "debug": {"description": "Debug"},
+            "info": {"description": "Info"},
+            "warning": {"description": "Warning"},
+            "error": {"description": "Error"},
+            "critical": {"description": "Critical"},
+        }
+    },
+    "metric_type": {
+        "name": "Metric Type",
+        "description": "Metric classification",
+        "values": {
+            "counter": {"description": "Counter"},
+            "gauge": {"description": "Gauge"},
+            "histogram": {"description": "Histogram"},
+            "summary": {"description": "Summary"},
+        }
+    },
+    "memory_type": {
+        "name": "Memory Type",
+        "description": "Agent memory architecture",
+        "values": {
+            "episodic": {"description": "Episodic memory"},
+            "semantic": {"description": "Semantic memory"},
+            "procedural": {"description": "Procedural memory"},
+            "working": {"description": "Working memory"},
+            "context": {"description": "Context window"},
+            "vector": {"description": "Vector embeddings"},
+            "knowledge_graph": {"description": "Knowledge graph"},
+            "hybrid": {"description": "Hybrid memory"},
         }
     },
 }
