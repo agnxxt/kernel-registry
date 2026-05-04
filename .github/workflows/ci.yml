@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -34,7 +34,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Docker Compose Lint Placeholder
         run: |
@@ -48,4 +48,5 @@ jobs:
           uvicorn kernel_api.main:app --host 0.0.0.0 --port 8000 &
           sleep 5
           pytest tests/e2e/test_platform_flow.py
+          pytest tests/e2e/test_runtime_core_flow.py
 
