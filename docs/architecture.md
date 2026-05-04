@@ -266,3 +266,12 @@ That model has been superseded by the current split:
 - Kernel executes pre-validated work
 
 Kernel may store policy decision IDs for audit correlation, but it is not the primary policy decision point.
+
+
+## Runner/Kernel Enforcement Boundary
+
+- Platform defines configuration and policy bundles.
+- Runner enforces authorization, identity verification, guardrails, and protocol validation.
+- Kernel executes only prevalidated requests and persists Runner metadata for traceability.
+
+Kernel explicitly rejects execution/memory requests that are missing tenant scope, Runner validation markers, or allowed authorization/policy outcomes. Kernel also rejects tenant mismatches between top-level tenant context and actor/prevalidation metadata.
