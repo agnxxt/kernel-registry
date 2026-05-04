@@ -260,3 +260,29 @@ Kernel must reject requests that:
 - Kernel executes only pre-validated work.
 - Kernel persists execution state, memory operations, results, and traces.
 - Policy decision IDs may be stored for audit correlation, but Kernel is not the primary policy decision point.
+
+
+## Prevalidated Kernel Execution API
+
+Kernel execution endpoints are intentionally narrow and execute only Runner-prevalidated work:
+
+- `POST /execute`
+- `POST /stream`
+- `POST /memory`
+- `GET /trace/{id}?tenant_id=<tenant>`
+
+Required request envelope fields:
+- `tenant_id`
+- `payload`
+- `prevalidation.validated_by == "AGenNext-Runner"`
+- `authorization_result` and/or `policy_result` with an explicit allow result
+- actor identity metadata (`type=agent`, `verified_by=AGenNext-Runner`, `identity_verified=true`) for actor execution flows
+
+Kernel persists Runner-provided metadata for authorization (AuthZEN/OpenFGA/OPA), identity, protocol (A2A/ACP/Agent Client Protocol/Agent Network Protocol), memory, and trace/audit records. Kernel does **not** make primary authorization decisions and rejects missing or denied prevalidation metadata.
+
+
+Production hardening controls in Kernel API include:
+- Optional request signature verification (`X-Runner-Signature`) when `RUNNER_SHARED_SECRET` is configured.
+- Payload and memory-key size guards.
+- Idempotent execution support via `X-Idempotency-Key`.
+- Durable local state persistence for execution, memory, trace, and idempotency records via SQLite.
