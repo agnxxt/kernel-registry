@@ -19,9 +19,17 @@
       "type": "string",
       "enum": [
         "identity",
+        "resource_identity",
         "wallet",
         "credential",
-        "trust"
+        "trust",
+        "decision_graph",
+        "taxonomy",
+        "ontology",
+        "policy",
+        "audit_event",
+        "schema",
+        "resource"
       ]
     },
     "status": {

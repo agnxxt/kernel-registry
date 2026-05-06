@@ -1,0 +1,570 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json",
+  "title": "DecisionKnowledgeGraphEvent",
+  "description": "JSON-LD compatible decision graph event. Every embedded resource node is identity-bearing and governed by the decision taxonomy.",
+  "type": "object",
+  "required": [
+    "@context",
+    "@id",
+    "@type",
+    "schema_version",
+    "identity",
+    "occurred_at",
+    "made_by",
+    "used_model",
+    "for_task",
+    "status",
+    "effective_verdict",
+    "selected_action"
+  ],
+  "properties": {
+    "@context": {
+      "type": [
+        "string",
+        "object",
+        "array"
+      ]
+    },
+    "@id": {
+      "type": "string",
+      "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+    },
+    "@type": {
+      "type": "string",
+      "const": "Decision"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "identity": {
+      "$ref": "../identity/resource-identity.schema.json"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "made_by": {
+      "$ref": "../identity/resource-identity.schema.json"
+    },
+    "used_model": {
+      "$ref": "../identity/resource-identity.schema.json"
+    },
+    "for_task": {
+      "$ref": "../identity/resource-identity.schema.json"
+    },
+    "run": {
+      "$ref": "../identity/resource-identity.schema.json"
+    },
+    "step": {
+      "$ref": "../identity/resource-identity.schema.json"
+    },
+    "trigger_event": {
+      "$ref": "../identity/resource-identity.schema.json"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "APPROVED",
+        "REJECTED",
+        "EXPIRED",
+        "CANCELED",
+        "REVISED",
+        "SUPERSEDED"
+      ]
+    },
+    "effective_verdict": {
+      "type": "string",
+      "enum": [
+        "ALLOW",
+        "WARN",
+        "BLOCK",
+        "ESCALATE"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "confidence_band": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "low",
+        "medium",
+        "high",
+        "verified"
+      ]
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/namedResource"
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/namedResource"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/evidenceResource"
+      }
+    },
+    "counter_evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/evidenceResource"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/constraintResource"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/riskResource"
+      }
+    },
+    "options_considered": {
+      "type": "array",
+      "items": {
+        "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/optionResource"
+      }
+    },
+    "selected_action": {
+      "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/actionResource"
+    },
+    "evaluations": {
+      "type": "array",
+      "items": {
+        "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/evaluationResource"
+      }
+    },
+    "outcome": {
+      "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/outcomeResource"
+    },
+    "lineage": {
+      "type": "object",
+      "properties": {
+        "parent_decision_id": {
+          "type": "string",
+          "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+        },
+        "revises_decision_id": {
+          "type": "string",
+          "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+        },
+        "supersedes_decision_id": {
+          "type": "string",
+          "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+        },
+        "revision_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "caused_by_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+          }
+        },
+        "supports_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+          }
+        },
+        "contradicts_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "policy_bindings": {
+      "type": "array",
+      "items": {
+        "$ref": "../identity/resource-identity.schema.json"
+      }
+    },
+    "tool_calls": {
+      "type": "array",
+      "items": {
+        "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/toolCallResource"
+      }
+    },
+    "semantic_extension": {
+      "$ref": "https://agnxxt.com/schemas/_semantic-extension.schema.json"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "namedResource": {
+      "type": "object",
+      "required": [
+        "identity",
+        "name",
+        "text"
+      ],
+      "properties": {
+        "identity": {
+          "$ref": "../identity/resource-identity.schema.json"
+        },
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "evidenceResource": {
+      "allOf": [
+        {
+          "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/namedResource"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "evidence_kind": {
+              "type": "string",
+              "enum": [
+                "user_input",
+                "tool_output",
+                "document",
+                "log",
+                "metric",
+                "trace",
+                "policy",
+                "credential",
+                "human_review",
+                "model_output",
+                "test_result",
+                "external_reference"
+              ]
+            },
+            "source_uri": {
+              "type": "string"
+            },
+            "content_hash": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "constraintResource": {
+      "allOf": [
+        {
+          "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/namedResource"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "priority": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ]
+            },
+            "constraint_status": {
+              "type": "string",
+              "enum": [
+                "followed",
+                "violated",
+                "waived",
+                "unknown",
+                "not_applicable"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "riskResource": {
+      "allOf": [
+        {
+          "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/namedResource"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "severity": {
+              "type": "string",
+              "enum": [
+                "info",
+                "low",
+                "medium",
+                "high",
+                "critical",
+                "catastrophic"
+              ]
+            },
+            "likelihood": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "likelihood_band": {
+              "type": "string",
+              "enum": [
+                "rare",
+                "unlikely",
+                "possible",
+                "likely",
+                "almost_certain"
+              ]
+            },
+            "risk_status": {
+              "type": "string",
+              "enum": [
+                "detected",
+                "accepted",
+                "mitigated",
+                "transferred",
+                "ignored",
+                "realized"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "optionResource": {
+      "allOf": [
+        {
+          "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/namedResource"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "selected": {
+              "type": "boolean"
+            },
+            "rejected_because": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "actionResource": {
+      "allOf": [
+        {
+          "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/namedResource"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "requires_human_review": {
+              "type": "boolean"
+            },
+            "approval_status": {
+              "type": "string",
+              "enum": [
+                "requested",
+                "approved",
+                "rejected",
+                "expired",
+                "withdrawn",
+                "overridden"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "evaluationResource": {
+      "type": "object",
+      "required": [
+        "identity",
+        "judge",
+        "scores"
+      ],
+      "properties": {
+        "identity": {
+          "$ref": "../identity/resource-identity.schema.json"
+        },
+        "judge": {
+          "$ref": "../identity/resource-identity.schema.json"
+        },
+        "scores": {
+          "type": "object",
+          "properties": {
+            "correctness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "risk_awareness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "constraint_following": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "consistency": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "format_reliability": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "tool_use_success": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "latency": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "cost": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "hallucination_rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "context_retention": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "pressure_resistance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "decision_log_quality": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomeResource": {
+      "allOf": [
+        {
+          "$ref": "https://agnxxt.com/schemas/decision/decision-knowledge-graph.schema.json#/$defs/namedResource"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "outcome_status": {
+              "type": "string",
+              "enum": [
+                "unknown",
+                "success",
+                "partial_success",
+                "failure",
+                "rolled_back",
+                "incident_opened"
+              ]
+            },
+            "outcome_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      ]
+    },
+    "toolCallResource": {
+      "type": "object",
+      "required": [
+        "identity",
+        "tool",
+        "success"
+      ],
+      "properties": {
+        "identity": {
+          "$ref": "../identity/resource-identity.schema.json"
+        },
+        "tool": {
+          "$ref": "../identity/resource-identity.schema.json"
+        },
+        "input_summary": {
+          "type": "string"
+        },
+        "output_summary": {
+          "type": "string"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "latency_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

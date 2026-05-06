@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agnxxt.com/schemas/identity/resource-identity.schema.json",
+  "title": "ResourceIdentity",
+  "description": "Canonical identity envelope required for every graph node, table row, event, resource, policy object, tool, model, memory, evidence item, and outcome tracked by the AGenNext Kernel.",
+  "type": "object",
+  "required": [
+    "canonical_id",
+    "resource_type",
+    "subject_ref",
+    "tenant_id",
+    "namespace",
+    "status",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "canonical_id": {
+      "type": "string",
+      "description": "Stable identity for the resource. Format is cid:<namespace>:<kind>:<id>.",
+      "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+    },
+    "resource_type": {
+      "type": "string",
+      "enum": [
+        "tenant",
+        "organization",
+        "workspace",
+        "environment",
+        "project",
+        "agent",
+        "human_user",
+        "group",
+        "role",
+        "permission",
+        "credential",
+        "wallet",
+        "model",
+        "model_version",
+        "tool",
+        "workflow",
+        "task",
+        "run",
+        "step",
+        "decision",
+        "option",
+        "action",
+        "risk",
+        "constraint",
+        "assumption",
+        "claim",
+        "belief",
+        "evidence",
+        "counter_evidence",
+        "policy",
+        "violation",
+        "mitigation",
+        "evaluation",
+        "outcome",
+        "feedback",
+        "revision",
+        "incident",
+        "memory",
+        "artifact",
+        "dataset",
+        "feature",
+        "secret",
+        "hook",
+        "event",
+        "topic",
+        "schema",
+        "service",
+        "deployment",
+        "approval",
+        "competency",
+        "capability",
+        "authority_level"
+      ]
+    },
+    "subject_ref": {
+      "type": "string",
+      "minLength": 2
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 2
+    },
+    "namespace": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_.-]*$"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "owner_canonical_id": {
+      "type": "string",
+      "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+    },
+    "parent_canonical_id": {
+      "type": "string",
+      "pattern": "^cid:[a-z0-9:_\\-]{8,}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "pending",
+        "suspended",
+        "revoked",
+        "archived",
+        "deleted"
+      ]
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted",
+        "secret"
+      ]
+    },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_.:-]*$"
+      },
+      "uniqueItems": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "semantic_extension": {
+      "$ref": "../_semantic-extension.schema.json"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

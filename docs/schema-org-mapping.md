@@ -84,3 +84,6 @@ By wrapping our artifacts strictly within the universal Schema.org envelope, the
 ## Schema References
 - Universal Action Envelope: `schemas/actions/schemaorg-actions.schema.json`
 - Extension Mechanism: `schemas/_semantic-extension.schema.json`
+
+## Decision identity ontology boundary
+Schema.org mappings are an interoperability baseline, not the complete kernel ontology. Advanced decision events use the decision identity registry in `docs/decision-identity-schema-registry.md` and the JSON-LD-compatible schema in `schemas/decision/decision-knowledge-graph.schema.json` to preserve kernel-only precision such as canonical resource identities, controlled decision relationships, risk/constraint statuses, evidence kinds, evaluation metrics, lineage, and policy bindings.

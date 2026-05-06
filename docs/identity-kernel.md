@@ -24,3 +24,8 @@ Kernel-level identity is based on two primitives:
 
 ## Registry
 - Canonical registry record tracks lifecycle status (`active/suspended/revoked/archived`).
+
+## Resource identity rule
+Every kernel resource is an identity subject, not only agents and users. The canonical resource identity envelope is `schemas/identity/resource-identity.schema.json`, which applies to agents, humans, groups, roles, permissions, models, tools, workflows, tasks, runs, steps, decisions, options, actions, risks, constraints, assumptions, claims, evidence, policies, evaluations, outcomes, memories, artifacts, datasets, secrets, hooks, events, topics, schemas, services, deployments, approvals, competencies, capabilities, and authority levels.
+
+This makes authorization and audit decisions graph-native: policy engines can evaluate `canonical_id`, `resource_type`, tenant, owner, parent, status, sensitivity classification, and relationship edges for every object in the kernel.

@@ -1,0 +1,160 @@
+{
+  "@context": {
+    "schema": "https://schema.org/",
+    "agnx": "https://agnxxt.com/ontology/decision-identity#",
+    "Decision": "agnx:Decision"
+  },
+  "@id": "cid:demo:decision:dec_000001",
+  "@type": "Decision",
+  "schema_version": "1.0.0",
+  "identity": {
+    "canonical_id": "cid:demo:decision:dec_000001",
+    "resource_type": "decision",
+    "subject_ref": "dec_000001",
+    "tenant_id": "tenant_demo",
+    "namespace": "demo",
+    "display_name": "Payment migration deployment decision",
+    "status": "active",
+    "classification": "internal",
+    "created_at": "2026-05-06T00:00:00Z",
+    "updated_at": "2026-05-06T00:00:00Z"
+  },
+  "occurred_at": "2026-05-06T00:00:00Z",
+  "made_by": {
+    "canonical_id": "cid:demo:agent:architect_001",
+    "resource_type": "agent",
+    "subject_ref": "architect_001",
+    "tenant_id": "tenant_demo",
+    "namespace": "demo",
+    "status": "active",
+    "created_at": "2026-05-06T00:00:00Z",
+    "updated_at": "2026-05-06T00:00:00Z"
+  },
+  "used_model": {
+    "canonical_id": "cid:demo:model:gpt_5_2_codex",
+    "resource_type": "model",
+    "subject_ref": "gpt-5.2-codex",
+    "tenant_id": "tenant_demo",
+    "namespace": "demo",
+    "status": "active",
+    "created_at": "2026-05-06T00:00:00Z",
+    "updated_at": "2026-05-06T00:00:00Z"
+  },
+  "for_task": {
+    "canonical_id": "cid:demo:task:payment_migration_001",
+    "resource_type": "task",
+    "subject_ref": "payment_migration_001",
+    "tenant_id": "tenant_demo",
+    "namespace": "demo",
+    "status": "active",
+    "created_at": "2026-05-06T00:00:00Z",
+    "updated_at": "2026-05-06T00:00:00Z"
+  },
+  "status": "APPROVED",
+  "effective_verdict": "ALLOW",
+  "confidence": 0.82,
+  "confidence_band": "high",
+  "priority": "critical",
+  "constraints": [
+    {
+      "identity": {
+        "canonical_id": "cid:demo:constraint:no_downtime",
+        "resource_type": "constraint",
+        "subject_ref": "no_downtime",
+        "tenant_id": "tenant_demo",
+        "namespace": "demo",
+        "status": "active",
+        "created_at": "2026-05-06T00:00:00Z",
+        "updated_at": "2026-05-06T00:00:00Z"
+      },
+      "name": "No downtime",
+      "text": "No downtime is allowed during payment migration.",
+      "priority": "critical",
+      "constraint_status": "followed"
+    }
+  ],
+  "risks": [
+    {
+      "identity": {
+        "canonical_id": "cid:demo:risk:migration_failure",
+        "resource_type": "risk",
+        "subject_ref": "migration_failure",
+        "tenant_id": "tenant_demo",
+        "namespace": "demo",
+        "status": "active",
+        "created_at": "2026-05-06T00:00:00Z",
+        "updated_at": "2026-05-06T00:00:00Z"
+      },
+      "name": "Migration failure",
+      "text": "The database migration could fail and require rollback.",
+      "severity": "high",
+      "likelihood": 0.35,
+      "likelihood_band": "possible",
+      "risk_status": "mitigated"
+    }
+  ],
+  "options_considered": [
+    {
+      "identity": {
+        "canonical_id": "cid:demo:option:canary_deploy",
+        "resource_type": "option",
+        "subject_ref": "canary_deploy",
+        "tenant_id": "tenant_demo",
+        "namespace": "demo",
+        "status": "active",
+        "created_at": "2026-05-06T00:00:00Z",
+        "updated_at": "2026-05-06T00:00:00Z"
+      },
+      "name": "Canary deploy",
+      "text": "Deploy to a small cohort with monitoring and rollback gates.",
+      "selected": true
+    }
+  ],
+  "selected_action": {
+    "identity": {
+      "canonical_id": "cid:demo:action:canary_with_rollback",
+      "resource_type": "action",
+      "subject_ref": "canary_with_rollback",
+      "tenant_id": "tenant_demo",
+      "namespace": "demo",
+      "status": "active",
+      "created_at": "2026-05-06T00:00:00Z",
+      "updated_at": "2026-05-06T00:00:00Z"
+    },
+    "name": "Canary deploy with rollback",
+    "text": "Run canary deployment with tested rollback and monitoring.",
+    "requires_human_review": true,
+    "approval_status": "approved"
+  },
+  "evaluations": [
+    {
+      "identity": {
+        "canonical_id": "cid:demo:evaluation:eval_000001",
+        "resource_type": "evaluation",
+        "subject_ref": "eval_000001",
+        "tenant_id": "tenant_demo",
+        "namespace": "demo",
+        "status": "active",
+        "created_at": "2026-05-06T00:00:00Z",
+        "updated_at": "2026-05-06T00:00:00Z"
+      },
+      "judge": {
+        "canonical_id": "cid:demo:model:judge_001",
+        "resource_type": "model",
+        "subject_ref": "judge_001",
+        "tenant_id": "tenant_demo",
+        "namespace": "demo",
+        "status": "active",
+        "created_at": "2026-05-06T00:00:00Z",
+        "updated_at": "2026-05-06T00:00:00Z"
+      },
+      "scores": {
+        "correctness": 0.88,
+        "risk_awareness": 0.92,
+        "constraint_following": 1.0,
+        "consistency": 0.86,
+        "decision_log_quality": 0.91
+      }
+    }
+  ]
+}

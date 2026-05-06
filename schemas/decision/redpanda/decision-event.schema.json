@@ -103,6 +103,25 @@
     "metadata": {
       "type": "object",
       "additionalProperties": true
+    },
+    "identity": {
+      "$ref": "../../identity/resource-identity.schema.json"
+    },
+    "resource_identities": {
+      "type": "array",
+      "description": "Identity-bearing resources participating in this decision event.",
+      "items": {
+        "$ref": "../../identity/resource-identity.schema.json"
+      }
+    },
+    "knowledge_graph": {
+      "description": "Optional canonical decision knowledge graph projection for graph stores and JSON-LD export.",
+      "$ref": "../decision-knowledge-graph.schema.json"
+    },
+    "taxonomy_version": {
+      "type": "string",
+      "description": "Decision taxonomy semantic version used to validate acceptable values.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
     }
   },
   "additionalProperties": false
