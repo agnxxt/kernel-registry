@@ -1,12 +1,97 @@
-<div align="center">
-  <a href="https://agentops.ai?ref=gh">
-    <img src="docs/images/external/logo/github-banner.png" alt="Logo">
-  </a>
-</div>
+# AgentOps
 
-<div align="center">
-  <em>Observability and DevTool platform for AI Agents</em>
-</div>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/AgentOps-AI/agentops/main/docs/images/external/logo/agentops_logo.png" alt="AgentOps" width="300"/>
+</p>
+
+<p align="center">
+  <em>Observability and DevTool Platform for AI Agents</em>
+</p>
+
+<p align="center">
+  <a href="https://pepy.tech/project/agentops">
+    <img src="https://static.pepy.tech/badge/agentops/month" alt="Downloads">
+  </a>
+  <img src="https://img.shields.io/pypi/v/agentops?&color=3670A0" alt="PyPI - Version">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg?&color=3670A0" alt="License: MIT">
+  </a>
+  <a href="https://discord.gg/FagdcwwXRR">
+    <img src="https://img.shields.io/badge/discord-7289da.svg?style=flat-square&logo=discord" alt="Discord">
+  </a>
+</p>
+
+---
+
+## About
+
+**AgentOps** is an observability and DevTool platform for AI agents. It helps developers build, evaluate, and monitor AI agents—from prototype to production.
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| 📊 **Replay Analytics** | Step-by-step agent execution graphs |
+| 💸 **LLM Cost Management** | Track spend with 400+ LLM providers |
+| 🤝 **Framework Integrations** | CrewAI, AG2, Agno, LangGraph, OpenAI Agents SDK, and more |
+| ⚙️ **OpenTelemetry** | Built-in tracing for custom instrumentation |
+| 🐳 **Self-Hosted** | Run on your own infrastructure |
+
+## Installation
+
+```bash
+pip install agentops
+```
+
+## Quick Start
+
+```python
+import agentops
+
+# Initialize with your API key
+agentops.init("<YOUR_API_KEY>")
+
+# Your agent code here...
+
+agentops.end_session("Success")
+```
+
+Get an API key at [app.agentops.ai](https://app.agentops.ai)
+
+## Supported Frameworks
+
+- OpenAI Agents SDK
+- CrewAI
+- AG2 (AutoGen)
+- LangChain / LangGraph
+- Anthropic
+- Google GenAI
+- Cohere
+- Mistral
+- LlamaIndex
+- And more...
+
+## Documentation
+
+For full documentation, visit [docs.agentops.ai](https://docs.agentops.ai)
+
+## CI/CD
+
+This repository includes GitHub Actions workflows for:
+- Unit tests (Python 3.9-3.13)
+- Integration tests
+- Static analysis (ruff, mypy)
+- PyPI package publishing
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  Built by <a href="https://agennext.com">AGenNext</a>
+</p>
 
 <br />
 
